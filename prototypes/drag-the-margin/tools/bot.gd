@@ -4,7 +4,7 @@ extends SceneTree
 #         w<word>       walk to a word on this line          c<word>,<char>  walk onto that letter cell
 #         f<W|J><R|L>@<x0>:<x1>,<x2>..  drop: Walk off (or Jump from x0) on the Right/Left side, then steer in the air
 #                       to each waypoint before crossing each lower line (jumps start with the take-off line)
-#         r+1 / r-1     press Right / Left (margin)          t               press Tab (alignment)
+#         r+k / r-k     one commit of k columns: drag the margin handle k columns and release   t  press Tab
 #         ds<word>,<char>  walk into that spike to die (respawn on the first word)
 #         df<drop>      a drop (as f) whose path misses every line: fall to the bottom and respawn
 #       adv <level> <hug|random|ends> <seed>   adversarial, never changes the margin or alignment:
@@ -51,6 +51,19 @@ func hold(dir):
 
 func tap(k):
 	key(k, true); key(k, false)
+
+func mouse(x, y, pressed = null):
+	var e
+	if pressed == null:
+		e = InputEventMouseMotion.new()
+	else:
+		e = InputEventMouseButton.new(); e.button_index = MOUSE_BUTTON_LEFT; e.pressed = pressed
+	e.position = Vector2(x, y)
+	Input.parse_input_event(e)
+
+func drag_margin(delta):  # press on the handle, move delta columns, release: one commit
+	var x0 = m.OX + m.cols * m.CW
+	mouse(x0, 300, true); mouse(x0 + delta * m.CW, 300); mouse(x0 + delta * m.CW, 300, false)
 
 func _initialize():
 	var a := OS.get_cmdline_user_args()
@@ -324,7 +337,8 @@ func _physics_process(_d):
 		"r", "t":
 			if standing() and safe_to_ride():
 				hold(0)
-				tap(KEY_TAB if t == "t" else (KEY_RIGHT if t[1] == "+" else KEY_LEFT))
+				if t == "t": tap(KEY_TAB)
+				else: drag_margin(int(t.substr(2)) * (1 if t[1] == "+" else -1))
 				fin = true; wait = 25
 	if fin: toks.pop_front()
 	return false

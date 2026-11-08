@@ -2,8 +2,8 @@ extends Node2D
 # Drag the margin: the level is a paragraph; words are platforms; the right margin re-wraps it.
 # Reflow rule: if you stand on a word, you ride it to its new spot. If airborne, you keep falling.
 # Walls: the left edge and the margin are solid, so the only ways down are ragged line ends and gaps of 2+ cells.
-# Changes: one column of margin change = one change; one Tab (alignment) = one change.
-# Budget (cheating in the player's favour): levels 1-3 unlimited, 4-7 par + 3, 8-10 par + 2. Par is shown as a target.
+# Changes: one commit = one change, however many columns it moves (a drag, a tap, or a whole hold); one Tab = one change.
+# Budget (cheating in the player's favour): levels 1-3 unlimited, 4-10 par + 2. Par is shown as a target.
 # Preview: dragging the handle, or holding an arrow, shows the would-be layout; releasing commits and charges.
 # Undo: Z reverts the last change and refunds it, as long as the player has not moved since it finished.
 # Each level: [text, start width, par, optional kind, optional letters].
@@ -12,19 +12,20 @@ extends Node2D
 # Par comes from solve.py (run it after editing levels). Words made only of 4+ punctuation marks are spike walls.
 
 const LEVELS := [
-	["You stand on a word and you cannot jump up a line so drag the purple margin to the right and the gold word will come up", 39, 2],
-	["The quick brown fox was told to jump over the lazy dog, but the dog kept moving to the next line. So the fox learned to shift the margin instead and rode the dog all the way home", 44, 3],
-	["Call me Ishmael. Some years ago, never mind how long precisely, having little or no money in my purse and nothing to interest me on shore, I thought I would sail about and see the watery part of the world", 48, 3],
-	["Some lines are guarded. Spikes are words too, so they wrap with the rest of the paragraph. Push them down a line or pull them up, then walk past this row of spikes !!!! to the gold word home", 42, 4],
-	["Hold the Shift key and every letter stands up tall. Hold the margin and every line lies down again. Between the two of them the paragraph keeps its secrets, and the last word waits just past the fence ?!?! at home", 30, 6],
-	["The editor said cut it, so the writer cut it. The editor said longer, so the writer padded every sentence with words that did nothing at all. Then the editor said no !!!! no !!!! no, and the last word left", 26, 6],
-	["Read me slowly. Then read me again with a narrower margin, and notice which words used to be neighbours !!!!! and now are strangers on different lines. Find the one width where the fence !!!!! leaves the last word alone", 46, 6],
-	["A caret blinks through every line in reading order, left to right and then down to the start of the next. It does not care where you stand. Change the margin and you change its road, so keep moving toward the gold word at the end", 48, 5, "caret"],
-	["Centre the text and every line grows a left edge to fall from. Justify it and the spaces stretch into holes. Right align it and the ragged end moves to the other side. Pick the shape that gets you past the fence !!!! home", 25, 5, "align"],
-	["Every letter you need is hiding somewhere in this paragraph, but you have to find them in the right order. The margin moves the words, the words move the letters, and only when the whole word is spelled for you does the gold one at the end let you finish", 34, 8, "spell", [[26, 4], [5, 0], [14, 1], [38, 0], [1, 3]]],
+	["You stand on a word and you cannot jump up a line so drag the purple margin to the right and the gold word will come up", 39, 1],
+	["The quick brown fox was told to jump over the lazy dog, but the dog kept moving to the next line. So the fox learned to shift the margin instead and rode the dog all the way home", 45, 2],
+	["Call me Ishmael. Some years ago, never mind how long precisely, having little or no money in my purse and nothing to interest me on shore, I thought I would sail about and see the watery part of the world", 48, 2],
+	["Some lines are guarded. Spikes are words too, so they wrap with the rest of the paragraph. Push them down a line or pull them up, then walk past this row of spikes !!!! to the gold word home", 42, 2],
+	["Hold the Shift key and every letter stands up tall. Hold the margin and every line lies !!!! down again. Between the two !!!! of them the paragraph keeps its secrets, and the last word waits just past the fence ?!?! at home", 30, 2],
+	["The editor said cut it, so the writer cut it. The editor said longer, so the writer padded every sentence with words that did nothing at all. Then the editor said !!!! no !!!! no !!!! no, and the last word left", 26, 2],
+	["Read me slowly. Then read me again with a narrower margin, and notice which words used to be neighbours !!!!! and now are strangers on different lines. Find the one width where the fence !!!!! leaves the last word alone", 46, 2],
+	["A caret blinks through every line in reading order, left to right and then down to the start of the next. It does not care where you stand. !!!! Change the margin and you change its road, so keep moving toward the gold word at the end", 48, 2, "caret"],
+	["Centre the text and every line grows a left edge to fall from. Justify it !!!! and the spaces stretch into holes. Right align it and the ragged end moves to the other side. Pick the !!!! shape that gets you past the fence !!!! home", 30, 4, "align"],
+	["Every letter you need is hiding somewhere in this paragraph, but you have to find them in the right order. The margin moves the words, the words move the letters, and only when the whole word is spelled for you does the gold one at the end let you finish", 34, 2, "spell", [[26, 4], [5, 0], [14, 1], [38, 0], [1, 3]]],
 ]
 const ALIGNS := ["left", "centre", "right", "justify"]
-const CARET_PERIOD := 7.0  # seconds for the caret to read the whole paragraph once
+const CARET_PERIOD := 11.0  # seconds for the caret to read the whole paragraph once
+const CARET_WARN := 1.0     # the cells it will cover in the next second are drawn as a dim trail
 const CW := 16.0          # cell width
 const CH := 16.0          # cell height
 const LH := 48.0          # line pitch: higher than a jump, so you cannot climb lines
@@ -86,6 +87,10 @@ var settled := true
 var settle_pos := Vector2.ZERO
 var note := ""
 var note_t := 0.0
+var clock := 0.0
+var last_tap := -10.0
+var tip_shown := false     # the "hold to preview" tip shows once per session
+var tip_t := 0.0
 
 func _ready() -> void:
 	label = Label.new()
@@ -133,7 +138,7 @@ func load_level(i: int) -> void:
 	words = LEVELS[i][0].split(" ")
 	cols = LEVELS[i][1]
 	par = LEVELS[i][2]
-	budget = -1 if i < 3 else par + (3 if i < 7 else 2)  # -1: unlimited
+	budget = -1 if i < 3 else par + 2  # -1: unlimited
 	preview = -1
 	arrow_held = false
 	dragging = false
@@ -251,12 +256,11 @@ func spend(n: int) -> bool:
 
 func set_cols(c: int, by_drag := false) -> void:
 	c = clampi(c, min_cols, MAX_COLS)
-	if not spend(abs(c - cols)):
+	if c == cols or not spend(1):  # one commit is one change, however far it moves
 		return
 	if by_drag:
-		for n in abs(c - cols):
-			log_key("Drag")
-	undo_stack.append([cols, align, abs(c - cols)])
+		log_key("Drag")
+	undo_stack.append([cols, align, 1])
 	cols = c
 	margin_wall.position.x = OX + cols * CW
 	widths.append(str(c))
@@ -315,7 +319,13 @@ func _unhandled_input(e: InputEvent) -> void:
 		preview = clampi(roundi((e.position.x - OX) / CW), min_cols, MAX_COLS)
 	elif e is InputEventKey and not e.pressed and e.keycode in [KEY_LEFT, KEY_RIGHT] and arrow_held:
 		if not (Input.is_key_pressed(KEY_LEFT) or Input.is_key_pressed(KEY_RIGHT)):
+			var tap: bool = abs(preview - cols) == 1 and arrow_t < 0.4
 			commit_preview()  # releasing the last arrow applies the previewed width
+			if tap:  # two quick taps in a row: teach the hold, once
+				if clock - last_tap < 1.0 and not tip_shown:
+					tip_shown = true
+					tip_t = 4.0
+				last_tap = clock
 	elif e is InputEventKey and e.pressed and not e.echo:
 		match e.keycode:
 			KEY_LEFT, KEY_RIGHT:  # hold to preview (one more column every 0.25 s), release to commit
@@ -343,6 +353,8 @@ func _process(dt: float) -> void:
 	var mp := get_viewport().get_mouse_position()
 	hover = abs(mp.x - (OX + cols * CW)) < 14
 	note_t = max(0.0, note_t - dt)
+	tip_t = max(0.0, tip_t - dt)
+	clock += dt
 	if arrow_held:
 		arrow_t += dt
 		if arrow_t >= 0.4:
@@ -495,8 +507,15 @@ func _draw() -> void:
 		draw_rect(r, lc)
 		if n == spell_p:
 			draw_rect(r.grow(2), Color.WHITE, false, 2.0)
-	if kind == "caret" and fmod(elapsed, 0.5) < 0.35:
-		draw_rect(caret_rect(), Color(1, 1, 1))
+	if kind == "caret":  # telegraph: a dim trail over the cells it reaches in the next second
+		var n := char_word.size()
+		var ahead := int(n * CARET_WARN / CARET_PERIOD)
+		for s in range(1, ahead + 1):
+			var i := (int(caret_q) + s) % n
+			var a := 0.28 * (1.0 - float(s) / (ahead + 1))
+			draw_rect(Rect2(bodies[char_word[i]].position + Vector2(char_off[i] * CW, -20), Vector2(CW, 36)), Color(1, 1, 1, a))
+		if fmod(elapsed, 0.5) < 0.35:
+			draw_rect(caret_rect(), Color(1, 1, 1))
 	draw_rect(Rect2(OX - 16, 0, 14, 540), Color(0.3, 0.3, 0.34))  # the left wall
 	var mx := OX + cols * CW
 	draw_rect(Rect2(mx, 0, 14, 540), Color(0.45, 0.25, 0.45))  # the margin wall
@@ -523,7 +542,7 @@ func _draw() -> void:
 		msg += "changes left: %d of %d (par %d)" % [budget - used, budget, par]
 	msg += "    time %.1f s    deaths %d" % [elapsed, deaths]
 	if preview >= 0:
-		msg = "Preview: width %d, costs %d. Release to apply, Esc to cancel." % [preview, abs(preview - cols)]
+		msg = "Preview: width %d, costs %d. Release to apply, Esc to cancel." % [preview, 0 if preview == cols else 1]
 	elif not undo_stack.is_empty():
 		msg += "    Z: undo"
 	if kind == "align":
@@ -550,4 +569,7 @@ func _draw() -> void:
 	label.text = msg
 	hint.text = "Drag the margin (or Left/Right)" if level == 0 else "Tab: alignment"
 	hint.visible = ((level == 0 and used == 0) or (kind == "align" and not tabbed)) and not (won or failed)
-	hint.position = player.position + Vector2(-48, -46)
+	if tip_t > 0:
+		hint.text = "hold to preview, one change per release"
+		hint.visible = true
+	hint.position = player.position + Vector2(-48 if tip_t <= 0 else -120, -46)

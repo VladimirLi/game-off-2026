@@ -14,12 +14,12 @@ State: (margin width, alignment, word you stand on, letters collected). Moves:
          line's spikes or capitals at all.
   die:   a death respawns on the first word, keeping width, alignment and letters (cost 0). Only where a death is
          possible: a punctuation spike in the segment to walk into, or a drop that reaches no lower line.
-  ride:  change the margin one column while standing on a word (cost 1).
+  ride:  change the margin to any width while standing on a word (cost 1: one commit is one change, however far).
   tab:   cycle alignment left > centre > right > justify, riding your word (cost 1; only on "align" levels).
   spell: on "spell" levels, letters must be touched in order; touching = walking onto that word's segment.
 0-1 BFS gives par, the minimum number of changes.
-Usage: python3 solve.py              check every level: stored par matches, no zero-change win, levels 4+ par >= 3,
-                                     level 1 par 2, level 9 needs a Tab and 2+ margin changes within its budget
+Usage: python3 solve.py              check every level: stored par matches, no zero-change win, levels 2+ par >= 2,
+                                     level 1 par 1 or 2, level 9 needs a Tab and a margin change within its budget
        python3 solve.py plan         print each level's optimal plan for tools/bot.gd
        python3 solve.py "text"       print par for every start width (left alignment)"""
 import json, re, sys
@@ -187,8 +187,8 @@ def parse_levels(src):
     return out
 
 def budget_for(n, par):
-    """Mirrors main.gd: levels 1-3 unlimited (None), 4-7 par + 3, 8-10 par + 2."""
-    return None if n <= 3 else par + (3 if n <= 7 else 2)
+    """Mirrors main.gd: levels 1-3 unlimited (None), 4-10 par + 2."""
+    return None if n <= 3 else par + 2
 
 def levels():
     out = parse_levels(open(__file__.replace("solve.py", "main.gd")).read())
@@ -223,9 +223,9 @@ def search(lv, allow_align=None, max_margin=None):
             for j in X.members[s2]: nxt.append(((w, a, j, p, mm), 0, pre + [tok, f"w{j}"]))
         if s in X.death: nxt.append(((w, a, 0, p, mm), 0, pre + [X.death[s]]))
         if max_margin is None or mm < max_margin:
-            for dd in (-1, 1):
-                if lo <= w + dd <= MAXC:
-                    nxt.append(((w + dd, a, i, p, mm + (max_margin is not None)), 1, pre + [f"r{dd:+d}"]))
+            for w2 in range(lo, MAXC + 1):
+                if w2 != w:
+                    nxt.append(((w2, a, i, p, mm + (max_margin is not None)), 1, pre + [f"r{w2 - w:+d}"]))
         if allow_align: nxt.append(((w, (a + 1) % 4, i, p, mm), 1, pre + ["t"]))
         for s2, c, act in nxt:
             if dist.get(s2, 1e9) > d + c:
@@ -243,15 +243,16 @@ def check(n, lv):
     errs = []
     if p is None: errs.append("unsolvable")
     elif lv["par"] != p: errs.append(f"par in main.gd should be {p}")
-    if n == 1 and p != 2: errs.append("level 1 should have par 2")
-    if n >= 4 and (p or 0) < 3: errs.append("par below 3")
+    if n == 1 and p not in (1, 2): errs.append("level 1 should have par 1 or 2")
+    if n >= 2 and (p or 0) < 2: errs.append("par below 2")
     if search(lv, allow_align=False, max_margin=0)[0] is not None: errs.append("solvable with zero changes")
     if lv["kind"] == "align":
         # "needs X" means: cannot be finished within the budget without X
         q = search(lv, allow_align=False)[0]
         if q is not None and (lv["budget"] is None or q <= lv["budget"]): errs.append(f"finishable within budget without a Tab ({q} changes)")
-        q = search(lv, max_margin=1)[0]
-        if q is not None and (lv["budget"] is None or q <= lv["budget"]): errs.append(f"finishable within budget with at most 1 margin change ({q})")
+        # with one change per commit, any width is one move, so the rule is now "needs a margin change", not "2+"
+        q = search(lv, max_margin=0)[0]
+        if q is not None and (lv["budget"] is None or q <= lv["budget"]): errs.append(f"finishable within budget with Tabs alone ({q})")
     if lv["kind"] == "spell":
         if not 3 <= len(lv["letters"]) <= 5 or len({k for k, _ in lv["letters"]}) != len(lv["letters"]):
             errs.append("needs 3-5 letters in different words")
