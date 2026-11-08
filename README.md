@@ -36,6 +36,7 @@ Every push builds the web version of every Godot project in the repo and publish
 - Each branch gets its own folder, so a work-in-progress branch is playable without merging. Deleting the branch removes its builds.
 - Builds live under a path that contains the commit hash, so a fresh push is never served from cache. Allow about two minutes after a push: one for the export, one for Pages to publish.
 - `game/` is built first when it exists, then every `prototypes/<name>/`.
+- **Playtest logs:** every build has a small `log` button at the right edge. It opens a panel with everything the game printed (level reports, errors, device info), kept across reloads. **Report to GitHub** opens a prefilled issue labelled `playtest-log` with the last part of the log, so a tester can send it in one tap and it can be read from the repo. Copy and Share are there too. Code: `web/launcher/playtest-log.js`.
 - The workflow is `.github/workflows/web.yml`; it uses `web/build-all.sh`, `web/publish.py` and the shared preset `web/export_presets.web.cfg`. To export by hand: `GODOT=godot web/build.sh prototypes/<name> build/<name>` (needs the Godot web export templates installed).
 - Pages must serve the `gh-pages` branch. The workflow enables that itself; if your plan does not allow Pages on a private repository, make the repository public (Game Off requires it at submission anyway) or set it once under Settings → Pages.
 

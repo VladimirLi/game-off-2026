@@ -6,6 +6,7 @@
 
 Layout of SITE:
     index.html        launcher page (copied from web/launcher/index.html)
+    playtest-log.js   console/error capture loaded by every build's page
     builds.json       one entry per branch: what was built, from which commit, when
     b/<slug>/<sha7>/<project>/   the builds themselves
 
@@ -44,6 +45,10 @@ def finish(site, data, launcher):
     save(os.path.join(site, "builds.json"), data)
     if launcher:
         shutil.copyfile(launcher, os.path.join(site, "index.html"))
+        # the log capture script every build loads from the site root (see export_presets.web.cfg)
+        logjs = os.path.join(os.path.dirname(launcher), "playtest-log.js")
+        if os.path.exists(logjs):
+            shutil.copyfile(logjs, os.path.join(site, "playtest-log.js"))
     open(os.path.join(site, ".nojekyll"), "a").close()
 
 
