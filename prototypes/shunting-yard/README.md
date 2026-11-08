@@ -14,7 +14,7 @@ Web build: open the launcher (see the top-level README) and tap Shunting Yard. T
 
 ## Rules
 
-- Enemies spawn on the left (green column) in their lane and walk east one cell per tick. Reaching the red column leaks and costs a life. Five lives per level.
+- Enemies spawn on the left (green column) in their lane and walk east one cell per tick. Reaching the red column leaks and costs a life. A wave passes only with zero leaks; otherwise the pits are restored and you retry it. Five lives per level.
 - **Plates** go on any free cell in columns 1 to 10 that is not a pit or bolted floor, up to two per cell. Stacking two plates doubles the strength. The level gives a plate budget; plates stay between waves and can be erased and moved.
 - **Shift up / Shift down:** move the enemy that many rows. **Alternator:** shifts up, then down, then up, one enemy at a time.
 - **Enemy types:** Light moves 1 row per strength. Slick moves 2. Heavy moves 1 only at strength 2 (two stacked plates), otherwise it ignores the plate.

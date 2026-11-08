@@ -6,7 +6,8 @@ extends Node2D
 # down, alternating per enemy. An enemy shifted onto another plate is shifted again (chains up to 4).
 # Walls clamp. Before Go, every enemy's path through the machine is traced, and each pit shows its predicted fill.
 # Levels: {name, pits: [[col, row, capacity]], budget, waves: [[[kind, row, count], ...], ...]}.
-# Groups within a wave are interleaved, so sorting matters. Each level gives 5 lives; a leak costs one.
+# Groups within a wave are interleaved, so sorting matters. A wave passes only with zero leaks; each leak costs
+# one of the level's 5 lives and the wave is retried with the pits as they were.
 
 const COLS := 12            # column 0 spawns, column 11 is the base
 const ROWS := 7
@@ -358,12 +359,17 @@ func end_wave() -> void:
 	running = false
 	killed += sim["killed"]
 	leaked += sim["leaked"]
-	for k in sim["pits"]:
-		pits[k] = sim["pits"][k]
 	if lives <= 0:
 		failed = true
 		report("FAILED")
 		return
+	if sim["leaked"] > 0:  # a wave passes only with zero leaks: pits are restored and the wave is retried
+		report("wave leaked, retry")
+		set_note("%d leaked. Fix the machine and Go again. Lives left: %d." % [sim["leaked"], lives])
+		update_preview()
+		return
+	for k in sim["pits"]:
+		pits[k] = sim["pits"][k]
 	report("wave done")
 	wave += 1
 	if wave >= LEVELS[level]["waves"].size():
