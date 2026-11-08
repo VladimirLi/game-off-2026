@@ -78,7 +78,7 @@ jobs:
           for attempt in 1 2 3 4 5; do
             rm -rf site
             if git ls-remote --exit-code --heads "$remote" gh-pages >/dev/null; then
-              git clone --quiet --depth 1 --branch gh-pages "$remote" site
+              git clone --quiet --depth 1 --branch gh-pages "$remote" site  # previous builds of other branches
             else
               git init --quiet -b gh-pages site
             fi
@@ -92,9 +92,12 @@ jobs:
             fi
             cd site
             git add -A
-            if git diff --cached --quiet; then echo "nothing to publish"; exit 0; fi
+            if git rev-parse -q --verify HEAD >/dev/null && git diff --cached --quiet; then echo "nothing to publish"; exit 0; fi
+            # Fresh single-commit history each time: the site is regenerated in full, and
+            # keeping every past wasm in history would grow the branch by ~250 MB a deploy.
+            git checkout --quiet --orphan deploy
             git commit --quiet -m "$msg"
-            if git push --quiet "$remote" HEAD:gh-pages; then echo "pushed"; exit 0; fi
+            if git push --quiet --force "$remote" deploy:gh-pages; then echo "pushed"; exit 0; fi
             cd ..
             echo "push rejected, retrying ($attempt)"; sleep $((attempt * 3))
           done
