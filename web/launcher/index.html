@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#14151a">
+<title>SHIFT builds</title>
+<style>
+  :root { color-scheme: dark; --bg:#14151a; --card:#1e2028; --line:#2c2f3a; --fg:#e8e8ee; --dim:#9a9db0; --accent:#ffd166; --btn:#2b6cb0; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; background:var(--bg); color:var(--fg); font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  body { padding: max(16px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom)); max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 4px 0 2px; }
+  .sub { color: var(--dim); font-size: 14px; margin: 0 0 18px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 14px 10px; margin-bottom: 14px; }
+  .card.main { border-color: var(--accent); }
+  .head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .branch { font-weight: 700; font-size: 17px; word-break: break-all; }
+  .tag { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 1px 8px; }
+  .meta { color: var(--dim); font-size: 13px; margin: 2px 0 10px; }
+  .meta code { font-family: ui-monospace, Menlo, monospace; }
+  .games { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  a.game { display: block; text-decoration: none; color: #fff; background: var(--btn); border-radius: 10px; padding: 14px 12px; font-weight: 600; text-align: center; min-height: 52px; }
+  a.game:active { filter: brightness(1.15); }
+  a.game small { display: block; font-weight: 400; color: #cfe3ff; font-size: 12px; margin-top: 2px; }
+  .empty, .err { color: var(--dim); padding: 24px 0; text-align: center; }
+  .foot { color: var(--dim); font-size: 13px; margin-top: 20px; }
+  .foot a { color: var(--dim); }
+  button { background: none; border: 1px solid var(--line); color: var(--fg); border-radius: 8px; padding: 6px 12px; font: inherit; }
+</style>
+</head>
+<body>
+<h1>SHIFT builds</h1>
+<p class="sub">Every push builds the web version and lists it here. <button id="reload">Refresh</button></p>
+<div id="list"><p class="empty">Loading…</p></div>
+<p class="foot">Loading a build? Open it, then rotate to landscape. Keep this page on your home screen: Share → Add to Home Screen.<br>
+<span id="gen"></span></p>
+<script>
+const list = document.getElementById('list');
+function ago(iso) {
+  const s = Math.max(0, (Date.now() - new Date(iso)) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return Math.round(s / 60) + ' min ago';
+  if (s < 86400) return Math.round(s / 3600) + ' h ago';
+  return Math.round(s / 86400) + ' d ago';
+}
+function esc(t) { return String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function render(data) {
+  const entries = Object.values(data.branches || {});
+  if (!entries.length) { list.innerHTML = '<p class="empty">No builds yet.</p>'; return; }
+  entries.sort((a, b) => (b.branch === 'main') - (a.branch === 'main') || new Date(b.time) - new Date(a.time));
+  list.innerHTML = entries.map(e => `
+    <div class="card ${e.branch === 'main' ? 'main' : ''}">
+      <div class="head"><span class="branch">${esc(e.branch)}</span>${e.branch === 'main' ? '<span class="tag">main</span>' : ''}</div>
+      <div class="meta">${ago(e.time)} · <code>${esc(e.sha7)}</code>${e.message ? ' · ' + esc(e.message) : ''}</div>
+      <div class="games">${e.projects.map(p => `<a class="game" href="${esc(p.path)}">${esc(p.title)}<small>${esc(p.source)}</small></a>`).join('')}</div>
+    </div>`).join('');
+  document.getElementById('gen').textContent = data.generated ? 'List updated ' + ago(data.generated) + '.' : '';
+}
+async function load() {
+  list.innerHTML = '<p class="empty">Loading…</p>';
+  try {
+    const r = await fetch('builds.json?t=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) throw new Error(r.status);
+    render(await r.json());
+  } catch (e) {
+    list.innerHTML = '<p class="err">Could not load builds.json (' + esc(e.message) + ').</p>';
+  }
+}
+document.getElementById('reload').onclick = load;
+document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); });
+load();
+</script>
+</body>
+</html>

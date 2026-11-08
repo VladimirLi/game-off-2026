@@ -7,3 +7,8 @@ export/
 .DS_Store
 # Agent scratch
 .claude/
+
+# Web builds
+dist/
+build/
+site/

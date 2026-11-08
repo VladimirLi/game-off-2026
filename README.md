@@ -15,6 +15,7 @@ Week 1, prototyping. Frontrunner: **Drag the margin**, a platformer on a paragra
 | `research/` | Primary-sourced notes: how to place in Game Off, idea-to-shipped-game process, theme-to-idea methods, and the filtered shortlist from 187 generated ideas |
 | `prototypes/` | Grey-box prototypes (rectangles only, no art, no sound). Each has a README with the question it tests and the verdict. Run one with `godot --path prototypes/<name>` |
 | `game/` | The entry itself (to come) |
+| `web/` | Web export preset, build scripts and the phone launcher page used by the GitHub Pages workflow |
 
 ## Prototype verdicts
 
@@ -28,10 +29,21 @@ Week 1, prototyping. Frontrunner: **Drag the margin**, a platformer on a paragra
 | tell | Out: theme in fiction only, random play beats the predictor |
 | slide-the-row | Out on prior art (six close jam games) |
 
+## Play on your phone
+
+Every push builds the web version of every Godot project in the repo and publishes it to GitHub Pages. Open **https://vladimirli.github.io/game-off-2026/** on your phone: the launcher lists one card per branch (`main` first) with a button per build. Add that page to your home screen and it is a one-tap playtest.
+
+- Each branch gets its own folder, so a work-in-progress branch is playable without merging. Deleting the branch removes its builds.
+- Builds live under a path that contains the commit hash, so a fresh push is never served from cache. Allow about two minutes after a push: one for the export, one for Pages to publish.
+- `game/` is built first when it exists, then every `prototypes/<name>/`.
+- The workflow is `.github/workflows/web.yml`; it uses `web/build-all.sh`, `web/publish.py` and the shared preset `web/export_presets.web.cfg`. To export by hand: `GODOT=godot web/build.sh prototypes/<name> build/<name>` (needs the Godot web export templates installed).
+- Pages must serve the `gh-pages` branch. The workflow enables that itself; if your plan does not allow Pages on a private repository, make the repository public (Game Off requires it at submission anyway) or set it once under Settings → Pages.
+
 ## Tooling
 
 - Godot 4.7.2 (`brew install --cask godot`)
 - Prototypes verify with `godot --headless --path <dir> --quit-after 180` (expect only the engine banner)
+- Web builds: see *Play on your phone* above; CI runs on every push
 
 ## AI disclosure
 

@@ -1,0 +1,136 @@
+# Builds every Godot project for the web on each push and publishes it to GitHub Pages.
+# One folder per branch, so a work-in-progress branch is playable on a phone without
+# merging. The launcher at the site root lists all branches. Deleting a branch removes
+# its builds.
+name: Web build
+
+on:
+  push:
+    branches: ['**', '!gh-pages']
+    paths-ignore: ['research/**', '**/*.md', 'LICENSE']
+  delete:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+# Serialise deploys: they all commit to the gh-pages branch.
+concurrency:
+  group: web-deploy
+  cancel-in-progress: false
+
+env:
+  GODOT_VERSION: "4.7.2"
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    if: github.event_name != 'delete' || github.event.ref_type == 'branch'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot and web templates
+        if: github.event_name != 'delete'
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ~/godot
+          key: godot-${{ env.GODOT_VERSION }}-web-v1
+
+      - name: Download Godot and web templates
+        if: github.event_name != 'delete' && steps.cache.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          mkdir -p ~/godot && cd ~/godot
+          base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
+          curl -fsSL --retry 5 -o godot.zip "$base/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          curl -fsSL --retry 5 -o templates.tpz "$base/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          unzip -q -o godot.zip && mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" godot && chmod +x godot
+          unzip -q -o -j templates.tpz 'templates/web_nothreads_release.zip' 'templates/web_nothreads_debug.zip' -d templates
+          rm -f godot.zip templates.tpz
+
+      - name: Install templates
+        if: github.event_name != 'delete'
+        run: |
+          set -euo pipefail
+          dest=~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          mkdir -p "$dest" && cp ~/godot/templates/*.zip "$dest/"
+          ~/godot/godot --version
+
+      - name: Export web builds
+        if: github.event_name != 'delete'
+        env:
+          GODOT: /home/runner/godot/godot
+        run: web/build-all.sh dist
+
+      - name: Publish to gh-pages
+        env:
+          EVENT: ${{ github.event_name }}
+          BRANCH: ${{ github.event_name == 'delete' && github.event.ref || github.ref_name }}
+          SHA: ${{ github.sha }}
+          MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          set -euo pipefail
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          remote="https://x-access-token:${{ github.token }}@github.com/${GITHUB_REPOSITORY}.git"
+          for attempt in 1 2 3 4 5; do
+            rm -rf site
+            if git ls-remote --exit-code --heads "$remote" gh-pages >/dev/null; then
+              git clone --quiet --depth 1 --branch gh-pages "$remote" site
+            else
+              git init --quiet -b gh-pages site
+            fi
+            if [ "$EVENT" = "delete" ]; then
+              python3 web/publish.py remove --site site --branch "$BRANCH" --launcher web/launcher/index.html
+              msg="Remove builds for $BRANCH"
+            else
+              python3 web/publish.py add --site site --dist dist --branch "$BRANCH" --sha "$SHA" \
+                --message "$MESSAGE" --launcher web/launcher/index.html
+              msg="Build $BRANCH @ ${SHA::7}"
+            fi
+            cd site
+            git add -A
+            if git diff --cached --quiet; then echo "nothing to publish"; exit 0; fi
+            git commit --quiet -m "$msg"
+            if git push --quiet "$remote" HEAD:gh-pages; then echo "pushed"; exit 0; fi
+            cd ..
+            echo "push rejected, retrying ($attempt)"; sleep $((attempt * 3))
+          done
+          echo "::error::could not push to gh-pages"; exit 1
+
+      - name: Make sure GitHub Pages serves gh-pages
+        if: github.event_name != 'delete'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -uo pipefail
+          body='{"build_type":"legacy","source":{"branch":"gh-pages","path":"/"}}'
+          if gh api "repos/$GITHUB_REPOSITORY/pages" > pages.json 2>/dev/null; then
+            if [ "$(jq -r '.source.branch // empty' pages.json)" != "gh-pages" ]; then
+              gh api -X PUT "repos/$GITHUB_REPOSITORY/pages" --input - <<< "$body" >/dev/null || true
+              gh api "repos/$GITHUB_REPOSITORY/pages" > pages.json
+            fi
+          elif ! gh api -X POST "repos/$GITHUB_REPOSITORY/pages" --input - <<< "$body" > pages.json 2> err.txt; then
+            echo "::warning::GitHub Pages could not be enabled automatically: $(cat err.txt)"
+            {
+              echo "### GitHub Pages is not enabled"
+              echo
+              echo "Enable it once by hand: repository **Settings → Pages → Build and deployment → Source: Deploy from a branch → Branch: gh-pages / (root)**."
+              echo "On a free plan Pages needs the repository to be public."
+              echo
+              echo '```'; cat err.txt; echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          url=$(jq -r '.html_url' pages.json)
+          slug=$(python3 -c "import re,sys;print(re.sub(r'[^A-Za-z0-9._-]+','-',sys.argv[1]).strip('-.'))" "${{ github.ref_name }}")
+          {
+            echo "### Play on your phone"
+            echo
+            echo "- Launcher (all branches): $url"
+            echo "- This branch: ${url}b/${slug}/${GITHUB_SHA::7}/"
+            echo
+            echo "Pages publishes the new build about a minute after this job finishes."
+          } >> "$GITHUB_STEP_SUMMARY"
