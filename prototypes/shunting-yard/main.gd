@@ -62,6 +62,7 @@ var acc := 0.0
 var sim := {}               # live simulation state, see new_sim()
 var preview: Array = []     # [{kind, cells: [Vector2i], end: "pit"|"base"}]
 var pit_fill := {}          # predicted kills per pit from the preview
+var leak_paths: Array = []  # paths of the enemies that leaked in the last run, shown until the next edit
 var flash := {}             # Vector2i -> seconds left
 var won := false
 var failed := false
@@ -102,6 +103,7 @@ func load_level(i: int) -> void:
 	killed = 0
 	leaked = 0
 	flash.clear()
+	leak_paths.clear()
 	update_preview()
 
 func plates_used() -> int:
@@ -168,8 +170,7 @@ func enter_cell(st: Dictionary, e: Dictionary, chain: int, record: bool) -> bool
 			flash[key] = 0.3
 		if d != 0:
 			e["row"] = clampi(e["row"] + d, 0, ROWS - 1)
-			if record:
-				e["path"].append(Vector2i(e["col"], e["row"]))
+			e["path"].append(Vector2i(e["col"], e["row"]))
 			return enter_cell(st, e, chain + 1, record)
 	key = Vector2i(e["col"], e["row"])
 	if st["pits"].has(key) and st["pits"][key] > 0:
@@ -188,8 +189,7 @@ func sim_tick(st: Dictionary, record: bool) -> void:
 			continue
 		e["prev"] = Vector2i(e["col"], e["row"])
 		e["col"] += 1
-		if record:
-			e["path"].append(Vector2i(e["col"], e["row"]))
+		e["path"].append(Vector2i(e["col"], e["row"]))
 		if enter_cell(st, e, 0, record):
 			continue
 		if e["col"] >= COLS - 1:
@@ -295,6 +295,7 @@ func edit_cell(c: Vector2i) -> void:
 			plates[c].pop_back()
 			if plates[c].is_empty():
 				plates.erase(c)
+			leak_paths.clear()
 	else:
 		var stack: Array = plates.get(c, [])
 		if stack.size() >= MAX_STACK:
@@ -305,7 +306,21 @@ func edit_cell(c: Vector2i) -> void:
 			return
 		stack.append(tool)
 		plates[c] = stack
+	leak_paths.clear()
 	update_preview()
+
+func all_locked() -> bool:
+	for k in plates:
+		if plates[k].size() > locked.get(k, 0):
+			return false
+	return true
+
+func predicted_leaks() -> int:
+	var n := 0
+	for pv in preview:
+		if pv["end"] != "pit":
+			n += 1
+	return n
 
 func set_note(t: String) -> void:
 	note = t
@@ -378,7 +393,14 @@ func end_wave() -> void:
 		return
 	if sim["leaked"] > 0:  # a wave passes only with zero leaks: pits are restored and the wave is retried
 		report("wave leaked, retry")
-		set_note("%d leaked. Fix the machine and Go again. Lives left: %d." % [sim["leaked"], lives])
+		leak_paths.clear()
+		for e in sim["enemies"]:
+			if e["end"] == "base":
+				leak_paths.append(e["path"])
+		if plates_used() >= budget and all_locked():
+			set_note("%d leaked (red paths). No plates left and all are locked: R restarts the level." % sim["leaked"])
+		else:
+			set_note("%d leaked (red paths). Change the machine and Go again. Lives left: %d." % [sim["leaked"], lives])
 		update_preview()
 		return
 	for k in sim["pits"]:
@@ -466,6 +488,14 @@ func _draw() -> void:
 				draw_line(last + Vector2(-6, -6), last + Vector2(6, 6), Color(1, 0.3, 0.3), 3.0)
 				draw_line(last + Vector2(-6, 6), last + Vector2(6, -6), Color(1, 0.3, 0.3), 3.0)
 			idx += 1
+	# last run's leakers, in red, until the next edit
+	if not running:
+		for path in leak_paths:
+			var pts := PackedVector2Array()
+			for c in path:
+				pts.append(cell_center(c) + Vector2(0, 6))
+			if pts.size() >= 2:
+				draw_polyline(pts, Color(1, 0.25, 0.25, 0.9), 4.0)
 	# enemies
 	if running:
 		var t: float = clamp(acc / TICK, 0.0, 1.0)
@@ -491,8 +521,11 @@ func _draw() -> void:
 			if sel:
 				fill = Color(0.45, 0.32, 0.55)
 		elif b[1] == "go":
-			txt = "Next level" if won else ("Retry (R)" if failed else "Go  (space)")
+			var pl := predicted_leaks()
+			txt = "Next level" if won else ("Retry (R)" if failed else ("Go: %d will leak" % pl if pl > 0 else "Go  (space)"))
 			fill = Color(0.2, 0.5, 0.3) if not running else Color(0.2, 0.3, 0.22)
+			if pl > 0 and not running and not won and not failed:
+				fill = Color(0.6, 0.2, 0.2)
 		else:
 			txt = "Speed x%d (F)" % int(speed)
 		draw_rect(rect, fill)
