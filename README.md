@@ -6,7 +6,7 @@ This repo holds the whole process, not just the game: the research that shaped i
 
 ## Status
 
-Week 1, prototyping. Frontrunner: **Drag the margin**, a platformer on a paragraph of text where dragging the right margin reflows the words under you.
+Week 1, prototyping. Frontrunner: **Shunting Yard**, a tower defence where towers never kill: every tower shifts an enemy sideways, only pits kill, and you compose plates so each wave sorts itself. Drag the margin was played on a phone and benched: its whole state is one integer, so puzzles became a search.
 
 ## Layout
 
@@ -21,7 +21,8 @@ Week 1, prototyping. Frontrunner: **Drag the margin**, a platformer on a paragra
 
 | Prototype | Verdict |
 |---|---|
-| drag-the-margin | Frontrunner. Readable at once; difficulty is a level-design dial. In iteration |
+| shunting-yard | New frontrunner after the margin playtest: tower defence where towers only shift enemies and pits do the killing. In test |
+| drag-the-margin | Played on phone: readable, but the state is one integer and level 4 became a width search. Benched |
 | insert-a-row | Confusing in play. Benched |
 | pull-the-rug | Confusing in play. Benched |
 | rulebender | Too complicated (18 rule bits). Out |
