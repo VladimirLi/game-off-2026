@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
-"""Verify every Shunting Yard level: fewest plates that win all waves with zero leaks, and how many
-distinct layouts do it with that many plates (1 = the player must find the one layout).
+"""Verify every Shunting Yard level has a perfect incremental run: plates arrive as income before each wave,
+plates that ran a wave are locked, every wave must pass with zero leaks.
 
-Mirrors main.gd: interleaved spawn order, stacking (max 2), multipliers, clamping, chaining (max 4),
-pit capacity carried across waves, bolted cells, rails (plates only in those columns). Locking needs no
-extra check: a layout that passes every wave can be built in full before wave 1. Search: iterative deepening on plate count; each step
-adds one plate on a cell along the path of a leaking enemy or of an enemy that used up a pit on the
-leaker's path (any zero-leak fix must touch one of those cells). Exits non-zero if a level's budget is
-below its minimum.
+Mirrors main.gd: interleaved spawn order, stacking (max 2), multipliers, clamping, chaining (max 4), pit capacity
+carried across waves, bolted cells, rails. Per wave, the search adds plates (within the cumulative income) on the
+path of a leaking enemy or of an enemy that filled a pit on its path; it backtracks over earlier waves' choices.
+Also reports, for wave 1, how many distinct minimal layouts pass it: 1 means "find the one layout".
 
-    python3 solve.py            check all levels
-    python3 solve.py 9 "U@4,5 U@4,4"   test one layout on level 9
+    python3 solve.py                      check all levels
+    python3 solve.py 9 "U@8,2 A@8,3"      test one layout on level 9 (all waves, pre-placed)
 """
 import sys
 
@@ -69,53 +67,75 @@ def run_wave(level, wave, plates, pits):
             enemies.append({"kind": k, "col": 0, "row": r, "alive": True, "end": None, "path": [(0, r)]})
     return enemies
 
-def evaluate(level, plates):
-    """Returns (ok, repair_cells): ok if zero leaks over all waves; else cells worth adding a plate to."""
-    pits = {(p[0], p[1]): p[2] for p in level["pits"]}
+def evaluate_wave(level, w, plates, pits_in):
+    """Runs wave w on pits_in (copied). Returns (ok, repair_cells, pits_out)."""
+    pits = dict(pits_in)
     forbidden = set(pits) | {(b[0], b[1]) for b in level.get("bolted", [])}
     rails = set(level.get("rails", range(1, COLS - 1)))
-    for w in range(len(level["waves"])):
-        enemies = run_wave(level, w, plates, pits)
-        leakers = [e for e in enemies if e["end"] == "base"]
-        if leakers:
-            e = leakers[0]
-            cells = set(e["path"])
-            on_path = set(e["path"])
-            for o in enemies:
-                if o["end"] not in (None, "base") and o["end"] in on_path:
-                    cells |= set(o["path"])  # it filled a pit the leaker crossed
-            cells = {c for c in cells if c[0] in rails and c not in forbidden}
-            return False, cells
-    return True, set()
+    enemies = run_wave(level, w, plates, pits)
+    leakers = [e for e in enemies if e["end"] == "base"]
+    if not leakers:
+        return True, set(), pits
+    e = leakers[0]
+    cells = set(e["path"])
+    on_path = set(e["path"])
+    for o in enemies:
+        if o["end"] not in (None, "base") and o["end"] in on_path:
+            cells |= set(o["path"])
+    cells = {c for c in cells if c[0] in rails and c not in forbidden}
+    return False, cells, pits
 
 def key_of(plates):
     return tuple(sorted((c, "".join(sorted(v))) for c, v in plates.items()))
 
-def search(level, max_n):
-    """Fewest plates (<= max_n) and the set of distinct winning layouts at that count."""
-    for n in range(1, max_n + 1):
-        found, seen = {}, set()
-        def dfs(plates, used):
-            k = key_of(plates)
-            if (k, used) in seen: return
-            seen.add((k, used))
-            ok, cells = evaluate(level, plates)
-            if ok:
-                if used == n: found[k] = dict(plates)
-                return
-            if used == n: return
-            for c in cells:
-                stack = plates.get(c, "")
-                if len(stack) >= MAX_STACK: continue
-                for t in "UDA":
-                    plates[c] = stack + t
-                    dfs(plates, used + 1)
-                    if stack: plates[c] = stack
-                    else: del plates[c]
-        dfs({}, 0)
-        if found:
-            return n, list(found.values())
-    return None, []
+def plates_count(plates):
+    return sum(len(v) for v in plates.values())
+
+def layouts_for_wave(level, w, base, pits, limit):
+    """All layouts that extend `base` with up to `limit` total plates and pass wave w, fewest additions first."""
+    out, seen = [], set()
+    def dfs(plates, used):
+        k = key_of(plates)
+        if k in seen:
+            return
+        seen.add(k)
+        ok, cells, pits_out = evaluate_wave(level, w, plates, pits)
+        if ok:
+            out.append((dict(plates), pits_out))
+            return
+        if used >= limit:
+            return
+        for c in cells:
+            stack = plates.get(c, "")
+            if len(stack) >= MAX_STACK:
+                continue
+            for t in "UDA":
+                plates[c] = stack + t
+                dfs(plates, used + 1)
+                if stack:
+                    plates[c] = stack
+                else:
+                    del plates[c]
+    dfs(dict(base), plates_count(base))
+    out.sort(key=lambda x: plates_count(x[0]))
+    return out
+
+def perfect_run(level):
+    """A sequence of layouts, one per wave, each extending the previous within cumulative income; or None."""
+    cum, total = [], 0
+    for inc in level["income"]:
+        total += inc
+        cum.append(total)
+    pits0 = {(p[0], p[1]): p[2] for p in level["pits"]}
+    def rec(w, base, pits):
+        if w == len(level["waves"]):
+            return []
+        for layout, pits_out in layouts_for_wave(level, w, base, pits, cum[w]):
+            rest = rec(w + 1, layout, pits_out)
+            if rest is not None:
+                return [layout] + rest
+        return None
+    return rec(0, {}, pits0)
 
 def fmt(plates):
     return " ".join(f"{''.join(sorted(v))}@{c[0]},{c[1]}" for c, v in sorted(plates.items()))
@@ -128,16 +148,23 @@ def main():
         for tok in sys.argv[2].split():
             st, pos = tok.split("@"); c, r = map(int, pos.split(","))
             plates[(c, r)] = st
-        ok, cells = evaluate(lv, plates)
-        print("wins" if ok else f"leaks; try cells {sorted(cells)}"); return
+        pits = {(p[0], p[1]): p[2] for p in lv["pits"]}
+        for w in range(len(lv["waves"])):
+            ok, cells, pits = evaluate_wave(lv, w, plates, pits)
+            print(f"wave {w+1}: {'clean' if ok else 'leaks; try cells ' + str(sorted(cells))}")
+        return
     bad = 0
     for i, lv in enumerate(levels):
-        n, sols = search(lv, lv["budget"])
-        if n is None:
-            print(f"level {i+1:2d} {lv['name']!r}: NOT solvable within budget {lv['budget']}"); bad += 1
+        run = perfect_run(lv)
+        pits0 = {(p[0], p[1]): p[2] for p in lv["pits"]}
+        first = layouts_for_wave(lv, 0, {}, pits0, lv["income"][0])
+        nmin = plates_count(first[0][0]) if first else None
+        n_at_min = sum(1 for l, _ in first if plates_count(l) == nmin) if first else 0
+        if run is None:
+            print(f"level {i+1:2d} {lv['name']!r}: NO perfect run within income {lv['income']}"); bad += 1
         else:
-            slack = lv["budget"] - n
-            print(f"level {i+1:2d} {lv['name']!r}: min {n} plates, budget {lv['budget']} (slack {slack}), {len(sols)} layout(s) at min, e.g. {fmt(sols[0])}")
+            steps = " | ".join(fmt(l) or "-" for l in run)
+            print(f"level {i+1:2d} {lv['name']!r}: income {lv['income']}, wave-1 min {nmin} plates ({n_at_min} layouts); run: {steps}")
     sys.exit(1 if bad else 0)
 
 if __name__ == "__main__":

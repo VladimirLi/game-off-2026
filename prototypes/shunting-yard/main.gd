@@ -6,10 +6,10 @@ extends Node2D
 # down, alternating per enemy. An enemy shifted onto another plate is shifted again (chains up to 4).
 # Walls clamp. Before Go, every enemy's path through the machine is traced, and each pit shows its predicted fill.
 # Levels: {name, rails: [columns where plates may go], pits: [[col, row, capacity]], bolted: [[col, row]],
-#   budget, waves: [[[kind, row, count], ...], ...]}. Plates that have run a passing wave are locked: you can add,
-#   never rebuild, so the machine must anticipate the waves listed in the side panel.
-# Groups within a wave are interleaved, so sorting matters. A wave passes only with zero leaks; each leak costs
-# one of the level's 5 lives and the wave is retried with the pits as they were.
+#   income: [plates granted before each wave], waves: [[[kind, row, count], ...], ...]}.
+# Tower-defence loop: plates arrive as income before each wave; a wave always passes, each leak costs a life
+# (4 per level); plates that have run a wave are locked, so you add to the machine, never rebuild it.
+# Groups within a wave are interleaved, so sorting matters.
 
 const COLS := 12            # column 0 spawns, column 11 is the base
 const ROWS := 7
@@ -20,7 +20,7 @@ const PANEL_X := 760.0
 const TICK := 0.45
 const MAX_STACK := 2
 const MAX_CHAIN := 4
-const LIVES := 5
+const LIVES := 4
 const MAX_SIM := 400
 
 enum Tool { UP, DOWN, ALT, ERASE }
@@ -32,18 +32,18 @@ const PLATE_CHAR := ["U", "D", "A"]
 const TOOL_NAME := ["Shift up", "Shift down", "Alternator", "Erase"]
 
 const LEVELS := [
-	{"name": "One shift", "rails": [4], "pits": [[8, 2, 4]], "budget": 1, "waves": [[[Kind.LIGHT, 3, 4]]]},
-	{"name": "Slick skips a row", "rails": [4], "pits": [[8, 2, 3], [8, 1, 3]], "budget": 1, "waves": [[[Kind.LIGHT, 3, 3], [Kind.SLICK, 3, 3]]]},
-	{"name": "Heavy needs two", "rails": [4], "pits": [[8, 4, 3], [8, 5, 3]], "budget": 2, "waves": [[[Kind.LIGHT, 3, 3], [Kind.HEAVY, 3, 3]]]},
-	{"name": "Plates lock", "rails": [4], "pits": [[8, 2, 4], [8, 4, 4]], "budget": 1, "waves": [[[Kind.LIGHT, 3, 4]], [[Kind.LIGHT, 3, 4]]]},
-	{"name": "Every other one", "rails": [4], "pits": [[8, 2, 4], [8, 5, 4]], "budget": 1, "waves": [[[Kind.LIGHT, 3, 4], [Kind.SLICK, 3, 4]]]},
-	{"name": "Merge", "rails": [3, 6], "pits": [[9, 3, 8]], "budget": 2, "waves": [[[Kind.LIGHT, 5, 4], [Kind.SLICK, 5, 4]]]},
-	{"name": "Sort all three", "rails": [4], "pits": [[8, 0, 3], [8, 1, 3], [8, 2, 3]], "budget": 2, "waves": [[[Kind.LIGHT, 3, 3], [Kind.SLICK, 3, 3], [Kind.HEAVY, 3, 3]]]},
-	{"name": "Two lanes, three waves", "rails": [3, 6], "pits": [[9, 3, 18]], "budget": 3, "waves": [[[Kind.LIGHT, 1, 3], [Kind.SLICK, 5, 3]], [[Kind.HEAVY, 3, 3], [Kind.LIGHT, 1, 3]], [[Kind.SLICK, 5, 3], [Kind.HEAVY, 3, 3]]]},
-	{"name": "Bolted rails", "rails": [2, 5, 8], "pits": [[10, 1, 4], [10, 5, 4]], "bolted": [[2, 3], [5, 2], [8, 3], [8, 5]], "budget": 2, "waves": [[[Kind.LIGHT, 3, 4], [Kind.SLICK, 3, 4]]]},
-	{"name": "Share the load", "rails": [4, 7], "pits": [[9, 1, 4], [9, 3, 8], [9, 5, 4]], "budget": 2, "waves": [[[Kind.LIGHT, 2, 4], [Kind.LIGHT, 4, 4]], [[Kind.LIGHT, 2, 4], [Kind.LIGHT, 4, 4]]]},
-	{"name": "Three lanes", "rails": [3, 6], "pits": [[9, 0, 6], [9, 2, 2], [9, 6, 6]], "budget": 4, "waves": [[[Kind.LIGHT, 1, 2], [Kind.SLICK, 3, 2], [Kind.HEAVY, 5, 2]], [[Kind.SLICK, 1, 2], [Kind.LIGHT, 3, 2], [Kind.HEAVY, 5, 2], [Kind.LIGHT, 5, 2]]]},
-	{"name": "The yard", "rails": [2, 5, 8], "pits": [[10, 1, 4], [10, 2, 4], [10, 4, 4], [10, 6, 4]], "budget": 4, "waves": [[[Kind.LIGHT, 3, 4], [Kind.SLICK, 3, 4]], [[Kind.HEAVY, 3, 4], [Kind.LIGHT, 3, 4]]]},
+	{"name": "One shift", "rails": [4], "pits": [[8, 2, 4]], "income": [1], "waves": [[[Kind.LIGHT, 3, 4]]]},
+	{"name": "Slick skips a row", "rails": [4], "pits": [[8, 2, 3], [8, 1, 3]], "income": [1], "waves": [[[Kind.LIGHT, 3, 3], [Kind.SLICK, 3, 3]]]},
+	{"name": "Heavy needs two", "rails": [4], "pits": [[8, 4, 3], [8, 5, 3]], "income": [2], "waves": [[[Kind.LIGHT, 3, 3], [Kind.HEAVY, 3, 3]]]},
+	{"name": "Every other one", "rails": [4], "pits": [[8, 2, 4], [8, 5, 4]], "income": [1], "waves": [[[Kind.LIGHT, 3, 4], [Kind.SLICK, 3, 4]]]},
+	{"name": "Plates lock", "rails": [4], "pits": [[8, 2, 4], [8, 4, 4]], "income": [1, 1], "waves": [[[Kind.LIGHT, 3, 4]], [[Kind.LIGHT, 3, 4]]]},
+	{"name": "Merge", "rails": [3, 6], "pits": [[9, 3, 8]], "income": [2], "waves": [[[Kind.LIGHT, 5, 4], [Kind.SLICK, 5, 4]]]},
+	{"name": "Sort all three", "rails": [4], "pits": [[8, 0, 3], [8, 1, 3], [8, 2, 3]], "income": [2], "waves": [[[Kind.LIGHT, 3, 3], [Kind.SLICK, 3, 3], [Kind.HEAVY, 3, 3]]]},
+	{"name": "Build as you go", "rails": [3, 6], "pits": [[9, 3, 18]], "income": [2, 1, 1], "waves": [[[Kind.LIGHT, 1, 3]], [[Kind.LIGHT, 1, 3], [Kind.SLICK, 5, 3]], [[Kind.HEAVY, 3, 3], [Kind.SLICK, 5, 3], [Kind.LIGHT, 5, 3]]]},
+	{"name": "Bolted rails", "rails": [2, 5, 8], "pits": [[10, 1, 4], [10, 5, 4]], "bolted": [[2, 3], [5, 2], [8, 3], [8, 5]], "income": [2], "waves": [[[Kind.LIGHT, 3, 4], [Kind.SLICK, 3, 4]]]},
+	{"name": "Share the load", "rails": [4, 7], "pits": [[9, 1, 4], [9, 3, 8], [9, 5, 4]], "income": [1, 1, 0], "waves": [[[Kind.LIGHT, 2, 4]], [[Kind.LIGHT, 4, 4]], [[Kind.LIGHT, 2, 4], [Kind.LIGHT, 4, 4]]]},
+	{"name": "Three lanes", "rails": [3, 6], "pits": [[9, 0, 6], [9, 2, 2], [9, 6, 6]], "income": [2, 2, 0], "waves": [[[Kind.LIGHT, 1, 2], [Kind.SLICK, 3, 2]], [[Kind.HEAVY, 5, 2], [Kind.LIGHT, 5, 2]], [[Kind.SLICK, 1, 2], [Kind.LIGHT, 3, 2], [Kind.HEAVY, 5, 2]]]},
+	{"name": "The yard", "rails": [2, 5, 8], "pits": [[10, 1, 4], [10, 2, 4], [10, 4, 4], [10, 6, 4]], "income": [1, 3], "waves": [[[Kind.LIGHT, 3, 4], [Kind.SLICK, 3, 4]], [[Kind.HEAVY, 3, 4], [Kind.LIGHT, 3, 4]]]},
 ]
 
 var level := 0
@@ -94,7 +94,7 @@ func load_level(i: int) -> void:
 		bolted[Vector2i(b[0], b[1])] = true
 	rails = LEVELS[i].get("rails", range(1, COLS - 1))
 	locked.clear()
-	budget = LEVELS[i]["budget"]
+	budget = LEVELS[i]["income"][0]
 	lives = LIVES
 	running = false
 	won = false
@@ -309,12 +309,6 @@ func edit_cell(c: Vector2i) -> void:
 	leak_paths.clear()
 	update_preview()
 
-func all_locked() -> bool:
-	for k in plates:
-		if plates[k].size() > locked.get(k, 0):
-			return false
-	return true
-
 func predicted_leaks() -> int:
 	var n := 0
 	for pv in preview:
@@ -387,24 +381,16 @@ func end_wave() -> void:
 	running = false
 	killed += sim["killed"]
 	leaked += sim["leaked"]
+	for k in sim["pits"]:
+		pits[k] = sim["pits"][k]
+	leak_paths.clear()
+	for e in sim["enemies"]:
+		if e["end"] == "base":
+			leak_paths.append(e["path"])
 	if lives <= 0:
 		failed = true
 		report("FAILED")
 		return
-	if sim["leaked"] > 0:  # a wave passes only with zero leaks: pits are restored and the wave is retried
-		report("wave leaked, retry")
-		leak_paths.clear()
-		for e in sim["enemies"]:
-			if e["end"] == "base":
-				leak_paths.append(e["path"])
-		if plates_used() >= budget and all_locked():
-			set_note("%d leaked (red paths). No plates left and all are locked: R restarts the level." % sim["leaked"])
-		else:
-			set_note("%d leaked (red paths). Change the machine and Go again. Lives left: %d." % [sim["leaked"], lives])
-		update_preview()
-		return
-	for k in sim["pits"]:
-		pits[k] = sim["pits"][k]
 	for k in plates:
 		locked[k] = plates[k].size()
 	report("wave done")
@@ -412,6 +398,13 @@ func end_wave() -> void:
 	if wave >= LEVELS[level]["waves"].size():
 		won = true
 		report("complete")
+	else:
+		var inc: int = LEVELS[level]["income"][wave]
+		budget += inc
+		if sim["leaked"] > 0:
+			set_note("%d leaked (red paths), %d lives left. +%d plate%s for the next wave." % [sim["leaked"], lives, inc, "" if inc == 1 else "s"])
+		elif inc > 0:
+			set_note("Clean wave. +%d plate%s for the next one." % [inc, "" if inc == 1 else "s"])
 	update_preview()
 
 # --- drawing ---
@@ -535,12 +528,14 @@ func _draw() -> void:
 	var lv: Dictionary = LEVELS[level]
 	var msg := "Level %d/%d  %s    wave %d/%d    plates %d/%d    lives %d    killed %d  leaked %d" % [
 		level + 1, LEVELS.size(), lv["name"], min(wave + 1, lv["waves"].size()), lv["waves"].size(), plates_used(), budget, lives, killed, leaked]
+	if not won and not failed and wave + 1 < lv["waves"].size() and lv["income"][wave + 1] > 0:
+		msg += " (+%d next wave)" % lv["income"][wave + 1]
 	if not running and not won and not failed:
 		msg += "    tap a cell: %s" % TOOL_NAME[tool].to_lower()
 	if won:
-		msg = "Level %d complete: %d killed, %d leaked, %.0f s. Press Next level (N)." % [level + 1, killed, leaked, level_t]
+		msg = "Level %d complete: %d killed, %d leaked, %d lives left, %.0f s. Press Next level (N)." % [level + 1, killed, leaked, lives, level_t]
 	if failed:
-		msg = "Out of lives. R to retry the level."
+		msg = "Out of lives: the yard is overrun. R to retry the level."
 	if finished:
 		msg = "All levels done. R to start over."
 	if note_t > 0:
@@ -561,6 +556,8 @@ func draw_wave_panel() -> void:
 			tag += " ok"
 		elif cur:
 			tag += " now"
+		if lv["income"][w] > 0 and not done:
+			tag += " +%d" % lv["income"][w]
 		draw_string(font, Vector2(PANEL_X, y + 13), tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, col)
 		var x := PANEL_X + 50
 		for g in lv["waves"][w]:
@@ -576,7 +573,11 @@ func draw_wave_panel() -> void:
 		y += 24
 	draw_string(font, Vector2(PANEL_X, y + 14), "Lanes are rows 0-6, top down.", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.6, 0.6, 0.66))
 	y += 20
-	draw_string(font, Vector2(PANEL_X, y + 14), "Plates that pass a wave lock.", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.6, 0.6, 0.66))
+	draw_string(font, Vector2(PANEL_X, y + 14), "+n: plates granted for that wave.", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.6, 0.6, 0.66))
+	y += 16
+	draw_string(font, Vector2(PANEL_X, y + 14), "Plates that ran a wave lock.", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.6, 0.6, 0.66))
+	y += 16
+	draw_string(font, Vector2(PANEL_X, y + 14), "Each leak costs a life (%d)." % LIVES, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.6, 0.6, 0.66))
 
 func draw_plate_glyph(t: int, c: Vector2, key: Vector2i) -> void:
 	var w := Color(1, 1, 1, 0.95)
