@@ -5,15 +5,18 @@ extends Node2D
 # Light moves 1 cell per strength, Slick 2, Heavy needs strength 2 to move 1. The Alternator shifts up, then
 # down, alternating per enemy. An enemy shifted onto another plate is shifted again (chains up to 4).
 # Walls clamp. Before Go, every enemy's path through the machine is traced, and each pit shows its predicted fill.
-# Levels: {name, pits: [[col, row, capacity]], budget, waves: [[[kind, row, count], ...], ...]}.
+# Levels: {name, rails: [columns where plates may go], pits: [[col, row, capacity]], bolted: [[col, row]],
+#   budget, waves: [[[kind, row, count], ...], ...]}. Plates that have run a passing wave are locked: you can add,
+#   never rebuild, so the machine must anticipate the waves listed in the side panel.
 # Groups within a wave are interleaved, so sorting matters. A wave passes only with zero leaks; each leak costs
 # one of the level's 5 lives and the wave is retried with the pits as they were.
 
 const COLS := 12            # column 0 spawns, column 11 is the base
 const ROWS := 7
-const CS := 64.0
-const ORG := Vector2(96, 36)
+const CS := 60.0
+const ORG := Vector2(24, 58)
 const PAL_Y := 484.0
+const PANEL_X := 760.0
 const TICK := 0.45
 const MAX_STACK := 2
 const MAX_CHAIN := 4
@@ -29,18 +32,18 @@ const PLATE_CHAR := ["U", "D", "A"]
 const TOOL_NAME := ["Shift up", "Shift down", "Alternator", "Erase"]
 
 const LEVELS := [
-	{"name": "One shift", "pits": [[6, 2, 4]], "budget": 1, "waves": [[[Kind.LIGHT, 3, 4]]]},
-	{"name": "Slick skips a row", "pits": [[6, 2, 3], [6, 1, 3]], "budget": 1, "waves": [[[Kind.LIGHT, 3, 3], [Kind.SLICK, 3, 3]]]},
-	{"name": "Heavy needs two", "pits": [[6, 4, 3], [6, 5, 3]], "budget": 2, "waves": [[[Kind.LIGHT, 3, 3], [Kind.HEAVY, 3, 3]]]},
-	{"name": "Pits fill up", "pits": [[6, 2, 3], [6, 4, 3]], "budget": 1, "waves": [[[Kind.LIGHT, 3, 6]]]},
-	{"name": "Every other one", "pits": [[6, 2, 4], [6, 5, 4]], "budget": 1, "waves": [[[Kind.LIGHT, 3, 4], [Kind.SLICK, 3, 4]]]},
-	{"name": "Merge", "pits": [[7, 3, 8]], "budget": 2, "waves": [[[Kind.LIGHT, 5, 4], [Kind.SLICK, 5, 4]]]},
-	{"name": "Sort all three", "pits": [[6, 0, 3], [6, 1, 3], [6, 2, 3]], "budget": 2, "waves": [[[Kind.LIGHT, 3, 3], [Kind.SLICK, 3, 3], [Kind.HEAVY, 3, 3]]]},
-	{"name": "Two lanes, two waves", "pits": [[7, 3, 15]], "budget": 3, "waves": [[[Kind.LIGHT, 1, 3], [Kind.SLICK, 5, 3]], [[Kind.LIGHT, 1, 3], [Kind.SLICK, 5, 3], [Kind.HEAVY, 3, 3]]]},
-	{"name": "Bolted floor", "pits": [[8, 1, 4], [8, 5, 4]], "bolted": [[2, 3], [3, 3], [4, 3], [5, 3], [6, 3], [7, 3], [3, 2], [3, 4], [5, 2], [5, 4]], "budget": 2, "waves": [[[Kind.LIGHT, 3, 4], [Kind.SLICK, 3, 4]]]},
-	{"name": "Share the load", "pits": [[7, 1, 4], [7, 3, 8], [7, 5, 4]], "budget": 2, "waves": [[[Kind.LIGHT, 2, 8], [Kind.LIGHT, 4, 8]]]},
-	{"name": "Three lanes", "pits": [[8, 0, 6], [8, 2, 2], [8, 6, 6]], "budget": 4, "waves": [[[Kind.LIGHT, 1, 2], [Kind.SLICK, 3, 2], [Kind.HEAVY, 5, 2]], [[Kind.SLICK, 1, 2], [Kind.LIGHT, 3, 2], [Kind.HEAVY, 5, 2], [Kind.LIGHT, 5, 2]]]},
-	{"name": "The yard", "pits": [[9, 1, 4], [9, 2, 4], [9, 4, 4], [9, 6, 4]], "budget": 4, "waves": [[[Kind.LIGHT, 3, 4], [Kind.SLICK, 3, 4]], [[Kind.HEAVY, 3, 4], [Kind.LIGHT, 3, 4]]]},
+	{"name": "One shift", "rails": [4], "pits": [[8, 2, 4]], "budget": 1, "waves": [[[Kind.LIGHT, 3, 4]]]},
+	{"name": "Slick skips a row", "rails": [4], "pits": [[8, 2, 3], [8, 1, 3]], "budget": 1, "waves": [[[Kind.LIGHT, 3, 3], [Kind.SLICK, 3, 3]]]},
+	{"name": "Heavy needs two", "rails": [4], "pits": [[8, 4, 3], [8, 5, 3]], "budget": 2, "waves": [[[Kind.LIGHT, 3, 3], [Kind.HEAVY, 3, 3]]]},
+	{"name": "Plates lock", "rails": [4], "pits": [[8, 2, 4], [8, 4, 4]], "budget": 1, "waves": [[[Kind.LIGHT, 3, 4]], [[Kind.LIGHT, 3, 4]]]},
+	{"name": "Every other one", "rails": [4], "pits": [[8, 2, 4], [8, 5, 4]], "budget": 1, "waves": [[[Kind.LIGHT, 3, 4], [Kind.SLICK, 3, 4]]]},
+	{"name": "Merge", "rails": [3, 6], "pits": [[9, 3, 8]], "budget": 2, "waves": [[[Kind.LIGHT, 5, 4], [Kind.SLICK, 5, 4]]]},
+	{"name": "Sort all three", "rails": [4], "pits": [[8, 0, 3], [8, 1, 3], [8, 2, 3]], "budget": 2, "waves": [[[Kind.LIGHT, 3, 3], [Kind.SLICK, 3, 3], [Kind.HEAVY, 3, 3]]]},
+	{"name": "Two lanes, three waves", "rails": [3, 6], "pits": [[9, 3, 18]], "budget": 3, "waves": [[[Kind.LIGHT, 1, 3], [Kind.SLICK, 5, 3]], [[Kind.HEAVY, 3, 3], [Kind.LIGHT, 1, 3]], [[Kind.SLICK, 5, 3], [Kind.HEAVY, 3, 3]]]},
+	{"name": "Bolted rails", "rails": [2, 5, 8], "pits": [[10, 1, 4], [10, 5, 4]], "bolted": [[2, 3], [5, 2], [8, 3], [8, 5]], "budget": 2, "waves": [[[Kind.LIGHT, 3, 4], [Kind.SLICK, 3, 4]]]},
+	{"name": "Share the load", "rails": [4, 7], "pits": [[9, 1, 4], [9, 3, 8], [9, 5, 4]], "budget": 2, "waves": [[[Kind.LIGHT, 2, 4], [Kind.LIGHT, 4, 4]], [[Kind.LIGHT, 2, 4], [Kind.LIGHT, 4, 4]]]},
+	{"name": "Three lanes", "rails": [3, 6], "pits": [[9, 0, 6], [9, 2, 2], [9, 6, 6]], "budget": 4, "waves": [[[Kind.LIGHT, 1, 2], [Kind.SLICK, 3, 2], [Kind.HEAVY, 5, 2]], [[Kind.SLICK, 1, 2], [Kind.LIGHT, 3, 2], [Kind.HEAVY, 5, 2], [Kind.LIGHT, 5, 2]]]},
+	{"name": "The yard", "rails": [2, 5, 8], "pits": [[10, 1, 4], [10, 2, 4], [10, 4, 4], [10, 6, 4]], "budget": 4, "waves": [[[Kind.LIGHT, 3, 4], [Kind.SLICK, 3, 4]], [[Kind.HEAVY, 3, 4], [Kind.LIGHT, 3, 4]]]},
 ]
 
 var level := 0
@@ -48,6 +51,8 @@ var wave := 0
 var plates := {}            # Vector2i -> Array[Tool]
 var pits := {}              # Vector2i -> capacity left
 var bolted := {}            # Vector2i -> true: floor you cannot put a plate on
+var rails: Array = []       # columns where plates may go
+var locked := {}            # Vector2i -> number of plates on that cell that have run a passing wave
 var budget := 0
 var lives := LIVES
 var tool: int = Tool.UP
@@ -86,6 +91,8 @@ func load_level(i: int) -> void:
 	bolted.clear()
 	for b in LEVELS[i].get("bolted", []):
 		bolted[Vector2i(b[0], b[1])] = true
+	rails = LEVELS[i].get("rails", range(1, COLS - 1))
+	locked.clear()
 	budget = LEVELS[i]["budget"]
 	lives = LIVES
 	running = false
@@ -277,8 +284,14 @@ func edit_cell(c: Vector2i) -> void:
 	if bolted.has(c):
 		set_note("Bolted floor: no plate goes here.")
 		return
+	if not (c.x in rails):
+		set_note("Plates go on the rails, the lit columns.")
+		return
 	if tool == Tool.ERASE:
 		if plates.has(c):
+			if plates[c].size() <= locked.get(c, 0):
+				set_note("Locked: that plate has run a wave. R restarts the level.")
+				return
 			plates[c].pop_back()
 			if plates[c].is_empty():
 				plates.erase(c)
@@ -370,6 +383,8 @@ func end_wave() -> void:
 		return
 	for k in sim["pits"]:
 		pits[k] = sim["pits"][k]
+	for k in plates:
+		locked[k] = plates[k].size()
 	report("wave done")
 	wave += 1
 	if wave >= LEVELS[level]["waves"].size():
@@ -386,6 +401,8 @@ func _draw() -> void:
 			var cell := Vector2i(c, r)
 			var rect := cell_rect(cell)
 			var col := Color(0.16, 0.17, 0.2) if (c + r) % 2 == 0 else Color(0.19, 0.2, 0.23)
+			if c in rails:
+				col = Color(0.26, 0.22, 0.32) if (c + r) % 2 == 0 else Color(0.29, 0.25, 0.35)
 			if c == 0:
 				col = Color(0.25, 0.3, 0.25)
 			elif c == COLS - 1:
@@ -426,6 +443,10 @@ func _draw() -> void:
 		for i in n:
 			var ox := (i - (n - 1) / 2.0) * 22.0
 			draw_plate_glyph(stack[i], cc + Vector2(ox, 0), k)
+		if locked.get(k, 0) > 0:  # a small padlock: ran a wave, cannot be erased
+			draw_rect(Rect2(rect.position + Vector2(CS - 16, 4), Vector2(10, 8)), Color(1, 0.85, 0.3))
+			draw_arc(rect.position + Vector2(CS - 11, 4), 3.5, PI, TAU, 8, Color(1, 0.85, 0.3), 2.0)
+	draw_wave_panel()
 	# preview paths
 	if not running:
 		var idx := 0
@@ -492,6 +513,37 @@ func _draw() -> void:
 	if note_t > 0:
 		msg = note
 	label.text = msg
+
+func draw_wave_panel() -> void:
+	var lv: Dictionary = LEVELS[level]
+	var y := ORG.y
+	draw_string(font, Vector2(PANEL_X, y + 14), "Waves", HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color(0.8, 0.8, 0.85))
+	y += 24
+	for w in lv["waves"].size():
+		var cur: bool = w == wave and not won
+		var done: bool = w < wave or won
+		var col := Color(1, 1, 1, 0.95) if cur else Color(1, 1, 1, 0.45)
+		var tag := "%d" % (w + 1)
+		if done:
+			tag += " ok"
+		elif cur:
+			tag += " now"
+		draw_string(font, Vector2(PANEL_X, y + 13), tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, col)
+		var x := PANEL_X + 50
+		for g in lv["waves"][w]:
+			var kc: Color = KIND_COL[g[0]]
+			kc.a = 0.95 if cur else 0.5
+			var sz: float = 12 if g[0] != Kind.HEAVY else 16
+			draw_rect(Rect2(Vector2(x, y + 9 - sz / 2), Vector2(sz, sz)), kc)
+			draw_string(font, Vector2(x + 19, y + 14), "%d r%d" % [g[2], g[1]], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, col)
+			x += 56
+			if x > 940:
+				x = PANEL_X + 50
+				y += 18
+		y += 24
+	draw_string(font, Vector2(PANEL_X, y + 14), "Lanes are rows 0-6, top down.", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.6, 0.6, 0.66))
+	y += 20
+	draw_string(font, Vector2(PANEL_X, y + 14), "Plates that pass a wave lock.", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.6, 0.6, 0.66))
 
 func draw_plate_glyph(t: int, c: Vector2, key: Vector2i) -> void:
 	var w := Color(1, 1, 1, 0.95)

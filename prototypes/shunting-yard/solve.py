@@ -3,7 +3,8 @@
 distinct layouts do it with that many plates (1 = the player must find the one layout).
 
 Mirrors main.gd: interleaved spawn order, stacking (max 2), multipliers, clamping, chaining (max 4),
-pit capacity carried across waves, bolted cells. Search: iterative deepening on plate count; each step
+pit capacity carried across waves, bolted cells, rails (plates only in those columns). Locking needs no
+extra check: a layout that passes every wave can be built in full before wave 1. Search: iterative deepening on plate count; each step
 adds one plate on a cell along the path of a leaking enemy or of an enemy that used up a pit on the
 leaker's path (any zero-leak fix must touch one of those cells). Exits non-zero if a level's budget is
 below its minimum.
@@ -72,6 +73,7 @@ def evaluate(level, plates):
     """Returns (ok, repair_cells): ok if zero leaks over all waves; else cells worth adding a plate to."""
     pits = {(p[0], p[1]): p[2] for p in level["pits"]}
     forbidden = set(pits) | {(b[0], b[1]) for b in level.get("bolted", [])}
+    rails = set(level.get("rails", range(1, COLS - 1)))
     for w in range(len(level["waves"])):
         enemies = run_wave(level, w, plates, pits)
         leakers = [e for e in enemies if e["end"] == "base"]
@@ -82,7 +84,7 @@ def evaluate(level, plates):
             for o in enemies:
                 if o["end"] not in (None, "base") and o["end"] in on_path:
                     cells |= set(o["path"])  # it filled a pit the leaker crossed
-            cells = {c for c in cells if 1 <= c[0] <= COLS - 2 and c not in forbidden}
+            cells = {c for c in cells if c[0] in rails and c not in forbidden}
             return False, cells
     return True, set()
 
