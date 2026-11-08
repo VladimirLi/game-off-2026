@@ -1,0 +1,62 @@
+{
+ "branches": {
+  "claude-mobile-game-playtesting-08puc1": {
+   "branch": "claude/mobile-game-playtesting-08puc1",
+   "message": "Shunting Yard: income per wave, leaky waves pass and cost lives",
+   "projects": [
+    {
+     "name": "drag-the-margin",
+     "path": "b/claude-mobile-game-playtesting-08puc1/e3de44e/drag-the-margin/",
+     "source": "prototypes/drag-the-margin",
+     "title": "Drag the Margin"
+    },
+    {
+     "name": "insert-a-row",
+     "path": "b/claude-mobile-game-playtesting-08puc1/e3de44e/insert-a-row/",
+     "source": "prototypes/insert-a-row",
+     "title": "Insert a Row"
+    },
+    {
+     "name": "pull-the-rug",
+     "path": "b/claude-mobile-game-playtesting-08puc1/e3de44e/pull-the-rug/",
+     "source": "prototypes/pull-the-rug",
+     "title": "Pull the Rug"
+    },
+    {
+     "name": "rulebender",
+     "path": "b/claude-mobile-game-playtesting-08puc1/e3de44e/rulebender/",
+     "source": "prototypes/rulebender",
+     "title": "Rulebender"
+    },
+    {
+     "name": "selection-pressure",
+     "path": "b/claude-mobile-game-playtesting-08puc1/e3de44e/selection-pressure/",
+     "source": "prototypes/selection-pressure",
+     "title": "Selection Pressure"
+    },
+    {
+     "name": "shunting-yard",
+     "path": "b/claude-mobile-game-playtesting-08puc1/e3de44e/shunting-yard/",
+     "source": "prototypes/shunting-yard",
+     "title": "Shunting Yard"
+    },
+    {
+     "name": "slide-the-row",
+     "path": "b/claude-mobile-game-playtesting-08puc1/e3de44e/slide-the-row/",
+     "source": "prototypes/slide-the-row",
+     "title": "Slide the Row"
+    },
+    {
+     "name": "tell",
+     "path": "b/claude-mobile-game-playtesting-08puc1/e3de44e/tell/",
+     "source": "prototypes/tell",
+     "title": "Tell"
+    }
+   ],
+   "sha": "e3de44e61b67097c4d69f1b5a1fb3e934e5f7077",
+   "sha7": "e3de44e",
+   "time": "2026-11-08T13:16:51Z"
+  }
+ },
+ "generated": "2026-11-08T13:16:51Z"
+}
