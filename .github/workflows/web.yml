@@ -43,9 +43,24 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p ~/godot && cd ~/godot
-          base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
-          curl -fsSL --retry 5 -o godot.zip "$base/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
-          curl -fsSL --retry 5 -o templates.tpz "$base/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          # GitHub's release CDN returns 504 now and then on big assets; keep trying for a
+          # few minutes, alternating between the two official release repositories.
+          fetch() {
+            local out=$1 name=$2 attempt repo
+            for attempt in $(seq 1 12); do
+              for repo in godot godot-builds; do
+                url="https://github.com/godotengine/$repo/releases/download/${GODOT_VERSION}-stable/$name"
+                if curl -fsSL --retry 3 --retry-all-errors --retry-delay 5 -o "$out" "$url"; then
+                  echo "fetched $name from $repo"; return 0
+                fi
+                echo "attempt $attempt via $repo failed for $name"
+              done
+              sleep 20
+            done
+            echo "::error::could not download $name"; return 1
+          }
+          fetch godot.zip "Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          fetch templates.tpz "Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
           unzip -q -o godot.zip && mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" godot && chmod +x godot
           unzip -q -o -j templates.tpz 'templates/web_nothreads_release.zip' 'templates/web_nothreads_debug.zip' -d templates
           rm -f godot.zip templates.tpz
