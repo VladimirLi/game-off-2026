@@ -28,19 +28,25 @@ const PLATE_CHAR := ["U", "D", "A"]
 const TOOL_NAME := ["Shift up", "Shift down", "Alternator", "Erase"]
 
 const LEVELS := [
-	{"name": "One shift", "pits": [[6, 2, 9]], "budget": 2, "waves": [[[Kind.LIGHT, 3, 4]]]},
-	{"name": "Slick skips a row", "pits": [[6, 2, 9], [6, 1, 9]], "budget": 2, "waves": [[[Kind.LIGHT, 3, 3], [Kind.SLICK, 3, 3]]]},
-	{"name": "Heavy needs two", "pits": [[6, 4, 9], [6, 5, 9]], "budget": 2, "waves": [[[Kind.LIGHT, 3, 3], [Kind.HEAVY, 3, 3]]]},
+	{"name": "One shift", "pits": [[6, 2, 4]], "budget": 1, "waves": [[[Kind.LIGHT, 3, 4]]]},
+	{"name": "Slick skips a row", "pits": [[6, 2, 3], [6, 1, 3]], "budget": 1, "waves": [[[Kind.LIGHT, 3, 3], [Kind.SLICK, 3, 3]]]},
+	{"name": "Heavy needs two", "pits": [[6, 4, 3], [6, 5, 3]], "budget": 2, "waves": [[[Kind.LIGHT, 3, 3], [Kind.HEAVY, 3, 3]]]},
 	{"name": "Pits fill up", "pits": [[6, 2, 3], [6, 4, 3]], "budget": 1, "waves": [[[Kind.LIGHT, 3, 6]]]},
-	{"name": "Two lanes", "pits": [[7, 3, 16]], "budget": 3, "waves": [[[Kind.LIGHT, 1, 3], [Kind.SLICK, 5, 3]], [[Kind.LIGHT, 1, 3], [Kind.SLICK, 5, 3], [Kind.HEAVY, 3, 3]]]},
-	{"name": "Sort all three", "pits": [[6, 0, 9], [6, 1, 9], [6, 2, 9]], "budget": 2, "waves": [[[Kind.LIGHT, 3, 3], [Kind.SLICK, 3, 3], [Kind.HEAVY, 3, 3]]]},
-	{"name": "Share the load", "pits": [[6, 1, 4], [6, 3, 8], [6, 5, 4]], "budget": 4, "waves": [[[Kind.LIGHT, 2, 8], [Kind.LIGHT, 4, 8]]]},
+	{"name": "Every other one", "pits": [[6, 2, 4], [6, 5, 4]], "budget": 1, "waves": [[[Kind.LIGHT, 3, 4], [Kind.SLICK, 3, 4]]]},
+	{"name": "Merge", "pits": [[7, 3, 8]], "budget": 2, "waves": [[[Kind.LIGHT, 5, 4], [Kind.SLICK, 5, 4]]]},
+	{"name": "Sort all three", "pits": [[6, 0, 3], [6, 1, 3], [6, 2, 3]], "budget": 2, "waves": [[[Kind.LIGHT, 3, 3], [Kind.SLICK, 3, 3], [Kind.HEAVY, 3, 3]]]},
+	{"name": "Two lanes, two waves", "pits": [[7, 3, 15]], "budget": 3, "waves": [[[Kind.LIGHT, 1, 3], [Kind.SLICK, 5, 3]], [[Kind.LIGHT, 1, 3], [Kind.SLICK, 5, 3], [Kind.HEAVY, 3, 3]]]},
+	{"name": "Bolted floor", "pits": [[8, 1, 4], [8, 5, 4]], "bolted": [[2, 3], [3, 3], [4, 3], [5, 3], [6, 3], [7, 3], [3, 2], [3, 4], [5, 2], [5, 4]], "budget": 2, "waves": [[[Kind.LIGHT, 3, 4], [Kind.SLICK, 3, 4]]]},
+	{"name": "Share the load", "pits": [[7, 1, 4], [7, 3, 8], [7, 5, 4]], "budget": 2, "waves": [[[Kind.LIGHT, 2, 8], [Kind.LIGHT, 4, 8]]]},
+	{"name": "Three lanes", "pits": [[8, 0, 6], [8, 2, 2], [8, 6, 6]], "budget": 4, "waves": [[[Kind.LIGHT, 1, 2], [Kind.SLICK, 3, 2], [Kind.HEAVY, 5, 2]], [[Kind.SLICK, 1, 2], [Kind.LIGHT, 3, 2], [Kind.HEAVY, 5, 2], [Kind.LIGHT, 5, 2]]]},
+	{"name": "The yard", "pits": [[9, 1, 4], [9, 2, 4], [9, 4, 4], [9, 6, 4]], "budget": 4, "waves": [[[Kind.LIGHT, 3, 4], [Kind.SLICK, 3, 4]], [[Kind.HEAVY, 3, 4], [Kind.LIGHT, 3, 4]]]},
 ]
 
 var level := 0
 var wave := 0
 var plates := {}            # Vector2i -> Array[Tool]
 var pits := {}              # Vector2i -> capacity left
+var bolted := {}            # Vector2i -> true: floor you cannot put a plate on
 var budget := 0
 var lives := LIVES
 var tool: int = Tool.UP
@@ -76,6 +82,9 @@ func load_level(i: int) -> void:
 	pits.clear()
 	for p in LEVELS[i]["pits"]:
 		pits[Vector2i(p[0], p[1])] = p[2]
+	bolted.clear()
+	for b in LEVELS[i].get("bolted", []):
+		bolted[Vector2i(b[0], b[1])] = true
 	budget = LEVELS[i]["budget"]
 	lives = LIVES
 	running = false
@@ -264,6 +273,9 @@ func edit_cell(c: Vector2i) -> void:
 	if pits.has(c):
 		set_note("That is a pit.")
 		return
+	if bolted.has(c):
+		set_note("Bolted floor: no plate goes here.")
+		return
 	if tool == Tool.ERASE:
 		if plates.has(c):
 			plates[c].pop_back()
@@ -377,6 +389,13 @@ func _draw() -> void:
 	for r in ROWS:
 		var cc := cell_center(Vector2i(0, r))
 		draw_colored_polygon(PackedVector2Array([cc + Vector2(-8, -8), cc + Vector2(8, 0), cc + Vector2(-8, 8)]), Color(0.5, 0.7, 0.5))
+	# bolted floor
+	for k in bolted:
+		var rect := cell_rect(k)
+		draw_rect(rect.grow(-4), Color(0.3, 0.3, 0.32))
+		for i in 4:
+			var q := rect.position + Vector2(14 + (i % 2) * 36, 14 + (i / 2) * 36)
+			draw_circle(q, 4, Color(0.55, 0.55, 0.58))
 	# pits
 	var live_pits: Dictionary = sim["pits"] if running else pits
 	for k in pits:
