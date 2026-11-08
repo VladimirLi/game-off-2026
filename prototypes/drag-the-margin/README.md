@@ -19,6 +19,10 @@ godot --path /Users/vladimir/orca/projects/scratchpad/greybox/drag-the-margin
 - **R:** restart the level, which also resets the change count. **N:** next paragraph, only after a win. **Shift+N:** skip an unfinished level (playtest aid); it prints a "SKIPPED" log line.
 - Falling off the bottom, touching red punctuation, or touching the caret respawns you on the first word. The margin, the alignment, the letters collected and the changes used stay as they are.
 
+### On a phone
+
+The web build shows on-screen buttons when a touchscreen is present (or on the first touch): **◀ ▶** walk (bottom left), **JUMP** (bottom right), **◀ margin / margin ▶** (above JUMP; hold to preview, release to apply, like the arrow keys), and a top-right row with **undo**, **align** (level 9), **cancel** while previewing, **R** and **next** after a win. You can also drag the purple margin handle with a finger; the touch grab zone is wider than the mouse one. The buttons send the same key events as the keyboard, so the key log, the reports and the bot are unchanged. Code: `touch_controls.gd`. Stretch and the touch layer are web-only: the desktop window and the headless bot keep the fixed 960x540 coordinates.
+
 ## Rules
 
 - Each letter is a cell; spaces are one-cell gaps. The player is wider than one space, so you cannot fall through a gap.

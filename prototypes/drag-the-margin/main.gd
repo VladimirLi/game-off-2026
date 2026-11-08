@@ -74,6 +74,7 @@ var keylog: Array = []
 var held_a := 0.0
 var held_d := 0.0
 var label: Label
+var help: Label
 var hint: Label
 var margin_wall: StaticBody2D
 var tabbed := false
@@ -96,7 +97,7 @@ func _ready() -> void:
 	label = Label.new()
 	label.position = Vector2(12, 8)
 	add_child(label)
-	var help := Label.new()
+	help = Label.new()
 	help.position = Vector2(12, 512)
 	help.text = "A/D walk  Space/W jump  drag the margin or hold Left/Right: preview, release to apply  Z undo  Tab align (lvl 9)  R restart  N next"
 	add_child(help)
@@ -129,6 +130,9 @@ func _ready() -> void:
 	player.add_child(cs)
 	add_child(player)
 	load_level(0)
+	var touch := Control.new()
+	touch.set_script(load("res://touch_controls.gd"))
+	add_child(touch)  # on-screen buttons on phones; sends the same key events
 
 func load_level(i: int) -> void:
 	level = i
@@ -286,6 +290,19 @@ func undo() -> void:  # only while the player has not moved since the last reflo
 	widths.append("undo>" + str(cols) + ("/" + ALIGNS[align] if kind == "align" else ""))
 	reflow()
 
+func drag_begin() -> void:  # grab the margin handle (mouse or touch)
+	dragging = true
+	preview = cols
+
+func drag_move(x: float) -> void:
+	if dragging:
+		preview = clampi(roundi((x - OX) / CW), min_cols, MAX_COLS)
+
+func drag_end() -> void:
+	if dragging:
+		dragging = false
+		commit_preview(true)
+
 func commit_preview(by_drag := false) -> void:
 	var c := preview
 	preview = -1
@@ -310,13 +327,11 @@ func _unhandled_input(e: InputEvent) -> void:
 	var mx := OX + cols * CW
 	if e is InputEventMouseButton and e.button_index == MOUSE_BUTTON_LEFT:
 		if e.pressed and abs(e.position.x - mx) < 14:
-			dragging = true
-			preview = cols
+			drag_begin()
 		elif not e.pressed and dragging:
-			dragging = false
-			commit_preview(true)
+			drag_end()
 	elif e is InputEventMouseMotion and dragging:
-		preview = clampi(roundi((e.position.x - OX) / CW), min_cols, MAX_COLS)
+		drag_move(e.position.x)
 	elif e is InputEventKey and not e.pressed and e.keycode in [KEY_LEFT, KEY_RIGHT] and arrow_held:
 		if not (Input.is_key_pressed(KEY_LEFT) or Input.is_key_pressed(KEY_RIGHT)):
 			var tap: bool = abs(preview - cols) == 1 and arrow_t < 0.4
