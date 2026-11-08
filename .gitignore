@@ -1,0 +1,9 @@
+# Godot
+.godot/
+*.tmp
+export/
+*.pck
+# OS
+.DS_Store
+# Agent scratch
+.claude/
