@@ -201,9 +201,12 @@ function drawTile(x, y, ch, who, tint, gateOpen) {
       g.fillStyle = "#23252a"; for (let i = 0; i < 5; i++) g.fillRect(px + 10, py + 11 + i * 8, T - 20, 4); return;
     case "_": {
       floor(); const held = BH.platesHeld(L, s);
-      g.fillStyle = held ? "#6d7380" : "#c9ced8"; g.fillRect(px + 8, py + 8, T - 16, T - 16);
-      g.strokeStyle = "#2e3138"; g.lineWidth = 3; g.strokeRect(px + 8, py + 8, T - 16, T - 16);
-      g.beginPath(); g.arc(px + T / 2, py + T / 2, held ? 5 : 8, 0, 7); g.fillStyle = "#2e3138"; g.fill(); return;
+      // A wide frame, so a plate stays visible around a body standing on it.
+      // Held: darker frame. White stays reserved for "this is you".
+      g.fillStyle = held ? "#9aa1ad" : "#c9ced8"; g.fillRect(px + 3, py + 3, T - 6, T - 6);
+      g.strokeStyle = "#2e3138"; g.lineWidth = 2; g.strokeRect(px + 4, py + 4, T - 8, T - 8);
+      g.fillStyle = "#2e3138"; g.fillRect(px + 12, py + 12, T - 24, T - 24);
+      g.beginPath(); g.arc(px + T / 2, py + T / 2, held ? 4 : 7, 0, 7); g.fillStyle = "#c9ced8"; g.fill(); return;
     }
     case "|":
       floor(); g.strokeStyle = gateOpen ? "rgba(201,206,216,0.3)" : "#c9ced8"; g.lineWidth = 4;

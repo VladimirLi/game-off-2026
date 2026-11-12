@@ -100,6 +100,68 @@
       on: { "3,3": "R" }, // the second cat starts asleep inside the red wall
       par: 18, checks: ["needs:G", "needs:C", "reenter", "plate", "door"],
     },
+    {
+      name: "Light sleeper",
+      teaches: "the spirit's first hop is the one move you can't undo: slip through while the sleeper holds the gate",
+      hint: "Who is holding that gate open? What happens to it when they wake up?",
+      map: [
+        "########",
+        "#E.DCS.#",
+        "###.R.##",
+        "#####|##",
+        "####...#",
+        "####G..#",
+        "########",
+      ],
+      on: { "4,1": "_" }, // the cat starts asleep on the plate
+      par: 18, checks: ["needs:G", "needs:C", "reenter", "plate", "door"],
+    },
+    {
+      name: "Middle of the bridge",
+      teaches: "a guard parked on its own bridge is the link between two cats across a pit",
+      hint: "Cats can't stand on a red bridge. They can still hop into whoever does.",
+      map: [
+        "########",
+        "####_R~#",
+        "#S.CrC~#",
+        "#.G..~~#",
+        "#|######",
+        "#V######",
+        "#E######",
+      ],
+      par: 16, checks: ["needs:G", "needs:C", "reenter", "plate"],
+    },
+    {
+      name: "Doorstop",
+      teaches: "a body standing in a gate keeps every gate open, so the plate can be left",
+      hint: "A gate can't close on someone standing in it.",
+      map: [
+        "#########",
+        "#.....DE#",
+        "#R#R##.##",
+        "#R#|##|##",
+        "#RC_..G.#",
+        "#####S###",
+        "#########",
+      ],
+      par: 22, checks: ["needs:G", "needs:C", "reenter", "plate", "door", "doorstop"],
+    },
+    {
+      name: "Night shift",
+      teaches: "finale: wake the guard before the sleeping cat (8), and let the cat hold the gates open from inside them (10)",
+      hint: "Stepping aside worked before. Will the gate still be open when the guard gets to it?",
+      map: [
+        "##########",
+        "#####..###",
+        "#ED|.C.S.#",
+        "#####||#.#",
+        "########.#",
+        "#######G.#",
+        "##########",
+      ],
+      on: { "5,2": "_" }, // the cat starts asleep on the plate
+      par: 20, checks: ["needs:G", "needs:C", "reenter", "plate", "door", "doorstop"],
+    },
   ];
   if (typeof module !== "undefined" && module.exports) module.exports = LEVELS; else root.BODY_HOP_LEVELS = LEVELS;
 })(typeof self !== "undefined" ? self : this);

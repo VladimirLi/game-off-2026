@@ -52,8 +52,12 @@ The board marks each body next to you with a small white arrow (you can hop ther
 | 5 | Dead weight | plates, gates, a parked body as a weight; spirit weighs nothing | 9 | 2 | needs both, plate |
 | 6 | Make way | parked bodies block; park where you can still hop back | 14 | 3 | needs both, re-entry |
 | 7 | Relay | a cat asleep inside a wall is the only link from the plate to the guard | 18 | 4 | needs both, re-entry, plate, door |
+| 8 | Light sleeper | a sleeping cat holds the gate open: walk the spirit through before you wake anyone | 18 | 3 | needs both, re-entry, plate, door |
+| 9 | Middle of the bridge | a guard parked on its own bridge links two cats across a pit | 16 | 4 | needs both, re-entry, plate |
+| 10 | Doorstop | a cat standing in one gate keeps every gate open, so the guard can leave the plate | 22 | 3 | needs both, re-entry, plate, door, doorstop |
+| 11 | Night shift | finale: levels 8 and 10 together; stepping aside into the alcove now shuts the gate | 20 | 3 | needs both, re-entry, plate, door, doorstop |
 
-`levels.js` is the source of truth; this table is a summary. Par is the optimal number of turns (walks plus hops) from the solver.
+Levels 8 to 11 were designed by a separate agent working from the design notes below, then re-checked with the same solver and the browser bot. `levels.js` is the source of truth; this table is a summary. Par is the optimal number of turns (walks plus hops) from the solver.
 
 ## Design notes (what the solver taught us)
 
@@ -62,7 +66,8 @@ The board marks each body next to you with a small white arrow (you can hop ther
 - **Every hop needs the two bodies to meet.** So the puzzle is really *where can these two bodies stand next to each other*, which differs per pair because of colour. A cat can stand inside a red block, next to a guard who never could.
 - **A "cat-only plate" cannot stand alone.** If a guard can stand next to a plate (to take control back from the cat on it), the guard can also step onto it. To make a plate cat-only, wall it in with red blocks; then only another cat, standing inside the red, can be the link back (level 7).
 - **Gates share one channel.** Any held plate opens every gate. A plate right next to a gate is a one-way door for a single body (step from the plate into the gate; the gate can't close on you). Keep plates two or more tiles from gates unless that is the point.
-- **Without gates, the only irreversible move is the spirit's first hop.** Everything else can be walked or hopped back. So with no gates, a dead end comes only from picking the wrong first body.
+- **Without gates, the only irreversible move is the spirit's first hop.** Everything else can be walked or hopped back. So with no gates, a dead end comes only from picking the wrong first body. With gates, waking a body that holds a plate can shut a gate behind you (levels 8, 10 and 11 have 14 to 31% dead states; undo gets you out).
+- **A body can start on a special tile** (the `on` field in `levels.js`): a cat asleep inside a red wall (level 7) or already on a plate (levels 8 and 11). A body that starts in place is the cheapest way to avoid leapfrogging.
 
 ## Tools
 
