@@ -17,12 +17,12 @@
     },
     {
       name: "Different eyes",
-      teaches: "colour vision: the cat doesn't see red",
-      hint: "The guard sees red. The cat sees blue, so red isn't there for it.",
+      teaches: "colour vision: red isn't there for the cat; a bridge exists only for its colour",
+      hint: "The guard sees red, the cat sees blue. Red isn't there for the cat, but a blue bridge is.",
       map: [
         "###########",
-        "#S.G...R.E#",
-        "#.C....R..#",
+        "#S...b.R.E#",
+        "#.CG~~~R..#",
         "###########",
       ],
       par: 10, checks: ["needs:C"],
@@ -42,21 +42,6 @@
         "#########",
       ],
       par: 8, checks: ["needs:G", "needs:C", "door"],
-    },
-    {
-      name: "Bridges",
-      teaches: "bridges only exist for the body that sees their colour",
-      hint: "A bridge is only there for the body that sees its colour.",
-      map: [
-        "#########",
-        "#S.C....#",
-        "#~~~~~b~#",
-        "#...G...#",
-        "#~~~r~~~#",
-        "#......E#",
-        "#########",
-      ],
-      par: 14, checks: ["needs:G", "needs:C"],
     },
     {
       name: "Dead weight",
@@ -145,22 +130,6 @@
         "#######",
       ],
       par: 14, checks: ["needs:G", "needs:C", "reenter", "plate", "door", "doorstop"],
-    },
-    {
-      name: "Night shift",
-      teaches: "finale: wake the guard before the sleeping cat (8), and let the cat hold the gates open from inside them (10)",
-      hint: "Will the gate still be open when the guard gets there?",
-      map: [
-        "##########",
-        "#####..###",
-        "#ED|.C.S.#",
-        "#####||#.#",
-        "########.#",
-        "#######G.#",
-        "##########",
-      ],
-      on: { "5,2": "_" }, // the cat starts asleep on the plate
-      par: 20, checks: ["needs:G", "needs:C", "reenter", "plate", "door", "doorstop"],
     },
   ];
   if (typeof module !== "undefined" && module.exports) module.exports = LEVELS; else root.BODY_HOP_LEVELS = LEVELS;
