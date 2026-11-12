@@ -14,6 +14,7 @@ Open `index.html` in a browser (double-click works). `index.html?level=7` opens 
 - **Z or Backspace:** undo one turn. **R:** restart.
 - **N:** next level, after a win. **Shift+N:** skip a level (playtest aid; it logs SKIPPED).
 - **L:** show the legend over the board.
+- **Touch:** on a phone or tablet an arrow pad and Undo, Restart and Next level buttons appear under the board. Tap an arrow to move or hop. On a laptop, the "Touch controls" button in the footer shows them too.
 - The level buttons under the board jump to any level. A tick means solved on this machine.
 
 The board marks each body next to you with a small white arrow (you can hop there). Things your current body cannot see are drawn as a dashed outline in their colour, so you still know they are there for others. The whole board takes on the tint of the body you are in, and the tint cross-fades on every hop.
