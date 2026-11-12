@@ -47,23 +47,25 @@ The board marks each body next to you with a small white arrow (you can hop ther
 | # | Name | Teaches | Par (turns) | Hops | Solver checks |
 |---|---|---|---|---|---|
 | 1 | First hop | hopping; doors are guard-only | 7 | 1 | needs guard |
-| 2 | Different eyes | the cat doesn't see red | 10 | 1 | needs cat |
+| 2 | Different eyes | red isn't there for the cat; a bridge exists only for its colour | 10 | 1 | needs cat |
 | 3 | Through the wall | hop body to body; a hop only needs adjacency | 8 | 2 | needs both, door |
-| 4 | Bridges | bridges exist only for their colour | 14 | 2 | needs both |
-| 5 | Dead weight | plates, gates, a parked body as a weight; spirit weighs nothing | 9 | 2 | needs both, plate |
-| 6 | Make way | parked bodies block; park where you can still hop back | 14 | 3 | needs both, re-entry |
-| 7 | Relay | a cat asleep inside a wall is the only link from the plate to the guard | 18 | 4 | needs both, re-entry, plate, door |
-| 8 | Light sleeper | a sleeping cat holds the gate open: walk the spirit through before you wake anyone | 18 | 3 | needs both, re-entry, plate, door |
-| 9 | Middle of the bridge | a guard parked on its own bridge links two cats across a pit | 16 | 4 | needs both, re-entry, plate |
-| 10 | Doorstop | a cat standing in one gate keeps every gate open, so the guard can leave the plate | 14 | 3 | needs both, re-entry, plate, door, doorstop |
-| 11 | Night shift | finale: levels 8 and 10 together; stepping aside into the alcove now shuts the gate | 20 | 3 | needs both, re-entry, plate, door, doorstop |
+| 4 | Dead weight | plates, gates, a parked body as a weight; the spirit weighs nothing | 9 | 2 | needs both, plate |
+| 5 | Make way | parked bodies block; park where you can still hop back | 14 | 3 | needs both, re-entry |
+| 6 | Relay | a cat asleep inside a wall is the only link from the plate to the guard | 18 | 4 | needs both, re-entry, plate, door |
+| 7 | Light sleeper | a sleeping cat holds the gate open: walk the spirit through before you wake anyone | 18 | 3 | needs both, re-entry, plate, door |
+| 8 | Doorstop | a cat standing in one gate keeps every gate open, so the guard can leave the plate | 14 | 3 | needs both, re-entry, plate, door, doorstop |
+| 9 | No trace | whoever hops into a boxed-in body stays behind in its only exit; only the spirit leaves nothing behind | 15 | 2 | needs both |
+| 10 | Lay-by | the guard waits inside a blue block, the one tile next to both places the cats can step aside to | 20 | 6 | needs both, re-entry |
+| 11 | Two breaks | a ring cut by a red block and a blue block is cut in a different place for each body | 25 | 5 | needs both, re-entry |
+| 12 | Changing of the guard | a second cat standing in the gate is the only link back to the guard leaving its plate | 24 | 7 | needs both, re-entry, plate, door |
 
-Levels 8 to 11 were designed by a separate agent working from the design notes below, then re-checked with the same solver and the browser bot. `levels.js` is the source of truth; this table is a summary. Par is the optimal number of turns (walks plus hops) from the solver.
+Levels 7 to 12 were designed by separate agents working from the design notes below, then re-checked with the same solver and the browser bot. Levels 9 to 12 were picked from six candidates by a blind play-tester, who rated 11 and 12 difficulty 3 and 4 of 5 with satisfaction 4 of 5. `levels.js` is the source of truth; this table is a summary. Par is the optimal number of turns (walks plus hops) from the solver.
 
 ## Design notes (what the solver taught us)
 
 - **Two bodies can never travel through a 1-wide corridor together.** You can only move the body you are in. Once it steps away, the other one is out of hop range. So a 1-tile bridge, a door or a vent lets exactly one body of a pair across, unless a third body is already waiting on the other side. Corridor width decides who can travel together.
 - **In a 2-wide space a pair can leapfrog,** two moves per body per tile. It is legal but tedious. Levels that need much of it read as busywork, so start bodies where they are needed.
+- **With exactly two bodies, one plate can never be held by each of them in turn.** The body you did not hop into first is always parked on its starting chessboard colour, and the other on the opposite colour (checked on 600 random boards). A third body breaks this.
 - **Every hop needs the two bodies to meet.** So the puzzle is really *where can these two bodies stand next to each other*, which differs per pair because of colour. A cat can stand inside a red block, next to a guard who never could.
 - **A "cat-only plate" cannot stand alone.** If a guard can stand next to a plate (to take control back from the cat on it), the guard can also step onto it. To make a plate cat-only, wall it in with red blocks; then only another cat, standing inside the red, can be the link back (level 7).
 - **Gates share one channel.** Any held plate opens every gate. A plate right next to a gate is a one-way door for a single body (step from the plate into the gate; the gate can't close on you). Keep plates two or more tiles from gates unless that is the point.
