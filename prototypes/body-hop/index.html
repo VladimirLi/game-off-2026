@@ -255,7 +255,7 @@ function drawLegend() {
     "Cat (C): sees blue. Blue blocks are walls, blue bridges are floor. Fits through vents.",
     "Spirit: sees no colour. Colour is fog it cannot pass. Weighs nothing.",
     "Dashed outline: there for others, not for you. Plates hold gates open while a body stands on them.",
-    "A body standing in a gate keeps it open. Parked bodies block the way.", "L to close"];
+    "A body standing in any gate holds every gate open. Parked bodies block the way.", "L to close"];
   const w = Math.min(cv.width - 20, 620), h = lines.length * 20 + 20;
   g.fillStyle = "rgba(10,10,14,0.92)"; g.fillRect(10, 10, w, h);
   g.fillStyle = "#e8e8ea"; g.font = "13px system-ui"; g.textAlign = "left"; g.textBaseline = "top";

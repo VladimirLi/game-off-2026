@@ -87,7 +87,7 @@
     {
       name: "Relay",
       teaches: "a cat asleep inside a wall is a link: plate cat to wall cat to guard",
-      hint: "The plate is walled in by red. Who could ever stand next to it?",
+      hint: "Who could ever stand next to that plate?",
       map: [
         "##########",
         "#S..C....#",
@@ -119,7 +119,7 @@
     {
       name: "Middle of the bridge",
       teaches: "a guard parked on its own bridge is the link between two cats across a pit",
-      hint: "Cats can't stand on a red bridge. They can still hop into whoever does.",
+      hint: "Two cats, one pit between them. Who could stand in the middle?",
       map: [
         "########",
         "####_R~#",
@@ -133,23 +133,23 @@
     },
     {
       name: "Doorstop",
-      teaches: "a body standing in a gate keeps every gate open, so the plate can be left",
-      hint: "A gate can't close on someone standing in it.",
+      teaches: "a body standing in any gate holds every gate open, so the plate can be left",
+      hint: "The plate opens both gates. What else keeps a gate open?",
       map: [
-        "#########",
-        "#.....DE#",
-        "#R#R##.##",
-        "#R#|##|##",
-        "#RC_..G.#",
-        "#####S###",
-        "#########",
+        "#######",
+        "####DE#",
+        "####.##",
+        "#R|#|##",
+        "#C_.G##",
+        "###S###",
+        "#######",
       ],
-      par: 22, checks: ["needs:G", "needs:C", "reenter", "plate", "door", "doorstop"],
+      par: 14, checks: ["needs:G", "needs:C", "reenter", "plate", "door", "doorstop"],
     },
     {
       name: "Night shift",
       teaches: "finale: wake the guard before the sleeping cat (8), and let the cat hold the gates open from inside them (10)",
-      hint: "Stepping aside worked before. Will the gate still be open when the guard gets to it?",
+      hint: "Will the gate still be open when the guard gets there?",
       map: [
         "##########",
         "#####..###",

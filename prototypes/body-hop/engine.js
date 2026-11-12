@@ -14,7 +14,8 @@
 // - Guard (sees red): carries the key, so locked doors are guard-only tiles.
 // - Cat (sees blue): the only one small enough for vents, so vents are cat-only tiles.
 // - Plates: a body on a plate (parked or not) holds it down. The spirit weighs nothing.
-//   Every gate is open while any plate is held, or while a body stands in a gate (a body is a doorstop).
+//   Gates share one channel: every gate is open while any plate is held, or while a body stands in any gate
+//   (a body is a doorstop for all of them).
 // - Win: you (the body you are in, or the spirit) step onto the exit. No death; undo and restart.
 (function (root) {
   "use strict";

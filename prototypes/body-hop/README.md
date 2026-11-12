@@ -26,7 +26,7 @@ The board marks each body next to you with a small white arrow (you can hop ther
 4. **A hop is not a walk.** Only adjacency matters, so a guard can hop into a cat that is standing inside a red block.
 5. **Colour vision.** A body's own colour is real to it, the other colour is not. A real block is a wall and an unreal block is floor. A real bridge is floor and an unreal bridge is a pit. The spirit sees no colour: every coloured thing is fog it cannot pass.
 6. **Guard (sees red)** carries the key: locked doors are guard-only tiles. **Cat (sees blue)** is small: vents are cat-only tiles. Doors and vents keep no state.
-7. **Plates and gates.** A body on a plate holds it down, parked or not. The spirit weighs nothing. Every gate in the level is open while any plate is held, and also while a body stands in a gate (a gate never closes on a body).
+7. **Plates and gates.** A body on a plate holds it down, parked or not. The spirit weighs nothing. All gates share one channel: every gate in the level is open while any plate is held, and also while a body stands in any gate. A body in one gate holds all of them open.
 8. **Win** by stepping onto the exit in any form. There is no death: undo or restart.
 
 | Tile | Spirit | Guard | Cat |
@@ -54,7 +54,7 @@ The board marks each body next to you with a small white arrow (you can hop ther
 | 7 | Relay | a cat asleep inside a wall is the only link from the plate to the guard | 18 | 4 | needs both, re-entry, plate, door |
 | 8 | Light sleeper | a sleeping cat holds the gate open: walk the spirit through before you wake anyone | 18 | 3 | needs both, re-entry, plate, door |
 | 9 | Middle of the bridge | a guard parked on its own bridge links two cats across a pit | 16 | 4 | needs both, re-entry, plate |
-| 10 | Doorstop | a cat standing in one gate keeps every gate open, so the guard can leave the plate | 22 | 3 | needs both, re-entry, plate, door, doorstop |
+| 10 | Doorstop | a cat standing in one gate keeps every gate open, so the guard can leave the plate | 14 | 3 | needs both, re-entry, plate, door, doorstop |
 | 11 | Night shift | finale: levels 8 and 10 together; stepping aside into the alcove now shuts the gate | 20 | 3 | needs both, re-entry, plate, door, doorstop |
 
 Levels 8 to 11 were designed by a separate agent working from the design notes below, then re-checked with the same solver and the browser bot. `levels.js` is the source of truth; this table is a summary. Par is the optimal number of turns (walks plus hops) from the solver.
