@@ -1,0 +1,393 @@
+{
+ "session": "theo",
+ "filter": null,
+ "started": "2026-11-13T08:49:36.114Z",
+ "calls": [
+  {
+   "t": "2026-11-13T08:49:36.786Z",
+   "keys": [],
+   "note": "Okay, a game. Let's see what this thing looks like.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0000.png"
+  },
+  {
+   "t": "2026-11-13T08:49:41.686Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Up"
+   ],
+   "note": "Ok the white circle. There's a red G up top. Walking into it, let's go.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 4,
+   "status": "hopped into the guard",
+   "shot": "shot-0001.png"
+  },
+  {
+   "t": "2026-11-13T08:49:46.148Z",
+   "keys": [
+    "Down",
+    "Right"
+   ],
+   "note": "Now I'm the red guard and the whole screen went red. The orange thing with the key is probably a door, so I'm heading that way.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 6,
+   "status": "",
+   "shot": "shot-0002.png"
+  },
+  {
+   "t": "2026-11-13T08:49:50.200Z",
+   "keys": [
+    "Right",
+    "Right"
+   ],
+   "note": "The key thing vanished when I walked over it, so I guess I grabbed it? Going for the yellow EXIT now.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": true,
+   "turns": 8,
+   "status": "Out in 8 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0003.png"
+  },
+  {
+   "t": "2026-11-13T08:49:53.898Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Oh it worked, the exit lit up. Easy. Next.",
+   "levelBefore": 1,
+   "level": 2,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0004.png"
+  },
+  {
+   "t": "2026-11-13T08:49:58.629Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Down"
+   ],
+   "note": "Ok so there's a blue cat in the corner, and the pink block is a gate maybe. Gonna just become the cat and see.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 3,
+   "status": "hopped into the cat",
+   "shot": "shot-0005.png"
+  },
+  {
+   "t": "2026-11-13T08:50:04.157Z",
+   "keys": [
+    "Up",
+    "Right",
+    "Right",
+    "Right",
+    "Down",
+    "Down",
+    "Down"
+   ],
+   "note": "The pink gate turned into a dashed outline now that I'm the cat, so I can walk through it. Mashing toward the guard and then the key, I think I need the key.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": true,
+   "turns": 10,
+   "status": "Out in 10 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0006.png"
+  },
+  {
+   "t": "2026-11-13T08:50:06.994Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Par again. This is getting easy and I'm bored a little. Next one.",
+   "levelBefore": 2,
+   "level": 3,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0007.png"
+  },
+  {
+   "t": "2026-11-13T08:50:15.007Z",
+   "keys": [
+    "Down",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "Okay the black stuff is a pit and there's a blue bridge only the cat sees. I'll grab the key with the guard and mash around, see what happens.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 6,
+   "status": "",
+   "shot": "shot-0008.png"
+  },
+  {
+   "t": "2026-11-13T08:50:20.718Z",
+   "keys": [
+    "Left",
+    "Left"
+   ],
+   "note": "Huh, I overshot. The guard went right past the key. Going back left to grab it.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 8,
+   "status": "",
+   "shot": "shot-0009.png"
+  },
+  {
+   "t": "2026-11-13T08:50:26.932Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Up",
+    "Left",
+    "Down",
+    "Down",
+    "Down",
+    "Left"
+   ],
+   "note": "Got the key. Now the black bit is a pit, so I'll hop into the cat up top and walk over its blue bridge. Hopefully the key comes with me.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 16,
+   "status": "pit",
+   "shot": "shot-0010.png"
+  },
+  {
+   "t": "2026-11-13T08:50:33.016Z",
+   "keys": [
+    "Down",
+    "Left"
+   ],
+   "note": "It said pit but I'm still a cat standing on the blue dashed thing. And the key's back on the floor, so the guard must have dropped it when I swapped. Whatever, going for the exit.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": true,
+   "turns": 18,
+   "status": "Out in 18 turns (par 14). Press N or tap Next level.",
+   "shot": "shot-0011.png"
+  },
+  {
+   "t": "2026-11-13T08:50:36.374Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Won, but I'm honestly not sure the key did anything. Next level.",
+   "levelBefore": 3,
+   "level": 4,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0012.png"
+  },
+  {
+   "t": "2026-11-13T08:50:44.519Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Down",
+    "Down",
+    "Down",
+    "Down"
+   ],
+   "note": "Ok so the rule here is any body can hop into a neighbour. The black column is a pit again. I'll hop into the guard and then go down to the cat and see if the cat can cross the dashed bit.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": false,
+   "turns": 5,
+   "status": "the guard sees red: that block is solid",
+   "shot": "shot-0013.png"
+  },
+  {
+   "t": "2026-11-13T08:50:51.817Z",
+   "keys": [
+    "Down",
+    "Left",
+    "Down",
+    "Down"
+   ],
+   "note": "The red block under me is solid for guards. So I'll poke around a bit and try going around down the left side to the cat.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": false,
+   "turns": 8,
+   "status": "",
+   "shot": "shot-0014.png"
+  },
+  {
+   "t": "2026-11-13T08:50:56.440Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "There's an arrow between me and the cat, so I'm hopping into it. Let's see if the cat can cross the dashed bit.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": false,
+   "turns": 9,
+   "status": "hopped into the cat",
+   "shot": "shot-0015.png"
+  },
+  {
+   "t": "2026-11-13T08:51:01.736Z",
+   "keys": [
+    "Up",
+    "Up",
+    "Right",
+    "Right",
+    "Up",
+    "Up"
+   ],
+   "note": "As the cat the red gate is see-through and the striped blue bridge is across the pit. Walking up and over to the exit.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": false,
+   "turns": 13,
+   "status": "only the guard has the key",
+   "shot": "shot-0016.png"
+  },
+  {
+   "t": "2026-11-13T08:51:08.649Z",
+   "keys": [
+    "Right",
+    "Up",
+    "Left",
+    "Up"
+   ],
+   "note": "Right, so the cat can't grab the key. The guard has to. I'll slide over to the other guard and hop into it, then go get the key.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": true,
+   "turns": 17,
+   "status": "Out in 17 turns (par!). Chapter complete: Eyes. Press N for Leftovers.",
+   "shot": "shot-0017.png"
+  },
+  {
+   "t": "2026-11-13T08:51:14.486Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Chapter one done, it's called Eyes. Now there's a Leftovers chapter. Okay, so the eyes thing is a whole mechanic about who sees what. Let's go.",
+   "levelBefore": 4,
+   "level": 5,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0018.png"
+  },
+  {
+   "t": "2026-11-13T08:51:21.703Z",
+   "keys": [
+    "Up"
+   ],
+   "note": "Gate's shut even though I'm standing on the plate. Maybe the plate only counts if a guard is on it, or maybe something's on top of it. Let me hop into this red guard and see what it does.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 1,
+   "status": "hopped into the guard",
+   "shot": "shot-0019.png"
+  },
+  {
+   "t": "2026-11-13T08:51:28.346Z",
+   "keys": [
+    "Down"
+   ],
+   "note": "Now the white dot is sitting on the plate by itself, and the gate is still shut. So it's not about me being there, it's about what's on the plate? I'm hopping back down into it to see.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 2,
+   "status": "",
+   "shot": "shot-0020.png"
+  },
+  {
+   "t": "2026-11-13T08:51:34.828Z",
+   "keys": [
+    "Right",
+    "Down",
+    "Down"
+   ],
+   "note": "The gate opened when the guard was on the plate. So the white circle didn't count and the guard did. Going through the gate to the exit.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 3,
+   "status": "the gate is shut: weigh down a plate",
+   "shot": "shot-0021.png"
+  },
+  {
+   "t": "2026-11-13T08:51:51.249Z",
+   "keys": [
+    "Left"
+   ],
+   "note": "Ok so the thing on the plate is a leftover circle and it does hold the gate, only when I'm the one standing on it. I think the trick is I need to be on the plate and the exit is past the gate. Messing around.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 4,
+   "status": "",
+   "shot": "shot-0022.png"
+  },
+  {
+   "t": "2026-11-13T08:52:02.218Z",
+   "keys": [
+    "Right",
+    "Right"
+   ],
+   "note": "Ugh. I keep getting the gate to open and then I walk off the plate and it shuts. So I need something else standing on the plate. Trying the cat.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 6,
+   "status": "hopped into the cat",
+   "shot": "shot-0023.png"
+  },
+  {
+   "t": "2026-11-13T08:52:11.452Z",
+   "keys": [
+    "Left",
+    "Left"
+   ],
+   "note": "Okay I'm just hopping along the row now to get back to the plate with a different body. If the gate opens when I'm on the plate, I'm going to be annoyed I didn't think of it earlier.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 8,
+   "status": "",
+   "shot": "shot-0024.png"
+  },
+  {
+   "t": "2026-11-13T08:52:21.366Z",
+   "keys": [
+    "Right",
+    "Down"
+   ],
+   "note": "Same thing. Walk off the plate, gate shuts. I give up on this one for now, I'm bored of it.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 9,
+   "status": "the gate is shut: weigh down a plate",
+   "shot": "shot-0025.png"
+  }
+ ]
+}

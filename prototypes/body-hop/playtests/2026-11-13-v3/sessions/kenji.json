@@ -1,0 +1,871 @@
+{
+ "session": "kenji",
+ "filter": null,
+ "started": "2026-11-13T08:49:34.758Z",
+ "calls": [
+  {
+   "t": "2026-11-13T08:49:35.535Z",
+   "keys": [],
+   "note": null,
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0000.png"
+  },
+  {
+   "t": "2026-11-13T08:49:41.783Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Up"
+   ],
+   "note": "Clean intro. Hop into the guard first, then key carries me through the door.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 4,
+   "status": "hopped into the guard",
+   "shot": "shot-0001.png"
+  },
+  {
+   "t": "2026-11-13T08:49:46.782Z",
+   "keys": [
+    "Down",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": null,
+   "levelBefore": 1,
+   "level": 1,
+   "won": true,
+   "turns": 8,
+   "status": "Out in 8 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0002.png"
+  },
+  {
+   "t": "2026-11-13T08:49:49.797Z",
+   "keys": [
+    "N"
+   ],
+   "note": null,
+   "levelBefore": 1,
+   "level": 2,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0003.png"
+  },
+  {
+   "t": "2026-11-13T08:49:57.745Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Down",
+    "Up",
+    "Right"
+   ],
+   "note": "Cat is blind to red, so red tile is a phantom for it. Chain: spirit->cat->guard->door.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 5,
+   "status": "",
+   "shot": "shot-0004.png"
+  },
+  {
+   "t": "2026-11-13T08:50:02.630Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Down",
+    "Down",
+    "Down"
+   ],
+   "note": null,
+   "levelBefore": 2,
+   "level": 2,
+   "won": true,
+   "turns": 10,
+   "status": "Out in 10 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0005.png"
+  },
+  {
+   "t": "2026-11-13T08:50:05.668Z",
+   "keys": [
+    "N"
+   ],
+   "note": null,
+   "levelBefore": 2,
+   "level": 3,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0006.png"
+  },
+  {
+   "t": "2026-11-13T08:50:14.270Z",
+   "keys": [
+    "Right",
+    "Down",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Up",
+    "Down",
+    "Down",
+    "Left",
+    "Down",
+    "Down",
+    "Left"
+   ],
+   "note": "Linear relay: guard for the door, cat for the bridge. Planned all 14 upfront.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 12,
+   "status": "",
+   "shot": "shot-0007.png"
+  },
+  {
+   "t": "2026-11-13T08:50:23.675Z",
+   "keys": [
+    "R",
+    "Right",
+    "Down",
+    "Right",
+    "Right"
+   ],
+   "note": "My batch desynced somewhere. Stepping through to see what the door does.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 4,
+   "status": "",
+   "shot": "shot-0008.png"
+  },
+  {
+   "t": "2026-11-13T08:50:28.332Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": null,
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 7,
+   "status": "",
+   "shot": "shot-0009.png"
+  },
+  {
+   "t": "2026-11-13T08:50:33.850Z",
+   "keys": [
+    "Up"
+   ],
+   "note": null,
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 8,
+   "status": "hopped into the cat",
+   "shot": "shot-0010.png"
+  },
+  {
+   "t": "2026-11-13T08:50:40.267Z",
+   "keys": [
+    "Left",
+    "Down",
+    "Down",
+    "Down",
+    "Down",
+    "Left"
+   ],
+   "note": "Aha, the body you leave stays behind asleep. My earlier Down hopped me right back into the guard. Fair, my fault.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": true,
+   "turns": 14,
+   "status": "Out in 14 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0011.png"
+  },
+  {
+   "t": "2026-11-13T08:50:43.270Z",
+   "keys": [
+    "N"
+   ],
+   "note": null,
+   "levelBefore": 3,
+   "level": 4,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0012.png"
+  },
+  {
+   "t": "2026-11-13T08:51:00.240Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Down",
+    "Down",
+    "Left",
+    "Down",
+    "Down",
+    "Right",
+    "Up",
+    "Up",
+    "Right",
+    "Right",
+    "Right",
+    "Up",
+    "Left",
+    "Up"
+   ],
+   "note": "Plan: guard parks in the doorway to reach the cat; cat ghosts through red, crosses bridge, sits inside the red wall to hop the far guard.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": true,
+   "turns": 17,
+   "status": "Out in 17 turns (par!). Chapter complete: Eyes. Press N for Leftovers.",
+   "shot": "shot-0013.png"
+  },
+  {
+   "t": "2026-11-13T08:51:03.665Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Level 4 was the first one that felt like a puzzle rather than a walk. Nice.",
+   "levelBefore": 4,
+   "level": 5,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0014.png"
+  },
+  {
+   "t": "2026-11-13T08:51:16.567Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Left",
+    "Left",
+    "Up",
+    "Right",
+    "Down",
+    "Down",
+    "Down"
+   ],
+   "note": "Spirit is weightless. Use the cat as a paperweight on the plate, hop out to the guard.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": true,
+   "turns": 9,
+   "status": "Out in 9 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0015.png"
+  },
+  {
+   "t": "2026-11-13T08:51:19.585Z",
+   "keys": [
+    "N"
+   ],
+   "note": null,
+   "levelBefore": 5,
+   "level": 6,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0016.png"
+  },
+  {
+   "t": "2026-11-13T08:51:30.231Z",
+   "keys": [
+    "Down",
+    "Down",
+    "Right",
+    "Right",
+    "Right",
+    "Down",
+    "Left",
+    "Up",
+    "Right",
+    "Right",
+    "Right",
+    "Down",
+    "Down"
+   ],
+   "note": "Cat ducks into the red wall, slides under the guard, hops back up. Small but tidy.",
+   "levelBefore": 6,
+   "level": 6,
+   "won": true,
+   "turns": 13,
+   "status": "Out in 13 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0017.png"
+  },
+  {
+   "t": "2026-11-13T08:51:33.743Z",
+   "keys": [
+    "N"
+   ],
+   "note": null,
+   "levelBefore": 6,
+   "level": 7,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0018.png"
+  },
+  {
+   "t": "2026-11-13T08:51:40.105Z",
+   "keys": [
+    "L"
+   ],
+   "note": "New tile with horizontal bars under the gate. Checking the legend before guessing.",
+   "levelBefore": 7,
+   "level": 7,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0019.png"
+  },
+  {
+   "t": "2026-11-13T08:51:49.200Z",
+   "keys": [
+    "L",
+    "Left",
+    "Left",
+    "Left",
+    "Up",
+    "Down",
+    "Down",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Down",
+    "Down",
+    "Down"
+   ],
+   "note": "Legend helps: vents are cat-only. So guard is the paperweight, cat is the runner.",
+   "levelBefore": 7,
+   "level": 7,
+   "won": true,
+   "turns": 13,
+   "status": "Out in 13 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0020.png"
+  },
+  {
+   "t": "2026-11-13T08:51:53.022Z",
+   "keys": [
+    "N"
+   ],
+   "note": null,
+   "levelBefore": 7,
+   "level": 8,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0021.png"
+  },
+  {
+   "t": "2026-11-13T08:52:07.315Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Down",
+    "Right",
+    "Down",
+    "Down",
+    "Left",
+    "Down",
+    "Right",
+    "Up",
+    "Up",
+    "Up",
+    "Right",
+    "Right",
+    "Down",
+    "Down"
+   ],
+   "note": "Bucket brigade indeed: C1 parks in the red wall, pass control guard->C2, C2 sits on plate, pass control back up the chain.",
+   "levelBefore": 8,
+   "level": 8,
+   "won": true,
+   "turns": 16,
+   "status": "Out in 16 turns (par!). Chapter complete: Leftovers. Press N for Gates.",
+   "shot": "shot-0022.png"
+  },
+  {
+   "t": "2026-11-13T08:52:10.983Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Level 8 had a nice hand-off chain. Still feels gentle though, the hints basically tell me the answer.",
+   "levelBefore": 8,
+   "level": 9,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0023.png"
+  },
+  {
+   "t": "2026-11-13T08:52:18.429Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Down",
+    "Right",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "A body in a gate props all gates open. Guard becomes the doorstop.",
+   "levelBefore": 9,
+   "level": 9,
+   "won": true,
+   "turns": 7,
+   "status": "Out in 7 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0024.png"
+  },
+  {
+   "t": "2026-11-13T08:52:22.152Z",
+   "keys": [
+    "N"
+   ],
+   "note": null,
+   "levelBefore": 9,
+   "level": 10,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0025.png"
+  },
+  {
+   "t": "2026-11-13T08:52:31.149Z",
+   "keys": [
+    "Up",
+    "Up",
+    "Left",
+    "Left",
+    "Right",
+    "Right",
+    "Down",
+    "Down",
+    "Left",
+    "Left",
+    "Left",
+    "Left"
+   ],
+   "note": "Guard to plate, hop the cat, through gate and vent. Felt like a straight walk, no real decision.",
+   "levelBefore": 10,
+   "level": 10,
+   "won": true,
+   "turns": 12,
+   "status": "Out in 12 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0026.png"
+  },
+  {
+   "t": "2026-11-13T08:52:34.262Z",
+   "keys": [
+    "N"
+   ],
+   "note": null,
+   "levelBefore": 10,
+   "level": 11,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0027.png"
+  },
+  {
+   "t": "2026-11-13T08:52:52.646Z",
+   "keys": [
+    "Up",
+    "Up",
+    "Right",
+    "Up",
+    "Left",
+    "Left",
+    "Down",
+    "Right",
+    "Up",
+    "Right",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "Guard waits inside the blue wall, control relays through C2 to C1, C1 tucks into the red lay-by and hops back. That one I enjoyed.",
+   "levelBefore": 11,
+   "level": 11,
+   "won": true,
+   "turns": 13,
+   "status": "Out in 13 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0028.png"
+  },
+  {
+   "t": "2026-11-13T08:52:56.042Z",
+   "keys": [
+    "N"
+   ],
+   "note": null,
+   "levelBefore": 11,
+   "level": 12,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0029.png"
+  },
+  {
+   "t": "2026-11-13T08:53:38.632Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Up",
+    "Left",
+    "Down",
+    "Right",
+    "Right",
+    "Up",
+    "Left",
+    "Down",
+    "Right",
+    "Up",
+    "Up",
+    "Up",
+    "Left",
+    "Left"
+   ],
+   "note": "Plan: two cats form an L-shaped relay around the plate so control can pass guard->C2->C1->plate->guard. Worked it out on paper first.",
+   "levelBefore": 12,
+   "level": 12,
+   "won": true,
+   "turns": 19,
+   "status": "Out in 19 turns (par!). That's the whole main game. Night shift has harder levels if you want more: press N.",
+   "shot": "shot-0030.png"
+  },
+  {
+   "t": "2026-11-13T08:53:44.045Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Level 12 was the best so far, an actual planning puzzle. Main game was too easy though; hoping Night shift has teeth.",
+   "levelBefore": 12,
+   "level": 13,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0031.png"
+  },
+  {
+   "t": "2026-11-13T08:54:06.607Z",
+   "keys": [
+    "Left",
+    "Up",
+    "Up",
+    "Right",
+    "Right",
+    "Right",
+    "Left",
+    "Left",
+    "Down",
+    "Left",
+    "Up",
+    "Right",
+    "Right",
+    "Right",
+    "Down",
+    "Down",
+    "Down",
+    "Down",
+    "Left",
+    "Left",
+    "Left",
+    "Left",
+    "Left",
+    "Up",
+    "Up"
+   ],
+   "note": "Spirit sneaks past over the plate to fetch the guard, guard parks beside C1, C1 sits on the plate, then the long lap. Runner will pass through C2 on the way, which is fine.",
+   "levelBefore": 13,
+   "level": 13,
+   "won": true,
+   "turns": 25,
+   "status": "Out in 25 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0032.png"
+  },
+  {
+   "t": "2026-11-13T08:54:10.339Z",
+   "keys": [
+    "N"
+   ],
+   "note": "X1: the setup was neat, the 13-step lap afterwards was pure busywork.",
+   "levelBefore": 13,
+   "level": 14,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0033.png"
+  },
+  {
+   "t": "2026-11-13T08:54:53.357Z",
+   "keys": [
+    "Down",
+    "Right",
+    "Right",
+    "Right",
+    "Left",
+    "Left",
+    "Left",
+    "Up",
+    "Left",
+    "Left",
+    "Down",
+    "Right",
+    "Right",
+    "Up",
+    "Left",
+    "Down",
+    "Right",
+    "Up",
+    "Left",
+    "Left",
+    "Up",
+    "Up",
+    "Right"
+   ],
+   "note": "Knot: guard parks at the elbow first, then cats shuffle down-and-right one at a time, always ending adjacent so I can pass control back. Planned all 23.",
+   "levelBefore": 14,
+   "level": 14,
+   "won": true,
+   "turns": 23,
+   "status": "Out in 23 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0034.png"
+  },
+  {
+   "t": "2026-11-13T08:54:57.441Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Knot was genuinely good: a sliding-block feel where the 'blocks' are also your hands.",
+   "levelBefore": 14,
+   "level": 15,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0035.png"
+  },
+  {
+   "t": "2026-11-13T08:55:52.970Z",
+   "keys": [
+    "Down",
+    "Down",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Left",
+    "Left",
+    "Left",
+    "Left",
+    "Up",
+    "Up",
+    "Up",
+    "Right",
+    "Down",
+    "Left",
+    "Up",
+    "Right",
+    "Down",
+    "Right",
+    "Right",
+    "Down",
+    "Down",
+    "Left",
+    "Left",
+    "Left",
+    "Up",
+    "Up",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "Only the spirit can enter G2 without blocking it. Guard detours through the blue wall to un-wedge C1, then C2 does a full lap off the island to hand control back. 34 by paper, matches par.",
+   "levelBefore": 15,
+   "level": 15,
+   "won": true,
+   "turns": 34,
+   "status": "Out in 34 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0036.png"
+  },
+  {
+   "t": "2026-11-13T08:55:57.174Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Junction: the reasoning was great (only the spirit can enter G2 cleanly), but the 9-step cat lap to hand control back is filler.",
+   "levelBefore": 15,
+   "level": 16,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0037.png"
+  },
+  {
+   "t": "2026-11-13T08:56:38.926Z",
+   "keys": [
+    "Left",
+    "Down",
+    "Left",
+    "Right",
+    "Up",
+    "Right",
+    "Up",
+    "Right",
+    "Right",
+    "Up",
+    "Up",
+    "Up",
+    "Left",
+    "Left",
+    "Down",
+    "Down",
+    "Down",
+    "Right",
+    "Right",
+    "Up",
+    "Up",
+    "Up",
+    "Left",
+    "Left",
+    "Down",
+    "Left",
+    "Down",
+    "Left"
+   ],
+   "note": "Crossed colours: pre-park Cb in the red cell under the guard's blue pocket. It's the guard's exit hatch. Nice reverse-thinking.",
+   "levelBefore": 16,
+   "level": 16,
+   "won": true,
+   "turns": 28,
+   "status": "Out in 28 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0038.png"
+  },
+  {
+   "t": "2026-11-13T08:56:43.504Z",
+   "keys": [
+    "N"
+   ],
+   "note": "X4 is my favourite: the exit-hatch idea is a real aha. Shame the second lap around the ring repeats the first.",
+   "levelBefore": 16,
+   "level": 17,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0039.png"
+  },
+  {
+   "t": "2026-11-13T08:57:41.749Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Left",
+    "Up",
+    "Left",
+    "Down",
+    "Right",
+    "Up",
+    "Left",
+    "Left",
+    "Down",
+    "Down",
+    "Right",
+    "Up",
+    "Left",
+    "Down",
+    "Right",
+    "Down",
+    "Right",
+    "Down",
+    "Left",
+    "Up",
+    "Up",
+    "Up",
+    "Left",
+    "Up",
+    "Left",
+    "Left"
+   ],
+   "note": "Shift change: cat A steps plate->gate (gate props itself), hands to cat B who takes over the plate, B hops back into A in the gate. A literal shift change. Lovely.",
+   "levelBefore": 17,
+   "level": 17,
+   "won": true,
+   "turns": 28,
+   "status": "Out in 28 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0040.png"
+  },
+  {
+   "t": "2026-11-13T08:57:45.841Z",
+   "keys": [
+    "N"
+   ],
+   "note": null,
+   "levelBefore": 17,
+   "level": 18,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0041.png"
+  },
+  {
+   "t": "2026-11-13T08:59:59.599Z",
+   "keys": [
+    "Up",
+    "Up",
+    "Down",
+    "Down",
+    "Right",
+    "Down",
+    "Left",
+    "Up",
+    "Right",
+    "Right",
+    "Right",
+    "Down",
+    "Down",
+    "Right",
+    "Up",
+    "Up",
+    "Left",
+    "Left",
+    "Left",
+    "Down",
+    "Right",
+    "Right",
+    "Up",
+    "Up",
+    "Up",
+    "Right"
+   ],
+   "note": "Go-between: spirit must take the cat (anyone else wedges it in its alcove). G1 crosses the red bridge and parks in the blue wall; G2 laps round onto the plate; cat crosses the blue bridge to reach G1. Took me a while on paper - this is the real puzzle of the game.",
+   "levelBefore": 18,
+   "level": 18,
+   "won": true,
+   "turns": 26,
+   "status": "Out in 26 turns (par!). That's every Night shift level. Thanks for playing!",
+   "shot": "shot-0042.png"
+  }
+ ]
+}

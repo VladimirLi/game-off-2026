@@ -1,0 +1,1227 @@
+{
+ "session": "sam",
+ "filter": null,
+ "started": "2026-11-13T08:49:34.937Z",
+ "calls": [
+  {
+   "t": "2026-11-13T08:49:35.722Z",
+   "keys": [],
+   "note": "Opening the game. Let's see what we've got.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0000.png"
+  },
+  {
+   "t": "2026-11-13T08:49:41.007Z",
+   "keys": [
+    "L"
+   ],
+   "note": "Before moving, I'll read the legend. Always read the manual.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0001.png"
+  },
+  {
+   "t": "2026-11-13T08:49:48.489Z",
+   "keys": [
+    "L",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "Legend read. Plan: walk to under the guard, hop up into it, then use the key on the door. Par 8 matches my count.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 3,
+   "status": "",
+   "shot": "shot-0002.png"
+  },
+  {
+   "t": "2026-11-13T08:49:54.222Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Rule test: what happens if the spirit (no key) walks into the locked door? Expect a bump.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 3,
+   "status": "only the guard has the key",
+   "shot": "shot-0003.png"
+  },
+  {
+   "t": "2026-11-13T08:49:57.667Z",
+   "keys": [
+    "Up"
+   ],
+   "note": "Good: clear message, and the bump cost no turn. Now hopping into the guard.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 4,
+   "status": "hopped into the guard",
+   "shot": "shot-0004.png"
+  },
+  {
+   "t": "2026-11-13T08:50:03.355Z",
+   "keys": [
+    "Down",
+    "Right"
+   ],
+   "note": "Hopping moves me onto the guard's tile; the spirit leaves nothing behind. World tinted red. Now testing the door with the key.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 6,
+   "status": "",
+   "shot": "shot-0005.png"
+  },
+  {
+   "t": "2026-11-13T08:50:08.152Z",
+   "keys": [
+    "Right",
+    "Right"
+   ],
+   "note": "Door opened by walking into it, one move, door consumed. Heading for exit.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": true,
+   "turns": 8,
+   "status": "Out in 8 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0006.png"
+  },
+  {
+   "t": "2026-11-13T08:50:11.135Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Par on level 1. Next.",
+   "levelBefore": 1,
+   "level": 2,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0007.png"
+  },
+  {
+   "t": "2026-11-13T08:50:18.992Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "Hypothesis: the red tile is fog to the spirit. Testing by walking the spirit into it.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 2,
+   "status": "the spirit can't pass colour",
+   "shot": "shot-0008.png"
+  },
+  {
+   "t": "2026-11-13T08:50:22.340Z",
+   "keys": [
+    "Down"
+   ],
+   "note": "Confirmed. Hopping into the cat below.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 3,
+   "status": "hopped into the cat",
+   "shot": "shot-0009.png"
+  },
+  {
+   "t": "2026-11-13T08:50:27.994Z",
+   "keys": [
+    "Up",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "As the cat the red tile is dashed. Walking through, then hopping into the guard. Do I leave the cat behind?",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 7,
+   "status": "hopped into the guard",
+   "shot": "shot-0010.png"
+  },
+  {
+   "t": "2026-11-13T08:50:34.046Z",
+   "keys": [
+    "Down",
+    "Down",
+    "Down"
+   ],
+   "note": "Revised model: hopping out of a body leaves it parked and asleep (the z). The red tile is now a raised wall to the guard. Down through the door.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": true,
+   "turns": 10,
+   "status": "Out in 10 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0011.png"
+  },
+  {
+   "t": "2026-11-13T08:50:37.004Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Level 3.",
+   "levelBefore": 2,
+   "level": 3,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0012.png"
+  },
+  {
+   "t": "2026-11-13T08:50:46.838Z",
+   "keys": [
+    "Down",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Up",
+    "Right"
+   ],
+   "note": "Plan: spirit->guard, guard opens door, walk over to the cat, cat takes the bridge. I count 14, matches par.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 8,
+   "status": "hopped into the cat",
+   "shot": "shot-0013.png"
+  },
+  {
+   "t": "2026-11-13T08:50:51.542Z",
+   "keys": [
+    "Down",
+    "Down",
+    "Left",
+    "Down",
+    "Down",
+    "Left"
+   ],
+   "note": "Cat to the bridge and over.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": true,
+   "turns": 14,
+   "status": "Out in 14 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0014.png"
+  },
+  {
+   "t": "2026-11-13T08:50:55.775Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Three for three at par. So far these are tutorials. Level 4.",
+   "levelBefore": 3,
+   "level": 4,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0015.png"
+  },
+  {
+   "t": "2026-11-13T08:51:08.960Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Down",
+    "Down",
+    "Left",
+    "Down",
+    "Down"
+   ],
+   "note": "Plan: guard1 walks around the red block to open the bottom door, standing in the doorway next to the cat. Counted 17 total.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": false,
+   "turns": 8,
+   "status": "",
+   "shot": "shot-0016.png"
+  },
+  {
+   "t": "2026-11-13T08:51:15.833Z",
+   "keys": [
+    "Right",
+    "Up",
+    "Up",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "Hop into cat from the doorway, then cat goes up through red, over the bridge, into the red block next to guard 2.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": false,
+   "turns": 14,
+   "status": "",
+   "shot": "shot-0017.png"
+  },
+  {
+   "t": "2026-11-13T08:51:21.044Z",
+   "keys": [
+    "Up",
+    "Left",
+    "Up"
+   ],
+   "note": "Cat sits inside the red wall and hops up into guard 2. Bridge is drawn as stripes when it's floor for me - nice touch.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": true,
+   "turns": 17,
+   "status": "Out in 17 turns (par!). Chapter complete: Eyes. Press N for Leftovers.",
+   "shot": "shot-0018.png"
+  },
+  {
+   "t": "2026-11-13T08:51:25.698Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Chapter Eyes done. Still haven't tested what a pit does to a guard - I'll look for a cheap chance.",
+   "levelBefore": 4,
+   "level": 5,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0019.png"
+  },
+  {
+   "t": "2026-11-13T08:51:35.833Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Left",
+    "Left"
+   ],
+   "note": "Spirit weighs nothing, so plate needs a body. Idea: bring the cat onto the plate, then hop out of it upward into the guard, leaving the cat as a paperweight.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 4,
+   "status": "",
+   "shot": "shot-0020.png"
+  },
+  {
+   "t": "2026-11-13T08:51:41.564Z",
+   "keys": [
+    "Up",
+    "Right",
+    "Down",
+    "Down",
+    "Down"
+   ],
+   "note": "Gate retracted with the cat on the plate. Now hop out into the guard and leave the cat behind.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": true,
+   "turns": 9,
+   "status": "Out in 9 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0021.png"
+  },
+  {
+   "t": "2026-11-13T08:51:44.781Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Leftover bodies as tools. Level 6.",
+   "levelBefore": 5,
+   "level": 6,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0022.png"
+  },
+  {
+   "t": "2026-11-13T08:51:55.082Z",
+   "keys": [
+    "Right",
+    "Down",
+    "Down",
+    "Right",
+    "Right",
+    "Down",
+    "Left",
+    "Up"
+   ],
+   "note": "Guard can't walk past the cat - walking into it means hopping. So: guard steps next to cat, hop in, cat ducks into the red wall, slides left under the guard, hops back up.",
+   "levelBefore": 6,
+   "level": 6,
+   "won": false,
+   "turns": 8,
+   "status": "hopped into the guard",
+   "shot": "shot-0023.png"
+  },
+  {
+   "t": "2026-11-13T08:52:00.690Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Down",
+    "Down"
+   ],
+   "note": "Worked as planned. Corridor clear now.",
+   "levelBefore": 6,
+   "level": 6,
+   "won": true,
+   "turns": 13,
+   "status": "Out in 13 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0024.png"
+  },
+  {
+   "t": "2026-11-13T08:52:03.932Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Level 7.",
+   "levelBefore": 6,
+   "level": 7,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0025.png"
+  },
+  {
+   "t": "2026-11-13T08:52:15.621Z",
+   "keys": [
+    "Left",
+    "Left",
+    "Left",
+    "Up",
+    "Down",
+    "Down",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "The horizontal-striped tile under the gate looks like a vent - legend says only the cat fits. So cat stays put; I fetch the guard and park it on the plate.",
+   "levelBefore": 7,
+   "level": 7,
+   "won": false,
+   "turns": 9,
+   "status": "",
+   "shot": "shot-0026.png"
+  },
+  {
+   "t": "2026-11-13T08:52:21.881Z",
+   "keys": [
+    "Right",
+    "Down",
+    "Down",
+    "Down"
+   ],
+   "note": "Gate open with the guard on the plate. Hop to cat, down through the vent.",
+   "levelBefore": 7,
+   "level": 7,
+   "won": true,
+   "turns": 13,
+   "status": "Out in 13 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0027.png"
+  },
+  {
+   "t": "2026-11-13T08:52:26.679Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Level 8. Note to self: vent rule (only cat) still guessed, not tested.",
+   "levelBefore": 7,
+   "level": 8,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0028.png"
+  },
+  {
+   "t": "2026-11-13T08:52:41.414Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Down",
+    "Right",
+    "Down",
+    "Down",
+    "Left",
+    "Down",
+    "Right",
+    "Up",
+    "Up"
+   ],
+   "note": "Bucket brigade: cat1 into the red wall, hop down to guard, guard hops left into cat2, cat2 walks onto plate, hops back up guard, guard hops up into cat1 in the wall. 11 moves so far by my count.",
+   "levelBefore": 8,
+   "level": 8,
+   "won": false,
+   "turns": 11,
+   "status": "hopped into the cat",
+   "shot": "shot-0029.png"
+  },
+  {
+   "t": "2026-11-13T08:52:46.979Z",
+   "keys": [
+    "Up",
+    "Right",
+    "Right",
+    "Down",
+    "Down"
+   ],
+   "note": "Gate open. Cat1 out and around to the exit.",
+   "levelBefore": 8,
+   "level": 8,
+   "won": true,
+   "turns": 16,
+   "status": "Out in 16 turns (par!). Chapter complete: Leftovers. Press N for Gates.",
+   "shot": "shot-0030.png"
+  },
+  {
+   "t": "2026-11-13T08:52:50.342Z",
+   "keys": [
+    "N"
+   ],
+   "note": "That one felt like a real puzzle. Chapter Gates.",
+   "levelBefore": 8,
+   "level": 9,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0031.png"
+  },
+  {
+   "t": "2026-11-13T08:52:58.960Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Down",
+    "Right"
+   ],
+   "note": "Legend said a body in any gate holds every gate open. Testing: park the guard inside the left gate, then take the cat off the plate.",
+   "levelBefore": 9,
+   "level": 9,
+   "won": false,
+   "turns": 4,
+   "status": "hopped into the cat",
+   "shot": "shot-0032.png"
+  },
+  {
+   "t": "2026-11-13T08:53:02.576Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Stepping off the plate - do the gates stay open?",
+   "levelBefore": 9,
+   "level": 9,
+   "won": false,
+   "turns": 5,
+   "status": "",
+   "shot": "shot-0033.png"
+  },
+  {
+   "t": "2026-11-13T08:53:08.909Z",
+   "keys": [
+    "Right",
+    "Right"
+   ],
+   "note": "Confirmed: right gate still open with the guard wedged in the left one.",
+   "levelBefore": 9,
+   "level": 9,
+   "won": true,
+   "turns": 7,
+   "status": "Out in 7 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0034.png"
+  },
+  {
+   "t": "2026-11-13T08:53:12.529Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Level 10.",
+   "levelBefore": 9,
+   "level": 10,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0035.png"
+  },
+  {
+   "t": "2026-11-13T08:53:22.773Z",
+   "keys": [
+    "Up",
+    "Up",
+    "Left",
+    "Left",
+    "Right",
+    "Right",
+    "Down",
+    "Down",
+    "Left",
+    "Left",
+    "Left",
+    "Left"
+   ],
+   "note": "Spirit leaves no trace, so I need the guard as the paperweight on the plate. Fetch guard, park on plate, cat goes through gate and vent. 12.",
+   "levelBefore": 10,
+   "level": 10,
+   "won": true,
+   "turns": 12,
+   "status": "Out in 12 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0036.png"
+  },
+  {
+   "t": "2026-11-13T08:53:28.575Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Solved, though the hint about the guard's 'doorway' didn't match anything I saw - the guard wasn't in a doorway. Odd.",
+   "levelBefore": 10,
+   "level": 11,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0037.png"
+  },
+  {
+   "t": "2026-11-13T08:53:46.793Z",
+   "keys": [
+    "Up",
+    "Up",
+    "Right",
+    "Up",
+    "Left",
+    "Left",
+    "Down",
+    "Right"
+   ],
+   "note": "Guard waits in the blue block (not there for him), relay through cat2 into cat1, cat1 goes round into the red lay-by and hops back into the guard.",
+   "levelBefore": 11,
+   "level": 11,
+   "won": false,
+   "turns": 8,
+   "status": "hopped into the guard",
+   "shot": "shot-0038.png"
+  },
+  {
+   "t": "2026-11-13T08:53:53.974Z",
+   "keys": [
+    "Up",
+    "Right",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "Row is clear. Guard walks through the blue block to the exit.",
+   "levelBefore": 11,
+   "level": 11,
+   "won": true,
+   "turns": 13,
+   "status": "Out in 13 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0039.png"
+  },
+  {
+   "t": "2026-11-13T08:53:57.511Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Level 12, last of main chapters.",
+   "levelBefore": 11,
+   "level": 12,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0040.png"
+  },
+  {
+   "t": "2026-11-13T08:54:52.174Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Up",
+    "Left"
+   ],
+   "note": "Took a while on paper. Final hop must be from a cat on the plate up into the guard standing below the gate. Working backwards: need one cat parked above the red strip and one in it. Step 1: cat2 runs along the red strip, pops up, hops cat1.",
+   "levelBefore": 12,
+   "level": 12,
+   "won": false,
+   "turns": 7,
+   "status": "hopped into the cat",
+   "shot": "shot-0041.png"
+  },
+  {
+   "t": "2026-11-13T08:54:59.855Z",
+   "keys": [
+    "Down",
+    "Right",
+    "Right",
+    "Up",
+    "Left"
+   ],
+   "note": "Cat1 into the red strip, hop the guard, guard steps off the plate and hops left into the parked cat.",
+   "levelBefore": 12,
+   "level": 12,
+   "won": false,
+   "turns": 12,
+   "status": "hopped into the cat",
+   "shot": "shot-0042.png"
+  },
+  {
+   "t": "2026-11-13T08:55:07.073Z",
+   "keys": [
+    "Down",
+    "Right",
+    "Up",
+    "Up",
+    "Up",
+    "Left",
+    "Left"
+   ],
+   "note": "Exactly the picture I wanted. Hop down into the red cat, step onto the plate, hop up into the guard, out through the gate and door.",
+   "levelBefore": 12,
+   "level": 12,
+   "won": true,
+   "turns": 19,
+   "status": "Out in 19 turns (par!). That's the whole main game. Night shift has harder levels if you want more: press N.",
+   "shot": "shot-0043.png"
+  },
+  {
+   "t": "2026-11-13T08:55:12.707Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Main game done, all at par. Level 12 was the best so far - had to plan backwards. On to Night shift.",
+   "levelBefore": 12,
+   "level": 13,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0044.png"
+  },
+  {
+   "t": "2026-11-13T08:55:41.357Z",
+   "keys": [
+    "Left",
+    "Up",
+    "Up",
+    "Right",
+    "Right",
+    "Right",
+    "Left",
+    "Left",
+    "Down",
+    "Left",
+    "Up",
+    "Right"
+   ],
+   "note": "No colour here, it's all about adjacency. Plan: fetch guard, bring it beside the top cat, cat goes onto the plate and hops back to the guard. Then the guard goes the long way round.",
+   "levelBefore": 13,
+   "level": 13,
+   "won": false,
+   "turns": 12,
+   "status": "hopped into the guard",
+   "shot": "shot-0045.png"
+  },
+  {
+   "t": "2026-11-13T08:55:49.972Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Down",
+    "Down",
+    "Down",
+    "Down",
+    "Left",
+    "Left",
+    "Left",
+    "Left",
+    "Left",
+    "Up",
+    "Up"
+   ],
+   "note": "Gate open. Long way round; the bottom cat is in the way so the guard hops into it and the cat finishes.",
+   "levelBefore": 13,
+   "level": 13,
+   "won": true,
+   "turns": 25,
+   "status": "Out in 25 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0046.png"
+  },
+  {
+   "t": "2026-11-13T08:55:54.042Z",
+   "keys": [
+    "N"
+   ],
+   "note": "X2.",
+   "levelBefore": 13,
+   "level": 14,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0047.png"
+  },
+  {
+   "t": "2026-11-13T08:56:42.440Z",
+   "keys": [
+    "Down",
+    "Right",
+    "Right",
+    "Right",
+    "Left",
+    "Left",
+    "Left",
+    "Up",
+    "Left",
+    "Left",
+    "Down",
+    "Right",
+    "Right",
+    "Up"
+   ],
+   "note": "Key insight: only the spirit can enter the guard without leaving a cat in its one-tile alcove, so first hop = guard. Then shuffle all three cats down into the bottom row using hop-out, hop-back.",
+   "levelBefore": 14,
+   "level": 14,
+   "won": false,
+   "turns": 14,
+   "status": "hopped into the guard",
+   "shot": "shot-0048.png"
+  },
+  {
+   "t": "2026-11-13T08:56:50.172Z",
+   "keys": [
+    "Left",
+    "Down",
+    "Right",
+    "Up",
+    "Left",
+    "Left",
+    "Up",
+    "Up",
+    "Right"
+   ],
+   "note": "Board matches my plan. Last cat drops into the gap, relay back to guard, guard walks up through the blue block.",
+   "levelBefore": 14,
+   "level": 14,
+   "won": true,
+   "turns": 23,
+   "status": "Out in 23 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0049.png"
+  },
+  {
+   "t": "2026-11-13T08:56:54.586Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Planned all 23 moves on paper and it worked first try. Very satisfying. X3.",
+   "levelBefore": 14,
+   "level": 15,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0050.png"
+  },
+  {
+   "t": "2026-11-13T08:57:30.973Z",
+   "keys": [
+    "Down",
+    "Down",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Left",
+    "Left",
+    "Left",
+    "Left",
+    "Up",
+    "Up",
+    "Up",
+    "Right"
+   ],
+   "note": "Bottom guard's alcove has one neighbour, so again only the spirit can take it cleanly. Guard comes round to the top-left and waits in the blue block.",
+   "levelBefore": 15,
+   "level": 15,
+   "won": false,
+   "turns": 14,
+   "status": "",
+   "shot": "shot-0051.png"
+  },
+  {
+   "t": "2026-11-13T08:57:40.017Z",
+   "keys": [
+    "Down",
+    "Left",
+    "Up",
+    "Right",
+    "Down",
+    "Right",
+    "Right"
+   ],
+   "note": "Swap: cat goes up to the corner, hops back into the guard in the blue block. Guard crosses the red bridge and hops into the island cat.",
+   "levelBefore": 15,
+   "level": 15,
+   "won": false,
+   "turns": 21,
+   "status": "hopped into the cat",
+   "shot": "shot-0052.png"
+  },
+  {
+   "t": "2026-11-13T08:57:46.452Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Rule test I've been putting off: what does a cat do if it walks onto a red bridge (a pit for it)? Fall? Refuse?",
+   "levelBefore": 15,
+   "level": 15,
+   "won": false,
+   "turns": 21,
+   "status": "the cat can't see red: that bridge is a pit",
+   "shot": "shot-0053.png"
+  },
+  {
+   "t": "2026-11-13T08:57:51.173Z",
+   "keys": [
+    "Down",
+    "Down",
+    "Left",
+    "Left",
+    "Left",
+    "Up",
+    "Up",
+    "Right",
+    "Right"
+   ],
+   "note": "Good - pits just refuse you, no death, no turn cost. Cat goes down the blue bridge and all the way round to come up behind the guard.",
+   "levelBefore": 15,
+   "level": 15,
+   "won": false,
+   "turns": 30,
+   "status": "hopped into the guard",
+   "shot": "shot-0054.png"
+  },
+  {
+   "t": "2026-11-13T08:57:59.371Z",
+   "keys": [
+    "Right",
+    "Down"
+   ],
+   "note": "Onto the island, and a quick symmetric test: guard stepping onto the blue bridge should also refuse.",
+   "levelBefore": 15,
+   "level": 15,
+   "won": false,
+   "turns": 31,
+   "status": "the guard can't see blue: that bridge is a pit",
+   "shot": "shot-0055.png"
+  },
+  {
+   "t": "2026-11-13T08:58:03.884Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "Consistent. Across the second red bridge, hop into the exit guard, step out.",
+   "levelBefore": 15,
+   "level": 15,
+   "won": true,
+   "turns": 34,
+   "status": "Out in 34 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0056.png"
+  },
+  {
+   "t": "2026-11-13T08:58:08.187Z",
+   "keys": [
+    "N"
+   ],
+   "note": "X4.",
+   "levelBefore": 15,
+   "level": 16,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0057.png"
+  },
+  {
+   "t": "2026-11-13T08:58:37.679Z",
+   "keys": [
+    "Left",
+    "Left",
+    "Down",
+    "Up",
+    "Right",
+    "Right",
+    "Up",
+    "Right"
+   ],
+   "note": "Exit is only reachable by a cat via the guard's tile. Guard's lay-by is the blue block, whose only bodily neighbour is the red block below. So: plant a cat in that red block first, then go around.",
+   "levelBefore": 16,
+   "level": 16,
+   "won": false,
+   "turns": 8,
+   "status": "hopped into the cat",
+   "shot": "shot-0058.png"
+  },
+  {
+   "t": "2026-11-13T08:58:45.352Z",
+   "keys": [
+    "Right",
+    "Up",
+    "Up",
+    "Up",
+    "Left",
+    "Left",
+    "Down",
+    "Down",
+    "Down"
+   ],
+   "note": "Cat B planted in the red block. Cat A runs round the top ring, hops into guard, guard steps into blue block, hops down into cat B.",
+   "levelBefore": 16,
+   "level": 16,
+   "won": false,
+   "turns": 17,
+   "status": "hopped into the cat",
+   "shot": "shot-0059.png"
+  },
+  {
+   "t": "2026-11-13T08:58:53.437Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Up",
+    "Up",
+    "Up",
+    "Left",
+    "Left",
+    "Down",
+    "Left",
+    "Down",
+    "Left"
+   ],
+   "note": "Cat B goes the long way round to reach cat A at the top, then cat A drops through the vacated guard tile into the red and out.",
+   "levelBefore": 16,
+   "level": 16,
+   "won": true,
+   "turns": 28,
+   "status": "Out in 28 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0060.png"
+  },
+  {
+   "t": "2026-11-13T08:58:57.880Z",
+   "keys": [
+    "N"
+   ],
+   "note": "X5.",
+   "levelBefore": 16,
+   "level": 17,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0061.png"
+  },
+  {
+   "t": "2026-11-13T09:00:02.843Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Left",
+    "Up",
+    "Left",
+    "Down",
+    "Right"
+   ],
+   "note": "Right cat is boxed in, so spirit takes it. Shuffle so the top cat ends up parked right above the gate.",
+   "levelBefore": 17,
+   "level": 17,
+   "won": false,
+   "turns": 7,
+   "status": "hopped into the cat",
+   "shot": "shot-0062.png"
+  },
+  {
+   "t": "2026-11-13T09:00:12.765Z",
+   "keys": [
+    "Up",
+    "Left",
+    "Left",
+    "Down",
+    "Down",
+    "Right"
+   ],
+   "note": "Now the riskiest step: walk onto the plate, then straight off it into the open gate. Does the gate still count as open as I step in? Testing.",
+   "levelBefore": 17,
+   "level": 17,
+   "won": false,
+   "turns": 13,
+   "status": "",
+   "shot": "shot-0063.png"
+  },
+  {
+   "t": "2026-11-13T09:00:22.865Z",
+   "keys": [
+    "Up",
+    "Left",
+    "Down",
+    "Right",
+    "Down",
+    "Right",
+    "Down",
+    "Left"
+   ],
+   "note": "It worked - stepping plate-to-gate is allowed and the cat in the gate holds it. Now the shift change: other cat onto the plate, hop back into the gate cat, go down and round to the guard.",
+   "levelBefore": 17,
+   "level": 17,
+   "won": false,
+   "turns": 21,
+   "status": "hopped into the guard",
+   "shot": "shot-0064.png"
+  },
+  {
+   "t": "2026-11-13T09:00:27.564Z",
+   "keys": [
+    "Up",
+    "Up",
+    "Up",
+    "Up",
+    "Left",
+    "Left",
+    "Left"
+   ],
+   "note": "Guard up through the held gate, to the door, out.",
+   "levelBefore": 17,
+   "level": 17,
+   "won": true,
+   "turns": 28,
+   "status": "Out in 28 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0065.png"
+  },
+  {
+   "t": "2026-11-13T09:00:32.696Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Last one, X6.",
+   "levelBefore": 17,
+   "level": 18,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0066.png"
+  },
+  {
+   "t": "2026-11-13T09:02:02.858Z",
+   "keys": [
+    "Up",
+    "Up",
+    "Down",
+    "Down",
+    "Right",
+    "Down",
+    "Left"
+   ],
+   "note": "Took me a while. The go-between is the cat: it sits in the red block next to the plate, and later on the blue bridge next to the far-bank blue block. Step 1: cat into red block, hop the left guard.",
+   "levelBefore": 18,
+   "level": 18,
+   "won": false,
+   "turns": 7,
+   "status": "hopped into the guard",
+   "shot": "shot-0067.png"
+  },
+  {
+   "t": "2026-11-13T09:02:09.476Z",
+   "keys": [
+    "Up",
+    "Right",
+    "Right",
+    "Right",
+    "Down",
+    "Down"
+   ],
+   "note": "Guard 1 crosses on the red bridge, waits in the blue block, hops into guard 2.",
+   "levelBefore": 18,
+   "level": 18,
+   "won": false,
+   "turns": 13,
+   "status": "hopped into the guard",
+   "shot": "shot-0068.png"
+  },
+  {
+   "t": "2026-11-13T09:02:17.824Z",
+   "keys": [
+    "Right",
+    "Up",
+    "Up",
+    "Left",
+    "Left",
+    "Left",
+    "Down"
+   ],
+   "note": "Guard 2 loops round the far bank, back over the red bridge onto the plate, and hops down into the cat. Guard 2 becomes the paperweight.",
+   "levelBefore": 18,
+   "level": 18,
+   "won": false,
+   "turns": 20,
+   "status": "hopped into the cat",
+   "shot": "shot-0069.png"
+  },
+  {
+   "t": "2026-11-13T09:02:23.539Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Up",
+    "Up",
+    "Up",
+    "Right"
+   ],
+   "note": "Cat onto the blue bridge, hop into guard 1 in the blue block, up through the open gate.",
+   "levelBefore": 18,
+   "level": 18,
+   "won": true,
+   "turns": 26,
+   "status": "Out in 26 turns (par!). That's every Night shift level. Thanks for playing!",
+   "shot": "shot-0070.png"
+  },
+  {
+   "t": "2026-11-13T09:02:33.638Z",
+   "keys": [
+    "Level:2",
+    "Right",
+    "Right",
+    "Down",
+    "Up",
+    "Z"
+   ],
+   "note": "All 18 done at par. Last housekeeping test: does undo reverse a hop cleanly? Back to level 2 to check.",
+   "levelBefore": 18,
+   "level": 2,
+   "won": false,
+   "turns": 3,
+   "status": "",
+   "shot": "shot-0071.png"
+  },
+  {
+   "t": "2026-11-13T09:02:38.772Z",
+   "keys": [
+    "Z"
+   ],
+   "note": "Undo stepped back a move as cat. Undoing once more should un-hop me back into the spirit.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 2,
+   "status": "",
+   "shot": "shot-0072.png"
+  }
+ ]
+}
