@@ -51,7 +51,7 @@ Slots 9 to 12 and the Night shift set may use ideas from v2 levels (Light sleepe
 4. **No busywork after the insight.** No stretch of the optimal route where two bodies alternate single steps just to move together, and no long walk with no decision in it. Start bodies where they are needed.
 5. **No accidental-hop lines.** Don't put a body directly in the line of a corridor the player must walk along, unless walking into it is the point.
 6. **Readable at a glance.** At most 3 bodies on the main path (4 allowed in Night shift). Board at most 9 wide and 8 tall including walls.
-7. **Hints are questions or nudges that never name the trick.** Tutorial hints (slots 1 to 4) may state the rule plainly; from slot 5 on, a hint is a question. A hint must match what the player actually does.
+7. **Hints never name the trick, but a level that introduces a new element states that element's rule plainly.** Chapter openers (slots 1, 5 and 9) and tutorial slots 2 to 4 state their rule; every other hint is a question or a nudge. A hint must match what the player actually does. (Changed after the second playtest: Theo quit on slot 5, one idea short, because its hint was only a question.)
 
 ## Targets
 

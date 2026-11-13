@@ -83,7 +83,7 @@
       teaches: "a body left on a plate holds the gate; the spirit weighs nothing",
       aha: "The plate only counts a body, so I leave one body standing on it and walk another through the gate.",
       wrong: "I can hold the plate myself and walk through.",
-      hint: "Why is the gate still shut while you stand on the plate?",
+      hint: "A body left on a plate holds the gate open. You, the white circle, weigh nothing.",
       map: [
         "#######",
         "#.G...#",
@@ -157,7 +157,7 @@
       teaches: "a body standing in a gate keeps every gate open, so the cat can leave the plate",
       aha: "The guard standing in the first gate keeps the second gate open after the cat steps off the plate.",
       wrong: "Leaving the plate shuts the gate.",
-      hint: "Where is the guard standing when the cat steps off the plate?",
+      hint: "A gate can't close on a body standing in it, and all gates open and close together.",
       map: [
         "#########",
         "#S.G#####",
@@ -174,7 +174,7 @@
       teaches: "whoever hops into a boxed-in body is left in its only way out; only the spirit leaves nothing behind",
       aha: "The guard's only way out is the square you hop in from, so only the spirit, which leaves no body behind, can bring it out.",
       wrong: "Any body can enter any body.",
-      hint: "When you hop into the guard, who is left in its doorway?",
+      hint: "That guard has one way out. What will you leave standing in it?",
       map: [
         "#######",
         "###G..#",
