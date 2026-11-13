@@ -19,7 +19,9 @@
   #body { display: inline-block; padding: 2px 8px; border-radius: 4px; background: var(--panel); }
   footer { color: var(--dim); font-size: 13px; margin-top: 10px; }
   kbd { background: var(--panel); border-radius: 3px; padding: 0 5px; font: 12px ui-monospace, monospace; }
-  #levels { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; }
+  #levels { display: flex; gap: 6px 14px; flex-wrap: wrap; margin-top: 8px; }
+  #levels .chapter { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+  #levels .chapter span { color: var(--dim); font-size: 12px; margin-right: 2px; }
   #levels button { background: var(--panel); color: var(--dim); border: 1px solid #3a3e46; border-radius: 4px; padding: 2px 8px; cursor: pointer; font: inherit; font-size: 13px; }
   #levels button.cur { color: var(--text); border-color: var(--accent); }
   /* Touch controls: shown on touch screens, or on demand with the "Touch controls" button. */
@@ -91,7 +93,7 @@ function load(i) {
   s = L.start; history = []; turns = 0; won = false; log = []; startTime = performance.now();
   shiftFrom = "S"; shiftT = 1;
   cv.width = L.w * T; cv.height = L.h * T;
-  $("title").textContent = `${idx + 1}. ${LEVELS[idx].name}`;
+  $("title").textContent = `${label(idx)}. ${LEVELS[idx].name}`;
   $("hint").textContent = LEVELS[idx].hint || "";
   setStatus("");
   renderLevels(); draw(); hud();
@@ -109,16 +111,41 @@ function hud() {
   $("turns").textContent = `turns ${turns}` + (par ? ` · par ${par}` : "");
 }
 
+// Levels are grouped by their `chapter` field; a level without one joins the group before it.
+// A chapter whose name starts with "Night shift" is optional and shown last, numbered X1, X2, ...
+const chapterOf = (i) => { for (let j = i; j >= 0; j--) if (LEVELS[j].chapter) return LEVELS[j].chapter; return ""; };
+const isBonus = (i) => /^Night shift/.test(chapterOf(i));
+const mainCount = LEVELS.filter((_, i) => !isBonus(i)).length;
+const label = (i) => isBonus(i) ? `X${i - mainCount + 1}` : String(i + 1);
+
 function renderLevels() {
   const box = $("levels"); box.innerHTML = "";
+  let group = null, name = null;
   LEVELS.forEach((lv, i) => {
+    if (chapterOf(i) !== name || !group) {
+      name = chapterOf(i);
+      group = document.createElement("div"); group.className = "chapter";
+      if (name) { const t = document.createElement("span"); t.textContent = name; group.appendChild(t); }
+      box.appendChild(group);
+    }
     const b = document.createElement("button");
-    b.textContent = i + 1; b.title = lv.name;
+    b.textContent = label(i); b.title = lv.name;
     if (i === idx) b.className = "cur";
     if (done.has(lv.name)) b.classList.add("done");
     b.onclick = () => { logEnd("left"); load(i); };
-    box.appendChild(b);
+    group.appendChild(b);
   });
+}
+
+// What the win line says after the score: the next level, a chapter end, or the end of the main game.
+function winNext() {
+  const last = idx === LEVELS.length - 1, endMain = idx === mainCount - 1;
+  if (endMain) return mainCount < LEVELS.length
+    ? " That's the whole main game. Night shift has harder levels if you want more: press N."
+    : " That's the whole game. Thanks for playing!";
+  if (last) return " That's every Night shift level. Thanks for playing!";
+  if (chapterOf(idx + 1) !== chapterOf(idx)) return ` Chapter complete: ${chapterOf(idx)}. Press N for ${chapterOf(idx + 1)}.`;
+  return " Press N or tap Next level.";
 }
 
 function logEnd(how) {
@@ -142,7 +169,7 @@ function act(dir) {
     won = true; done.add(LEVELS[idx].name);
     try { localStorage.setItem("bodyhop-done", JSON.stringify([...done])); } catch (e) { /* ignore */ }
     const par = LEVELS[idx].par;
-    setStatus(`Out in ${turns} turns${par ? (turns <= par ? " (par!)" : ` (par ${par})`) : ""}. Press N or tap Next level.`, "good");
+    setStatus(`Out in ${turns} turns${par ? (turns <= par ? " (par!)" : ` (par ${par})`) : ""}.${winNext()}`, "good");
     logEnd("complete"); renderLevels();
   }
   hud(); draw();
@@ -291,7 +318,7 @@ function drawLegend() {
 }
 
 function restart() { logEnd("restarted"); log.push("R"); load(idx); }
-function next() { if (won) load(idx + 1); }
+function next() { if (won && idx < LEVELS.length - 1) load(idx + 1); }
 
 // On-screen controls. pointerdown (not click) so taps feel instant and double-tap never zooms.
 for (const b of document.querySelectorAll("#pad button")) {
