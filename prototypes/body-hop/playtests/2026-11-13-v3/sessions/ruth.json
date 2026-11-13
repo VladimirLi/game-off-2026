@@ -1,0 +1,538 @@
+{
+ "session": "ruth",
+ "filter": null,
+ "started": "2026-11-13T08:49:34.173Z",
+ "calls": [
+  {
+   "t": "2026-11-13T08:49:35.105Z",
+   "keys": [],
+   "note": "Let me see what this is.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0000.png"
+  },
+  {
+   "t": "2026-11-13T08:49:40.038Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "The white circle is me. The red G with z is a sleeping guard? I'll walk toward it.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 1,
+   "status": "",
+   "shot": "shot-0001.png"
+  },
+  {
+   "t": "2026-11-13T08:49:43.120Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "One square per press. Keep going.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 2,
+   "status": "",
+   "shot": "shot-0002.png"
+  },
+  {
+   "t": "2026-11-13T08:49:45.971Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Now under the guard's column, I think.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 3,
+   "status": "",
+   "shot": "shot-0003.png"
+  },
+  {
+   "t": "2026-11-13T08:49:49.487Z",
+   "keys": [
+    "Up"
+   ],
+   "note": "Walking up into the guard, as instructed.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 4,
+   "status": "hopped into the guard",
+   "shot": "shot-0004.png"
+  },
+  {
+   "t": "2026-11-13T08:49:55.265Z",
+   "keys": [
+    "Down"
+   ],
+   "note": "I'm the guard now, the whole room turned red. The brown square with a keyhole is probably a lock, so the guard opens it.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 5,
+   "status": "",
+   "shot": "shot-0005.png"
+  },
+  {
+   "t": "2026-11-13T08:49:56.433Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Walking into the lock.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 6,
+   "status": "",
+   "shot": "shot-0006.png"
+  },
+  {
+   "t": "2026-11-13T08:50:01.364Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "The lock opened and disappeared. Nice.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 7,
+   "status": "",
+   "shot": "shot-0007.png"
+  },
+  {
+   "t": "2026-11-13T08:50:02.609Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Onto the exit.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": true,
+   "turns": 8,
+   "status": "Out in 8 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0008.png"
+  },
+  {
+   "t": "2026-11-13T08:50:05.738Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Solved! 'par' - I suppose it means the expected number of turns. I hit it exactly.",
+   "levelBefore": 1,
+   "level": 2,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0009.png"
+  },
+  {
+   "t": "2026-11-13T08:50:13.356Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "A pink block in the way, and a blue cat. I guess I become the cat to pass the pink block.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 1,
+   "status": "",
+   "shot": "shot-0010.png"
+  },
+  {
+   "t": "2026-11-13T08:50:14.899Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Next to above the cat's column.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 2,
+   "status": "",
+   "shot": "shot-0011.png"
+  },
+  {
+   "t": "2026-11-13T08:50:16.068Z",
+   "keys": [
+    "Down"
+   ],
+   "note": "Hop into the cat.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 3,
+   "status": "hopped into the cat",
+   "shot": "shot-0012.png"
+  },
+  {
+   "t": "2026-11-13T08:50:23.941Z",
+   "keys": [
+    "Up"
+   ],
+   "note": "As the cat, the pink block is dashed — like a ghost. I can walk through it.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 4,
+   "status": "",
+   "shot": "shot-0013.png"
+  },
+  {
+   "t": "2026-11-13T08:50:25.036Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Stepping into the dashed square.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 5,
+   "status": "",
+   "shot": "shot-0014.png"
+  },
+  {
+   "t": "2026-11-13T08:50:26.249Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Through!",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 6,
+   "status": "",
+   "shot": "shot-0015.png"
+  },
+  {
+   "t": "2026-11-13T08:50:27.548Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Into the guard, for the key.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 7,
+   "status": "hopped into the guard",
+   "shot": "shot-0016.png"
+  },
+  {
+   "t": "2026-11-13T08:50:32.615Z",
+   "keys": [
+    "Down"
+   ],
+   "note": "Heading down toward the lock.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 8,
+   "status": "",
+   "shot": "shot-0017.png"
+  },
+  {
+   "t": "2026-11-13T08:50:34.017Z",
+   "keys": [
+    "Down"
+   ],
+   "note": "Lock.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 9,
+   "status": "",
+   "shot": "shot-0018.png"
+  },
+  {
+   "t": "2026-11-13T08:50:35.214Z",
+   "keys": [
+    "Down"
+   ],
+   "note": "Exit.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": true,
+   "turns": 10,
+   "status": "Out in 10 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0019.png"
+  },
+  {
+   "t": "2026-11-13T08:50:37.887Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Par again. Lovely. The game colours the whole room by who I am.",
+   "levelBefore": 2,
+   "level": 3,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0020.png"
+  },
+  {
+   "t": "2026-11-13T08:50:48.459Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Plan: guard opens the lock, then cat crosses the bridge over the black pit.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 1,
+   "status": "",
+   "shot": "shot-0021.png"
+  },
+  {
+   "t": "2026-11-13T08:50:49.673Z",
+   "keys": [
+    "Down"
+   ],
+   "note": "Into the guard.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 2,
+   "status": "hopped into the guard",
+   "shot": "shot-0022.png"
+  },
+  {
+   "t": "2026-11-13T08:50:50.988Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Right.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 3,
+   "status": "",
+   "shot": "shot-0023.png"
+  },
+  {
+   "t": "2026-11-13T08:50:52.166Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Lock.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 4,
+   "status": "",
+   "shot": "shot-0024.png"
+  },
+  {
+   "t": "2026-11-13T08:50:53.500Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Through the lock's place.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 5,
+   "status": "",
+   "shot": "shot-0025.png"
+  },
+  {
+   "t": "2026-11-13T08:51:00.841Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Odd: the lock picture is still there but I got past it. Never mind. Now to the cat.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 6,
+   "status": "",
+   "shot": "shot-0026.png"
+  },
+  {
+   "t": "2026-11-13T08:51:02.053Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Right.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 7,
+   "status": "",
+   "shot": "shot-0027.png"
+  },
+  {
+   "t": "2026-11-13T08:51:03.267Z",
+   "keys": [
+    "Up"
+   ],
+   "note": "Into the cat.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 8,
+   "status": "hopped into the cat",
+   "shot": "shot-0028.png"
+  },
+  {
+   "t": "2026-11-13T08:51:09.043Z",
+   "keys": [
+    "Down"
+   ],
+   "note": "Cat now; heading down to the bridge.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 9,
+   "status": "hopped into the guard",
+   "shot": "shot-0029.png"
+  },
+  {
+   "t": "2026-11-13T08:51:10.239Z",
+   "keys": [
+    "Down"
+   ],
+   "note": "Down.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 10,
+   "status": "",
+   "shot": "shot-0030.png"
+  },
+  {
+   "t": "2026-11-13T08:51:11.372Z",
+   "keys": [
+    "Left"
+   ],
+   "note": "Lining up with the bridge.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 11,
+   "status": "",
+   "shot": "shot-0031.png"
+  },
+  {
+   "t": "2026-11-13T08:51:22.042Z",
+   "keys": [
+    "Up"
+   ],
+   "note": "Ah - when I hop, my old body stays behind where it stood. I walked back into the guard by mistake. I'll go around to the cat from the side so I don't bump the guard again.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 12,
+   "status": "",
+   "shot": "shot-0032.png"
+  },
+  {
+   "t": "2026-11-13T08:51:23.459Z",
+   "keys": [
+    "Up"
+   ],
+   "note": "Up.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 13,
+   "status": "",
+   "shot": "shot-0033.png"
+  },
+  {
+   "t": "2026-11-13T08:51:24.740Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Into the cat from the left.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 14,
+   "status": "hopped into the cat",
+   "shot": "shot-0034.png"
+  },
+  {
+   "t": "2026-11-13T08:51:31.086Z",
+   "keys": [
+    "Down"
+   ],
+   "note": "Cat: down.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 15,
+   "status": "",
+   "shot": "shot-0035.png"
+  },
+  {
+   "t": "2026-11-13T08:51:32.536Z",
+   "keys": [
+    "Down"
+   ],
+   "note": "Down.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 16,
+   "status": "",
+   "shot": "shot-0036.png"
+  },
+  {
+   "t": "2026-11-13T08:51:34.238Z",
+   "keys": [
+    "Left"
+   ],
+   "note": "Left.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 17,
+   "status": "",
+   "shot": "shot-0037.png"
+  },
+  {
+   "t": "2026-11-13T08:51:35.516Z",
+   "keys": [
+    "Down"
+   ],
+   "note": "Onto the bridge.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 18,
+   "status": "",
+   "shot": "shot-0038.png"
+  },
+  {
+   "t": "2026-11-13T08:51:39.226Z",
+   "keys": [
+    "Down"
+   ],
+   "note": "Across the bridge.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 19,
+   "status": "",
+   "shot": "shot-0039.png"
+  },
+  {
+   "t": "2026-11-13T08:51:40.720Z",
+   "keys": [
+    "Left"
+   ],
+   "note": "Exit.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": true,
+   "turns": 20,
+   "status": "Out in 20 turns (par 14). Press N or tap Next level.",
+   "shot": "shot-0040.png"
+  }
+ ]
+}

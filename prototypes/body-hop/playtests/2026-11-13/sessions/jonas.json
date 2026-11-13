@@ -1,0 +1,283 @@
+{
+ "session": "jonas",
+ "filter": null,
+ "started": "2026-11-13T05:33:29.565Z",
+ "calls": [
+  {
+   "t": "2026-11-13T05:33:30.433Z",
+   "keys": [],
+   "note": "Opening the next jam game.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0000.png"
+  },
+  {
+   "t": "2026-11-13T05:33:34.584Z",
+   "keys": [
+    "Right",
+    "Right"
+   ],
+   "note": "Spirit walks into sleeping guard G, probably possess it.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 2,
+   "status": "hopped into the guard",
+   "shot": "shot-0001.png"
+  },
+  {
+   "t": "2026-11-13T05:33:37.630Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "Guard has keys, so walk to the lock then exit.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 6,
+   "status": "",
+   "shot": "shot-0002.png"
+  },
+  {
+   "t": "2026-11-13T05:33:40.699Z",
+   "keys": [
+    "Right",
+    "N"
+   ],
+   "note": "Lock vanished, red tint is the guard's vision. Cute.",
+   "levelBefore": 1,
+   "level": 2,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0003.png"
+  },
+  {
+   "t": "2026-11-13T05:33:46.269Z",
+   "keys": [
+    "Down",
+    "Right"
+   ],
+   "note": "Hop into the cat; guess red walls vanish and blue bridge appears over the pit.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 2,
+   "status": "hopped into the cat",
+   "shot": "shot-0004.png"
+  },
+  {
+   "t": "2026-11-13T05:33:50.566Z",
+   "keys": [
+    "Up",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "Walk over the bridge and the now-faint red walls.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 9,
+   "status": "",
+   "shot": "shot-0005.png"
+  },
+  {
+   "t": "2026-11-13T05:33:53.810Z",
+   "keys": [
+    "Right",
+    "N"
+   ],
+   "note": "Level 2 done, quick.",
+   "levelBefore": 2,
+   "level": 3,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0006.png"
+  },
+  {
+   "t": "2026-11-13T05:33:59.759Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Down",
+    "Down",
+    "Down",
+    "Right"
+   ],
+   "note": "Cat ignores red walls, so cat walks to guard and hops in.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 6,
+   "status": "hopped into the guard",
+   "shot": "shot-0007.png"
+  },
+  {
+   "t": "2026-11-13T05:34:03.284Z",
+   "keys": [
+    "Down",
+    "Down",
+    "N"
+   ],
+   "note": "Cat got left inside the wall, neat.",
+   "levelBefore": 3,
+   "level": 4,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0008.png"
+  },
+  {
+   "t": "2026-11-13T05:34:08.612Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Down",
+    "Right",
+    "Right",
+    "Down",
+    "Down",
+    "Right"
+   ],
+   "note": "Guard onto plate, hop to cat, cat through gate.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": true,
+   "turns": 9,
+   "status": "Out in 9 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0009.png"
+  },
+  {
+   "t": "2026-11-13T05:34:12.148Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Par on first try, nice teaching curve.",
+   "levelBefore": 4,
+   "level": 5,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0010.png"
+  },
+  {
+   "t": "2026-11-13T05:34:32.014Z",
+   "keys": [
+    "Right",
+    "Up",
+    "Right",
+    "Right"
+   ],
+   "note": "Spirit sneaks into the alcove; testing whether I can hop diagonally or the spirit can walk through bodies.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 3,
+   "status": "hopped into the guard",
+   "shot": "shot-0011.png"
+  },
+  {
+   "t": "2026-11-13T05:34:38.882Z",
+   "keys": [
+    "Up",
+    "Left",
+    "Down",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "Park guard in alcove, hop to cat, run to exit.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": true,
+   "turns": 14,
+   "status": "Out in 14 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0012.png"
+  },
+  {
+   "t": "2026-11-13T05:34:43.056Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Par again, feels good.",
+   "levelBefore": 5,
+   "level": 6,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0013.png"
+  },
+  {
+   "t": "2026-11-13T05:34:52.126Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Down",
+    "Left",
+    "Left",
+    "Down",
+    "Down",
+    "Right",
+    "Up"
+   ],
+   "note": "Cat1 onto the walled-off plate, then hop to the cat inside the walls.",
+   "levelBefore": 6,
+   "level": 6,
+   "won": false,
+   "turns": 10,
+   "status": "hopped into the cat",
+   "shot": "shot-0014.png"
+  },
+  {
+   "t": "2026-11-13T05:34:58.904Z",
+   "keys": [
+    "Left",
+    "Down",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "Oops, left cat1 off the plate. Fix: this cat onto plate, hop to the other, then guard.",
+   "levelBefore": 6,
+   "level": 6,
+   "won": true,
+   "turns": 18,
+   "status": "Out in 18 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0015.png"
+  },
+  {
+   "t": "2026-11-13T05:35:02.952Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Peek at level 7.",
+   "levelBefore": 6,
+   "level": 7,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0016.png"
+  }
+ ]
+}

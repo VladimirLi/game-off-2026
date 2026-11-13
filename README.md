@@ -13,7 +13,7 @@ Week 1, prototyping. Frontrunner: **Drag the margin**, a platformer on a paragra
 | Path | What |
 |---|---|
 | `research/` | Primary-sourced notes: how to place in Game Off, idea-to-shipped-game process, theme-to-idea methods, and the filtered shortlist from 187 generated ideas |
-| `prototypes/` | Grey-box prototypes (rectangles only, no art, no sound). Each has a README with the question it tests and the verdict. Run one with `godot --path prototypes/<name>` |
+| `prototypes/` | Grey-box prototypes (rectangles only, no art, no sound). Each has a README with the question it tests and the verdict. Run one with `godot --path prototypes/<name>`, except body-hop, which is plain HTML: open its `index.html` |
 | `game/` | The entry itself (to come) |
 
 ## Prototype verdicts
@@ -21,6 +21,7 @@ Week 1, prototyping. Frontrunner: **Drag the margin**, a platformer on a paragra
 | Prototype | Verdict |
 |---|---|
 | drag-the-margin | Frontrunner. Readable at once; difficulty is a level-design dial. In iteration |
+| body-hop | Contender. Possess bodies that each see one colour; parked bodies make placement the puzzle. Browser grey box, 11 solver-checked levels, not yet played by people |
 | insert-a-row | Confusing in play. Benched |
 | pull-the-rug | Confusing in play. Benched |
 | rulebender | Too complicated (18 rule bits). Out |

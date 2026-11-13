@@ -1,0 +1,390 @@
+{
+ "session": "maya",
+ "filter": null,
+ "started": "2026-11-13T08:49:36.015Z",
+ "calls": [
+  {
+   "t": "2026-11-13T08:49:36.693Z",
+   "keys": [],
+   "note": "Ok, a game. Let's see what this even is.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0000.png"
+  },
+  {
+   "t": "2026-11-13T08:49:41.551Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Okay, I'm the white dot. Guard is up top, there's a key thing and an exit. Just going right to poke at it.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 1,
+   "status": "",
+   "shot": "shot-0001.png"
+  },
+  {
+   "t": "2026-11-13T08:49:45.774Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Up"
+   ],
+   "note": "Walking up to the red G. The text says walk into it to become it, so I'll just do that.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 4,
+   "status": "hopped into the guard",
+   "shot": "shot-0002.png"
+  },
+  {
+   "t": "2026-11-13T08:49:50.070Z",
+   "keys": [
+    "Down",
+    "Right"
+   ],
+   "note": "Now I'm the red guard. The key is the orange thing, so I'll go grab it.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 6,
+   "status": "",
+   "shot": "shot-0003.png"
+  },
+  {
+   "t": "2026-11-13T08:49:54.601Z",
+   "keys": [
+    "Right",
+    "Right"
+   ],
+   "note": "The key icon vanished when the guard stepped on it. So the guard has the key now. Going to the exit.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": true,
+   "turns": 8,
+   "status": "Out in 8 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0004.png"
+  },
+  {
+   "t": "2026-11-13T08:49:58.208Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Oh, it won. Okay, that was easy. Next.",
+   "levelBefore": 1,
+   "level": 2,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0005.png"
+  },
+  {
+   "t": "2026-11-13T08:50:03.701Z",
+   "keys": [
+    "Down",
+    "Right"
+   ],
+   "note": "Okay, the blue C is the cat. Walking into it to see what I become.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 2,
+   "status": "",
+   "shot": "shot-0006.png"
+  },
+  {
+   "t": "2026-11-13T08:50:08.003Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Hm, the cat was one square further than I thought. There's an arrow now, so I guess I face the way I'm going. Once more.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 3,
+   "status": "hopped into the cat",
+   "shot": "shot-0007.png"
+  },
+  {
+   "t": "2026-11-13T08:50:13.823Z",
+   "keys": [
+    "Up",
+    "Right"
+   ],
+   "note": "I'm the blue cat now. The pink block turned into a dashed outline, so it's basically not there for me. I'll walk over it to the right.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 5,
+   "status": "",
+   "shot": "shot-0008.png"
+  },
+  {
+   "t": "2026-11-13T08:50:18.092Z",
+   "keys": [
+    "Right",
+    "Down"
+   ],
+   "note": "Okay I'm standing where the pink was. Going right, then down toward the key.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 7,
+   "status": "",
+   "shot": "shot-0009.png"
+  },
+  {
+   "t": "2026-11-13T08:50:23.274Z",
+   "keys": [
+    "Right",
+    "Down"
+   ],
+   "note": "Cat is just under the guard now. Key is right below that square, so I'll grab it.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 8,
+   "status": "only the guard has the key",
+   "shot": "shot-0010.png"
+  },
+  {
+   "t": "2026-11-13T08:50:29.034Z",
+   "keys": [
+    "Up"
+   ],
+   "note": "Right, so the orange thing is locked and only the guard holds the key. The guard is right above me. I'll hop into it.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 9,
+   "status": "hopped into the guard",
+   "shot": "shot-0011.png"
+  },
+  {
+   "t": "2026-11-13T08:50:35.589Z",
+   "keys": [
+    "Down"
+   ],
+   "note": "Hm, the cat is right under me now. The red block to my left is solid for the guard, and only the guard can open the lock. I'll try walking down.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 10,
+   "status": "hopped into the cat",
+   "shot": "shot-0012.png"
+  },
+  {
+   "t": "2026-11-13T08:50:40.584Z",
+   "keys": [
+    "Right",
+    "Up",
+    "Left"
+   ],
+   "note": "Ugh, I hopped into the cat by accident. Okay, I'll walk around and hop back into the guard from the side.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 13,
+   "status": "hopped into the guard",
+   "shot": "shot-0013.png"
+  },
+  {
+   "t": "2026-11-13T08:50:45.586Z",
+   "keys": [
+    "Down",
+    "Down"
+   ],
+   "note": "Got the guard back. Now heading straight down at the lock.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 15,
+   "status": "",
+   "shot": "shot-0014.png"
+  },
+  {
+   "t": "2026-11-13T08:50:50.223Z",
+   "keys": [
+    "Down"
+   ],
+   "note": "The lock vanished when the guard walked into it. So the key opens it. Exit is right below.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": true,
+   "turns": 16,
+   "status": "Out in 16 turns (par 10). Press N or tap Next level.",
+   "shot": "shot-0015.png"
+  },
+  {
+   "t": "2026-11-13T08:50:53.121Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Done, 16 turns over par 10. Took me a bit of fumbling but I got it. Next one.",
+   "levelBefore": 2,
+   "level": 3,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0016.png"
+  },
+  {
+   "t": "2026-11-13T08:51:01.692Z",
+   "keys": [
+    "Right",
+    "Down"
+   ],
+   "note": "New one. The blue bridge is only for the cat, the black gap is a pit for everyone else. So the cat probably goes over the bridge. First I'll grab the guard like before.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 2,
+   "status": "hopped into the guard",
+   "shot": "shot-0017.png"
+  },
+  {
+   "t": "2026-11-13T08:51:06.423Z",
+   "keys": [
+    "Right",
+    "Right"
+   ],
+   "note": "Guard heading to the orange lock.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 4,
+   "status": "",
+   "shot": "shot-0018.png"
+  },
+  {
+   "t": "2026-11-13T08:51:13.494Z",
+   "keys": [
+    "Right",
+    "Right"
+   ],
+   "note": "Lock's open. But the exit is over the black pit and the guard can't cross it. So it must be the cat's job. Walking the guard over toward the cat.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 6,
+   "status": "",
+   "shot": "shot-0019.png"
+  },
+  {
+   "t": "2026-11-13T08:51:18.903Z",
+   "keys": [
+    "Right",
+    "Up"
+   ],
+   "note": "Orange thing came back when I walked off it, so it's a gate that closes again. Anyway, I'm going to hop into the cat up top.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 8,
+   "status": "hopped into the cat",
+   "shot": "shot-0020.png"
+  },
+  {
+   "t": "2026-11-13T08:51:24.059Z",
+   "keys": [
+    "Left",
+    "Down",
+    "Down"
+   ],
+   "note": "I'm the cat. Blue bridge is in the middle of the pit row. Going down to it.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 11,
+   "status": "",
+   "shot": "shot-0021.png"
+  },
+  {
+   "t": "2026-11-13T08:51:28.640Z",
+   "keys": [
+    "Down",
+    "Down"
+   ],
+   "note": "Stepping onto the bridge. Let's see if it holds.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 13,
+   "status": "",
+   "shot": "shot-0022.png"
+  },
+  {
+   "t": "2026-11-13T08:51:33.319Z",
+   "keys": [
+    "Left"
+   ],
+   "note": "I'm across. Exit is right next to me.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": true,
+   "turns": 14,
+   "status": "Out in 14 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0023.png"
+  },
+  {
+   "t": "2026-11-13T08:51:36.682Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Par again. Okay, I'm starting to see the pattern: each level swaps which body can do what. Next.",
+   "levelBefore": 3,
+   "level": 4,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0024.png"
+  },
+  {
+   "t": "2026-11-13T08:51:45.370Z",
+   "keys": [
+    "Right",
+    "Right"
+   ],
+   "note": "Okay this one's busier. Two guards, two keys, a cat, a black slot. Hopping into the nearest guard and see.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": false,
+   "turns": 2,
+   "status": "",
+   "shot": "shot-0025.png"
+  },
+  {
+   "t": "2026-11-13T08:51:50.143Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Still walking. Guess the guard is one more step over.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": false,
+   "turns": 3,
+   "status": "hopped into the guard",
+   "shot": "shot-0026.png"
+  },
+  {
+   "t": "2026-11-13T08:51:57.684Z",
+   "keys": [
+    "Down",
+    "Down",
+    "Right"
+   ],
+   "note": "Black column is in the way up top. Dashed square in the middle looks like a walkway for something. Trying down and across.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": false,
+   "turns": 5,
+   "status": "the guard can't see blue: that bridge is a pit",
+   "shot": "shot-0027.png"
+  }
+ ]
+}

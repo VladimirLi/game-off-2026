@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Body Hop (grey box)</title>
+<style>
+  :root { --bg: #1d1f24; --panel: #2a2d34; --text: #e8e8ea; --dim: #9a9ca3; --accent: #f0d060; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.4 system-ui, sans-serif; }
+  #app { max-width: 960px; margin: 0 auto; padding: 16px; }
+  header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 20px; margin: 0; }
+  #turns { color: var(--dim); font-variant-numeric: tabular-nums; }
+  #hint { min-height: 1.4em; margin: 8px 0; color: var(--dim); }
+  #stage { position: relative; display: flex; justify-content: center; margin: 12px 0; }
+  canvas { background: #000; border-radius: 6px; max-width: 100%; }
+  #status { min-height: 1.4em; text-align: center; font-weight: 600; }
+  #status.bad { color: #ff9a8a; } #status.good { color: var(--accent); }
+  #body { display: inline-block; padding: 2px 8px; border-radius: 4px; background: var(--panel); }
+  footer { color: var(--dim); font-size: 13px; margin-top: 10px; }
+  kbd { background: var(--panel); border-radius: 3px; padding: 0 5px; font: 12px ui-monospace, monospace; }
+  #levels { display: flex; gap: 6px 14px; flex-wrap: wrap; margin-top: 8px; }
+  #levels .chapter { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+  #levels .chapter span { color: var(--dim); font-size: 12px; margin-right: 2px; }
+  #levels button { background: var(--panel); color: var(--dim); border: 1px solid #3a3e46; border-radius: 4px; padding: 2px 8px; cursor: pointer; font: inherit; font-size: 13px; }
+  #levels button.cur { color: var(--text); border-color: var(--accent); }
+  /* Touch controls: shown on touch screens, or on demand with the "Touch controls" button. */
+  #touch { display: none; margin: 12px auto 0; max-width: 360px; gap: 12px; align-items: center; justify-content: space-between; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+  body.touch #touch { display: flex; }
+  @media (pointer: coarse) { body:not(.no-touch) #touch { display: flex; } }
+  #pad { display: grid; grid-template-columns: repeat(3, 60px); grid-template-rows: repeat(3, 60px); gap: 6px; }
+  #pad button, #acts button { background: var(--panel); color: var(--text); border: 1px solid #3a3e46; border-radius: 10px; font: 600 22px system-ui, sans-serif; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  #pad button:active, #acts button:active { background: #3a3e46; }
+  #pad [data-dir="up"] { grid-area: 1 / 2; } #pad [data-dir="left"] { grid-area: 2 / 1; }
+  #pad [data-dir="right"] { grid-area: 2 / 3; } #pad [data-dir="down"] { grid-area: 3 / 2; }
+  #acts { display: flex; flex-direction: column; gap: 8px; }
+  #acts button { font-size: 15px; padding: 12px 16px; min-width: 112px; }
+  #acts button:disabled { opacity: 0.4; }
+  #touchToggle { background: none; border: 1px solid #3a3e46; color: var(--dim); border-radius: 4px; padding: 2px 8px; font: inherit; font-size: 13px; cursor: pointer; }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #levels button.done::after { content: " ✓"; color: var(--accent); }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1 id="title">Body Hop</h1>
+    <div><span id="body">spirit</span> <span id="turns"></span></div>
+  </header>
+  <div id="hint"></div>
+  <div id="stage"><canvas id="c"></canvas></div>
+  <div id="status"></div>
+  <div id="touch">
+    <div id="pad">
+      <button id="btnUp" data-dir="up" aria-label="Up">&#9650;</button>
+      <button id="btnLeft" data-dir="left" aria-label="Left">&#9664;</button>
+      <button id="btnRight" data-dir="right" aria-label="Right">&#9654;</button>
+      <button id="btnDown" data-dir="down" aria-label="Down">&#9660;</button>
+    </div>
+    <div id="acts">
+      <button id="btnUndo">Undo</button>
+      <button id="btnRestart">Restart</button>
+      <button id="btnNext" disabled>Next level</button>
+    </div>
+  </div>
+  <div id="levels"></div>
+  <footer>
+    <kbd>←↑→↓</kbd>/<kbd>WASD</kbd> move, or walk into a body to hop into it ·
+    <kbd>Z</kbd>/<kbd>Backspace</kbd> undo · <kbd>R</kbd> restart · <kbd>N</kbd> next level (after a win) · <kbd>Shift+N</kbd> skip ·
+    <kbd>L</kbd> legend · <button id="touchToggle">Touch controls</button>
+  </footer>
+</div>
+<script src="engine.js"></script>
+<script src="levels.js"></script>
+<script>
+"use strict";
+const BH = window.BodyHop, LEVELS = window.BODY_HOP_LEVELS;
+const T = 56; // tile size in px
+const cv = document.getElementById("c"), g = cv.getContext("2d");
+const $ = (id) => document.getElementById(id);
+
+// Each form tints the whole world; hopping cross-fades between tints ("shifting").
+const TINT = { S: [150, 150, 165], G: [235, 110, 95], C: [95, 150, 235] };
+const RED = "#d94a3a", BLUE = "#3a78d9";
+
+let idx = 0, L, s, history, turns, startTime, log, won, flash = null, shiftT = 1, shiftFrom = "S", showLegend = false;
+const done = new Set();
+try { for (const n of JSON.parse(localStorage.getItem("bodyhop-done") || "[]")) done.add(n); } catch (e) { /* storage unavailable */ }
+
+function load(i) {
+  idx = (i + LEVELS.length) % LEVELS.length;
+  L = BH.parse(LEVELS[idx]);
+  s = L.start; history = []; turns = 0; won = false; log = []; startTime = performance.now();
+  shiftFrom = "S"; shiftT = 1;
+  cv.width = L.w * T; cv.height = L.h * T;
+  $("title").textContent = `${label(idx)}. ${LEVELS[idx].name}`;
+  $("hint").textContent = LEVELS[idx].hint || "";
+  setStatus("");
+  renderLevels(); draw(); hud();
+}
+
+function setStatus(text, cls) { const el = $("status"); el.textContent = text; el.className = cls || ""; }
+
+function hud() {
+  $("btnNext").disabled = !won;
+  const me = BH.current(L, s);
+  const sees = me.t === "G" ? "sees red" : me.t === "C" ? "sees blue" : "sees no colour";
+  $("body").textContent = `${BH.NAMES[me.t]}: ${sees}`;
+  $("body").style.color = me.t === "G" ? "#ff9a8a" : me.t === "C" ? "#9ac0ff" : "#ddd";
+  const par = LEVELS[idx].par;
+  $("turns").textContent = `turns ${turns}` + (par ? ` · par ${par}` : "");
+}
+
+// Levels are grouped by their `chapter` field; a level without one joins the group before it.
+// A chapter whose name starts with "Night shift" is optional and shown last, numbered X1, X2, ...
+const chapterOf = (i) => { for (let j = i; j >= 0; j--) if (LEVELS[j].chapter) return LEVELS[j].chapter; return ""; };
+const isBonus = (i) => /^Night shift/.test(chapterOf(i));
+const mainCount = LEVELS.filter((_, i) => !isBonus(i)).length;
+const label = (i) => isBonus(i) ? `X${i - mainCount + 1}` : String(i + 1);
+
+function renderLevels() {
+  const box = $("levels"); box.innerHTML = "";
+  let group = null, name = null;
+  LEVELS.forEach((lv, i) => {
+    if (chapterOf(i) !== name || !group) {
+      name = chapterOf(i);
+      group = document.createElement("div"); group.className = "chapter";
+      if (name) { const t = document.createElement("span"); t.textContent = name; group.appendChild(t); }
+      box.appendChild(group);
+    }
+    const b = document.createElement("button");
+    b.textContent = label(i); b.title = lv.name;
+    if (i === idx) b.className = "cur";
+    if (done.has(lv.name)) b.classList.add("done");
+    b.onclick = () => { logEnd("left"); load(i); };
+    group.appendChild(b);
+  });
+}
+
+// What the win line says after the score: the next level, a chapter end, or the end of the main game.
+function winNext() {
+  const last = idx === LEVELS.length - 1, endMain = idx === mainCount - 1;
+  if (endMain) return mainCount < LEVELS.length
+    ? " That's the whole main game. Night shift has harder levels if you want more: press N."
+    : " That's the whole game. Thanks for playing!";
+  if (last) return " That's every Night shift level. Thanks for playing!";
+  if (chapterOf(idx + 1) !== chapterOf(idx)) return ` Chapter complete: ${chapterOf(idx)}. Press N for ${chapterOf(idx + 1)}.`;
+  return " Press N or tap Next level.";
+}
+
+function logEnd(how) {
+  if (!log.length && how !== "complete") return;
+  const secs = ((performance.now() - startTime) / 1000).toFixed(1);
+  const par = LEVELS[idx].par;
+  console.log(`Level ${idx + 1} ${how} | turns ${turns} (par ${par}) | time ${secs} s | undos ${log.filter((x) => x === "Z").length} | keys ${compress(log)}`);
+}
+function compress(a) { const out = []; for (const k of a) { const last = out[out.length - 1]; if (last && last[0] === k) last[1]++; else out.push([k, 1]); } return out.map(([k, n]) => n > 1 ? `${k}x${n}` : k).join(" "); }
+
+function act(dir) {
+  if (won) return;
+  const before = BH.current(L, s).t;
+  const r = BH.step(L, s, dir);
+  log.push(dir[0].toUpperCase());
+  if (!r.state) { setStatus(r.why, "bad"); flash = { t: performance.now(), dir }; draw(); return; }
+  history.push(s); s = r.state; turns++;
+  setStatus(r.kind === "hop" ? `hopped into the ${BH.NAMES[BH.current(L, s).t]}` : "");
+  if (r.kind === "hop") { shiftFrom = before; shiftT = 0; animate(); }
+  if (BH.won(L, s)) {
+    won = true; done.add(LEVELS[idx].name);
+    try { localStorage.setItem("bodyhop-done", JSON.stringify([...done])); } catch (e) { /* ignore */ }
+    const par = LEVELS[idx].par;
+    setStatus(`Out in ${turns} turns${par ? (turns <= par ? " (par!)" : ` (par ${par})`) : ""}.${winNext()}`, "good");
+    logEnd("complete"); renderLevels();
+  }
+  hud(); draw();
+}
+
+function undo() {
+  log.push("Z");
+  if (!history.length) return;
+  const before = BH.current(L, s).t;
+  s = history.pop(); turns--; won = false; setStatus("");
+  const after = BH.current(L, s).t;
+  if (after !== before) { shiftFrom = before; shiftT = 0; animate(); }
+  hud(); draw();
+}
+
+function animate() {
+  const t0 = performance.now();
+  const tick = (now) => { shiftT = Math.min(1, (now - t0) / 260); draw(); if (shiftT < 1) requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
+}
+
+// ---------- drawing ----------
+function mix(a, b, t) { return a.map((v, i) => Math.round(v + (b[i] - v) * t)); }
+function rgb(c, a = 1) { return `rgba(${c[0]},${c[1]},${c[2]},${a})`; }
+
+function draw() {
+  const me = BH.current(L, s);
+  const tint = mix(TINT[shiftFrom], TINT[me.t], shiftT);
+  const gateOpen = BH.gateOpen(L, s);
+  g.clearRect(0, 0, cv.width, cv.height);
+  for (let y = 0; y < L.h; y++) for (let x = 0; x < L.w; x++) drawTile(x, y, L.tiles[y][x], me.t, tint, gateOpen);
+  // Bodies
+  s.pos.forEach(([x, y], i) => drawBody(x, y, L.types[i], i === s.ctrl, me));
+  if (s.ctrl < 0) drawSpirit(s.sx, s.sy);
+  // Hop affordance: a small chevron toward each adjacent body.
+  for (const [dx, dy] of Object.values(BH.DIRS)) {
+    if (BH.bodyAt(s, me.x + dx, me.y + dy) >= 0) chevron(me.x, me.y, dx, dy);
+  }
+  if (flash && performance.now() - flash.t < 250) {
+    const [dx, dy] = BH.DIRS[flash.dir];
+    g.strokeStyle = "rgba(255,120,100,0.9)"; g.lineWidth = 3;
+    g.strokeRect((me.x + dx) * T + 4, (me.y + dy) * T + 4, T - 8, T - 8);
+    setTimeout(draw, 260);
+  }
+  if (showLegend) drawLegend();
+}
+
+function drawTile(x, y, ch, who, tint, gateOpen) {
+  const px = x * T, py = y * T;
+  const floor = () => { g.fillStyle = rgb(mix([70, 72, 78], tint, 0.25)); g.fillRect(px, py, T, T); g.strokeStyle = "rgba(0,0,0,0.25)"; g.lineWidth = 1; g.strokeRect(px + 0.5, py + 0.5, T - 1, T - 1); };
+  const pit = () => { g.fillStyle = "#0b0c0f"; g.fillRect(px, py, T, T); };
+  switch (ch) {
+    case " ": g.fillStyle = "#000"; g.fillRect(px, py, T, T); return;
+    case "#": g.fillStyle = rgb(mix([28, 29, 34], tint, 0.12)); g.fillRect(px, py, T, T); return;
+    case ".": floor(); return;
+    case "~": pit(); return;
+    case "E":
+      floor(); g.fillStyle = "#f0d060"; g.fillRect(px + 10, py + 10, T - 20, T - 20);
+      g.fillStyle = "#1d1f24"; g.font = "bold 18px system-ui"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("EXIT", px + T / 2, py + T / 2, T - 22); return;
+    case "R": case "B": {
+      const col = ch === "R" ? RED : BLUE;
+      const real = who === "S" || (ch === "R" ? who === "G" : who === "C");
+      floor();
+      if (real && who === "S") { // the spirit sees colour as grey fog it cannot pass
+        g.fillStyle = "rgba(170,170,180,0.85)"; g.fillRect(px + 2, py + 2, T - 4, T - 4);
+        g.fillStyle = col; g.globalAlpha = 0.35; g.fillRect(px + 2, py + 2, T - 4, T - 4); g.globalAlpha = 1;
+      } else if (real) { g.fillStyle = col; g.fillRect(px + 2, py + 2, T - 4, T - 4); g.fillStyle = "rgba(0,0,0,0.18)"; g.fillRect(px + 2, py + T - 10, T - 4, 8); }
+      else { ghost(px, py, col); }
+      return;
+    }
+    case "r": case "b": {
+      const col = ch === "r" ? RED : BLUE;
+      const real = ch === "r" ? who === "G" : who === "C";
+      pit();
+      if (real) { g.fillStyle = col; for (let i = 0; i < 4; i++) g.fillRect(px + 6, py + 5 + i * 12, T - 12, 8); }
+      else ghost(px, py, col);
+      return;
+    }
+    case "D":
+      floor(); g.fillStyle = "#8a5a2b"; g.fillRect(px + 6, py + 4, T - 12, T - 8);
+      g.fillStyle = "#e0b040"; g.beginPath(); g.arc(px + T / 2, py + T / 2 - 4, 5, 0, 7); g.fill(); g.fillRect(px + T / 2 - 2, py + T / 2, 4, 10); return;
+    case "V":
+      floor(); g.fillStyle = "#555a63"; g.fillRect(px + 6, py + 6, T - 12, T - 12);
+      g.fillStyle = "#23252a"; for (let i = 0; i < 5; i++) g.fillRect(px + 10, py + 11 + i * 8, T - 20, 4); return;
+    case "_": {
+      floor(); const held = BH.platesHeld(L, s);
+      // A wide frame, so a plate stays visible around a body standing on it.
+      // Held: darker frame. White stays reserved for "this is you".
+      g.fillStyle = held ? "#9aa1ad" : "#c9ced8"; g.fillRect(px + 3, py + 3, T - 6, T - 6);
+      g.strokeStyle = "#2e3138"; g.lineWidth = 2; g.strokeRect(px + 4, py + 4, T - 8, T - 8);
+      g.fillStyle = "#2e3138"; g.fillRect(px + 12, py + 12, T - 24, T - 24);
+      g.beginPath(); g.arc(px + T / 2, py + T / 2, held ? 4 : 7, 0, 7); g.fillStyle = "#c9ced8"; g.fill(); return;
+    }
+    case "|":
+      floor(); g.strokeStyle = gateOpen ? "rgba(201,206,216,0.3)" : "#c9ced8"; g.lineWidth = 4;
+      for (let i = 0; i < 4; i++) { const gx = px + 9 + i * 12.5; g.beginPath(); g.moveTo(gx, py + 3); g.lineTo(gx, gateOpen ? py + 10 : py + T - 3); g.stroke(); }
+      return;
+  }
+}
+
+// A thing this body cannot see: a faint dashed outline, so the player still knows it is there for others.
+function ghost(px, py, col) {
+  g.save(); g.setLineDash([5, 5]); g.strokeStyle = col; g.globalAlpha = 0.55; g.lineWidth = 2;
+  g.strokeRect(px + 5, py + 5, T - 10, T - 10); g.restore();
+}
+
+function drawBody(x, y, t, active, me) {
+  const px = x * T, py = y * T, cx = px + T / 2, cy = py + T / 2;
+  const col = t === "G" ? RED : BLUE;
+  const size = t === "G" ? T - 14 : T - 24; // the cat is small (it fits in vents)
+  g.globalAlpha = active ? 1 : 0.55;
+  g.fillStyle = col; g.fillRect(cx - size / 2, cy - size / 2, size, size);
+  g.fillStyle = "#fff"; g.font = `bold ${t === "G" ? 20 : 15}px system-ui`; g.textAlign = "center"; g.textBaseline = "middle";
+  g.fillText(t, cx, cy + 1);
+  g.globalAlpha = 1;
+  if (active) { g.strokeStyle = "#fff"; g.lineWidth = 3; g.strokeRect(cx - size / 2 - 4, cy - size / 2 - 4, size + 8, size + 8); }
+  else { g.fillStyle = "rgba(255,255,255,0.8)"; g.font = "bold 12px system-ui"; g.fillText("z", px + T - 9, py + 10); }
+}
+
+function drawSpirit(x, y) {
+  const cx = x * T + T / 2, cy = y * T + T / 2;
+  g.fillStyle = "rgba(255,255,255,0.9)"; g.beginPath(); g.arc(cx, cy, T / 4, 0, 7); g.fill();
+  g.strokeStyle = "rgba(255,255,255,0.4)"; g.lineWidth = 2; g.beginPath(); g.arc(cx, cy, T / 4 + 6, 0, 7); g.stroke();
+}
+
+function chevron(x, y, dx, dy) {
+  const cx = x * T + T / 2 + dx * T * 0.5, cy = y * T + T / 2 + dy * T * 0.5;
+  g.fillStyle = "rgba(255,255,255,0.85)"; g.beginPath();
+  const a = Math.atan2(dy, dx), r = 7;
+  g.moveTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+  g.lineTo(cx + Math.cos(a + 2.4) * r, cy + Math.sin(a + 2.4) * r);
+  g.lineTo(cx + Math.cos(a - 2.4) * r, cy + Math.sin(a - 2.4) * r);
+  g.fill();
+}
+
+function drawLegend() {
+  const lines = ["Guard (G): sees red. Red blocks are walls, red bridges are floor. Has the key for doors.",
+    "Cat (C): sees blue. Blue blocks are walls, blue bridges are floor. Fits through vents.",
+    "Spirit: sees no colour. Colour is fog it cannot pass. Weighs nothing.",
+    "Dashed outline: there for others, not for you. Plates hold gates open while a body stands on them.",
+    "A body standing in any gate holds every gate open. Parked bodies block the way.", "L to close"];
+  const w = Math.min(cv.width - 20, 620), h = lines.length * 20 + 20;
+  g.fillStyle = "rgba(10,10,14,0.92)"; g.fillRect(10, 10, w, h);
+  g.fillStyle = "#e8e8ea"; g.font = "13px system-ui"; g.textAlign = "left"; g.textBaseline = "top";
+  lines.forEach((l, i) => g.fillText(l, 20, 20 + i * 20, w - 20));
+}
+
+function restart() { logEnd("restarted"); log.push("R"); load(idx); }
+function next() { if (won && idx < LEVELS.length - 1) load(idx + 1); }
+
+// On-screen controls. pointerdown (not click) so taps feel instant and double-tap never zooms.
+for (const b of document.querySelectorAll("#pad button")) {
+  b.addEventListener("pointerdown", (e) => { e.preventDefault(); act(b.dataset.dir); });
+}
+$("btnUndo").addEventListener("pointerdown", (e) => { e.preventDefault(); undo(); });
+$("btnRestart").addEventListener("pointerdown", (e) => { e.preventDefault(); restart(); });
+$("btnNext").addEventListener("pointerdown", (e) => { e.preventDefault(); next(); });
+$("touchToggle").addEventListener("click", () => {
+  const coarse = matchMedia("(pointer: coarse)").matches;
+  const shown = document.body.classList.contains("touch") || (coarse && !document.body.classList.contains("no-touch"));
+  document.body.classList.toggle("touch", !shown);
+  document.body.classList.toggle("no-touch", shown);
+});
+
+const KEYS = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right", w: "up", s: "down", a: "left", d: "right", W: "up", S: "down", A: "left", D: "right" };
+addEventListener("keydown", (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (KEYS[e.key]) { e.preventDefault(); act(KEYS[e.key]); return; }
+  if (e.key === "z" || e.key === "Z" || e.key === "Backspace") { e.preventDefault(); undo(); return; }
+  if (e.key === "r" || e.key === "R") { restart(); return; }
+  if (e.key === "N" && e.shiftKey) { logEnd("SKIPPED"); load(idx + 1); return; }
+  if (e.key === "n") { next(); return; }
+  if (e.key === "l" || e.key === "L") { showLegend = !showLegend; draw(); return; }
+});
+
+const q = Number(new URLSearchParams(location.search).get("level"));
+load(q > 0 ? q - 1 : 0);
+window.__bodyhop = { get state() { return s; }, get level() { return idx; }, get won() { return won; }, get turns() { return turns; } };
+</script>
+</body>
+</html>
