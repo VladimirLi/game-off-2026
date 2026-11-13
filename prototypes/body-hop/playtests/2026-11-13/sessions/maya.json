@@ -1,0 +1,216 @@
+{
+ "session": "maya",
+ "filter": null,
+ "started": "2026-11-13T05:33:30.514Z",
+ "calls": [
+  {
+   "t": "2026-11-13T05:33:31.213Z",
+   "keys": [],
+   "note": "Okay, a little game. Let's see what this is.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0000.png"
+  },
+  {
+   "t": "2026-11-13T05:33:35.631Z",
+   "keys": [
+    "Right",
+    "Right"
+   ],
+   "note": "Ok the white dot is me. There's a sleeping G. The text says walk into it, so I'll just walk into it.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 2,
+   "status": "hopped into the guard",
+   "shot": "shot-0001.png"
+  },
+  {
+   "t": "2026-11-13T05:33:39.661Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Now I'm the red G, and the whole screen went red. Guards have keys, so I want to get to that keyhole.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 3,
+   "status": "",
+   "shot": "shot-0002.png"
+  },
+  {
+   "t": "2026-11-13T05:33:42.248Z",
+   "keys": [
+    "Right",
+    "Right"
+   ],
+   "note": "Keep going right toward the lock.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 5,
+   "status": "",
+   "shot": "shot-0003.png"
+  },
+  {
+   "t": "2026-11-13T05:33:46.214Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "The lock is gone, I guess I opened it by walking in. Now EXIT.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": true,
+   "turns": 7,
+   "status": "Out in 7 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0004.png"
+  },
+  {
+   "t": "2026-11-13T05:33:48.562Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Ok, level one done. Hopped into a guard, walked to the lock, out. Simple enough. Next.",
+   "levelBefore": 1,
+   "level": 2,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0005.png"
+  },
+  {
+   "t": "2026-11-13T05:33:53.176Z",
+   "keys": [
+    "Down",
+    "Right"
+   ],
+   "note": "Two sleeping things. The cat is blue and the guard is red. The black hole in the middle probably needs a bridge. I'll hop into the cat first and see what it can do.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 2,
+   "status": "hopped into the cat",
+   "shot": "shot-0006.png"
+  },
+  {
+   "t": "2026-11-13T05:33:58.965Z",
+   "keys": [
+    "Up",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "Okay, now I see it. The blue striped tile is a bridge for the cat. The red dashed ones are invisible to me, so they're probably the guard's floor. Testing how far the cat can go.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 6,
+   "status": "",
+   "shot": "shot-0007.png"
+  },
+  {
+   "t": "2026-11-13T05:34:03.565Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "I'm on the bridge. Try one more right.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 7,
+   "status": "",
+   "shot": "shot-0008.png"
+  },
+  {
+   "t": "2026-11-13T05:34:10.772Z",
+   "keys": [
+    "Z"
+   ],
+   "note": "Dead end for the cat, the red dashed tile is a wall for blue. Undo. I want to see if the guard can walk over the red stuff.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 6,
+   "status": "",
+   "shot": "shot-0009.png"
+  },
+  {
+   "t": "2026-11-13T05:34:13.683Z",
+   "keys": [
+    "Left",
+    "Left",
+    "Down"
+   ],
+   "note": "Walking back to hop into the guard.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 9,
+   "status": "hopped into the guard",
+   "shot": "shot-0010.png"
+  },
+  {
+   "t": "2026-11-13T05:34:26.770Z",
+   "keys": [
+    "Right",
+    "Up",
+    "Right"
+   ],
+   "note": "Now I'm the guard. Red tiles on the far side are solid floor for me, the blue bridge is gone for me. Let's see if I can get across the top.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 11,
+   "status": "",
+   "shot": "shot-0011.png"
+  },
+  {
+   "t": "2026-11-13T05:34:38.682Z",
+   "keys": [
+    "Right",
+    "Right"
+   ],
+   "note": "Ugh, the cat keeps walking onto the bridge. I'll just see how far it goes.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 13,
+   "status": "",
+   "shot": "shot-0012.png"
+  },
+  {
+   "t": "2026-11-13T05:34:49.523Z",
+   "keys": [
+    "R"
+   ],
+   "note": "I'm stuck, the cat can't get past the red dashed tile and the guard can't get over the hole. Restarting to see if the spirit can walk across the top.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0013.png"
+  },
+  {
+   "t": "2026-11-13T05:34:52.395Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "Spirit, you see no colour, so maybe you can go anywhere. Walking right along the top.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 3,
+   "status": "the spirit can't see bridges: it's a pit",
+   "shot": "shot-0014.png"
+  }
+ ]
+}
