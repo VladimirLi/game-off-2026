@@ -3,6 +3,7 @@
 //   node tools/solve.js            check every level in levels.js (exit 1 on any failure)
 //   node tools/solve.js plan [n]   print the optimal move list for level n (1-based) or all
 //   node tools/solve.js file.txt   analyse an ad-hoc map (one level, plain text)
+//   node tools/solve.js luck       per level: share of 1000 random-play runs (300 moves each) that win
 // Checks a level can declare (each is verified by re-solving under a restriction that must make it unsolvable):
 //   "needs:G" / "needs:C"  unsolvable if you may never hop into that body type
 //   "reenter"              unsolvable if each body may be entered only once (you must go back to a parked body)
@@ -89,6 +90,24 @@ function restriction(c) {
   return { reenter: { once: true }, plate: { swap: { "_": ".", "|": "#" } }, door: { swap: { "D": "#" } }, doorstop: { noDoorstop: true } }[c];
 }
 
+// Brute-force proxy: how often a player pressing random arrows (no-ops skipped) reaches the exit
+// within a move budget. High = the level falls to trial and error; hard levels should be near 0%.
+function luck(level, runs = 1000, budget = 300, seed = 7) {
+  const L = BH.parse(level);
+  let s0 = seed, wins = 0;
+  const rnd = () => { s0 = (s0 + 0x6d2b79f5) | 0; let t = s0; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  for (let r = 0; r < runs; r++) {
+    let s = L.start;
+    for (let m = 0; m < budget; m++) {
+      const opts = DIRS.map((d) => BH.step(L, s, d)).filter((x) => x.state);
+      if (!opts.length) break;
+      s = opts[Math.floor(rnd() * opts.length)].state;
+      if (BH.won(L, s)) { wins++; break; }
+    }
+  }
+  return wins / runs;
+}
+
 function check(level) {
   const r = solve(level, { full: true });
   const problems = [];
@@ -110,7 +129,9 @@ function fmt(i, level, r, problems) {
 
 if (require.main === module) {
   const args = process.argv.slice(2);
-  if (args[0] === "plan") {
+  if (args[0] === "luck") {
+    LEVELS.forEach((l, i) => console.log(`${String(i + 1).padStart(2)} ${l.name.padEnd(24)} random solve ${(100 * luck(l)).toFixed(1).padStart(5)}%`));
+  } else if (args[0] === "plan") {
     const n = args[1] ? [Number(args[1]) - 1] : LEVELS.map((_, i) => i);
     for (const i of n) { const r = solve(LEVELS[i]); console.log(`${i + 1} ${LEVELS[i].name}: ${r.solvable ? r.moves + "\n   " + r.route : "UNSOLVABLE"}`); }
   } else if (args[0]) {
@@ -126,4 +147,4 @@ if (require.main === module) {
     process.exit(bad ? 1 : 0);
   }
 }
-module.exports = { solve, check };
+module.exports = { solve, check, luck };
