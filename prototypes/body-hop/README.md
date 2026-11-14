@@ -19,7 +19,11 @@ Open `index.html` in a browser (double-click works). `index.html?level=7` opens 
 
 The board marks each body next to you with a small white arrow (you can hop there). Things your current body cannot see are drawn as a dashed outline in their colour, so you still know they are there for others. The whole board takes on the tint of the body you are in, and the tint cross-fades on every hop.
 
+Plates and gates show their state. An empty plate is a raised grey square; a held plate sinks in and its frame lights green. A gate is a frame with bars: shut, it is grey with the bars down to the floor; open, its frame lights the same green and the bars are pulled up into the top beam, so the floor shows through. The frame sits at the tile edges, so it stays visible around a body standing on a plate or in a gate.
+
 The status line under the board names the body after every hop: "You are the cat now. Z to undo.", or "Back in the guard. Z to undo." when you walk into a body you were in before (an easy accident). A refused press starts with "Blocked:" and says why, for example "Blocked: the cat can't cross a pit." Nothing ever dies.
+
+A walk that changes the gates says so: "The gates open." or "The gates shut: no body on a plate." ("The gate opens." and "The gate shuts: ..." in a level with one gate). When the last body leaves a plate but a body in a gate keeps them open, it says "No body on a plate, but a body standing in a gate holds the gates open." When the spirit steps onto a plate: "You weigh nothing: the plate stays up." These can't clash with a hop line or a "Blocked:" line: a hop moves no body, so it never changes a plate or gate, and a refused press changes nothing. The win line replaces them. If one walk could trigger more than one, the order is gate change, then the doorstop line, then the spirit line. The next walk clears the line, as it does a hop line.
 
 ## Rules (v2)
 
@@ -52,11 +56,11 @@ The status line under the board names the body after every hop: "You are the cat
 | 2 |  | Dashed means not there | red isn't there for the cat: a dashed outline is not there for you | 10 | 2 | needs both, door |
 | 3 |  | Cat's bridge | a blue bridge exists only for the cat; the guard sees a pit | 10 | 2 | needs both, door |
 | 4 |  | Side by side | hop body to body from wherever you stand: a guard in a doorway, a cat inside a red block | 17 | 3 | needs both, door |
-| 5 | Leftovers | Paperweight | a body left on a plate holds the gate; the spirit weighs nothing | 9 | 2 | needs both, plate |
+| 5 | Leftovers | Paperweight | a body left on a plate holds the gate; the spirit weighs nothing | 10 | 2 | needs both, plate |
 | 6 |  | Step aside | parked bodies block; park where you can still hop back | 13 | 3 | needs both, re-entry, door |
 | 7 |  | Who goes first | the first hop is the one move you can't undo: pick the right first body | 13 | 2 | needs both, plate |
 | 8 |  | Bucket brigade | a chain of bodies is a route: control passes along adjacent bodies | 16 | 5 | needs both, plate, re-entry |
-| 9 | Gates | Two gates | a body standing in a gate keeps every gate open, so the cat can leave the plate | 7 | 2 | needs both, plate, doorstop |
+| 9 | Gates | Two gates | a body standing in a gate keeps every gate open, so the cat can leave the plate | 9 | 2 | needs both, plate, doorstop |
 | 10 |  | No trace | whoever hops into a boxed-in body is left in its only way out; only the spirit leaves nothing behind | 12 | 2 | needs both, plate |
 | 11 |  | Lay-by | each body has its own waiting places: the guard waits inside a blue block, the cat inside a red one | 13 | 4 | needs both, re-entry |
 | 12 |  | Changing of the guard | hand the plate from the guard to a cat: a second cat in the corner is the only link between the plate and the guard's way out | 19 | 6 | needs both, re-entry, plate, door |

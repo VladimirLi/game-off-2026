@@ -1,0 +1,250 @@
+{
+ "session": "alex",
+ "filter": null,
+ "started": "2026-11-14T10:16:29.771Z",
+ "calls": [
+  {
+   "t": "2026-11-14T10:16:30.850Z",
+   "keys": [
+    "Level:13"
+   ],
+   "note": "Starting at level 13, speedrun mode.",
+   "levelBefore": 1,
+   "level": 13,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0000.png"
+  },
+  {
+   "t": "2026-11-14T10:16:35.359Z",
+   "keys": [
+    "Up"
+   ],
+   "note": "Walk into C to hop.",
+   "levelBefore": 13,
+   "level": 13,
+   "won": false,
+   "turns": 1,
+   "status": "You are the cat now. Z to undo.",
+   "shot": "shot-0001.png"
+  },
+  {
+   "t": "2026-11-14T10:16:36.704Z",
+   "keys": [
+    "L"
+   ],
+   "note": "check legend",
+   "levelBefore": 13,
+   "level": 13,
+   "won": false,
+   "turns": 1,
+   "status": "You are the cat now. Z to undo.",
+   "shot": "shot-0002.png"
+  },
+  {
+   "t": "2026-11-14T10:16:42.151Z",
+   "keys": [
+    "L"
+   ],
+   "note": "close legend",
+   "levelBefore": 13,
+   "level": 13,
+   "won": false,
+   "turns": 1,
+   "status": "You are the cat now. Z to undo.",
+   "shot": "shot-0003.png"
+  },
+  {
+   "t": "2026-11-14T10:17:15.908Z",
+   "keys": [
+    "Up",
+    "Right",
+    "Right"
+   ],
+   "note": "Heading to hop the guard; no plan beyond that. Wondering how to hold plate and also go through gate.",
+   "levelBefore": 13,
+   "level": 13,
+   "won": false,
+   "turns": 4,
+   "status": "You are the guard now. Z to undo.",
+   "shot": "shot-0004.png"
+  },
+  {
+   "t": "2026-11-14T10:17:19.814Z",
+   "keys": [
+    "Down",
+    "Down",
+    "Down",
+    "Down",
+    "Down",
+    "Left",
+    "Left"
+   ],
+   "note": "Guard goes round to cat2.",
+   "levelBefore": 13,
+   "level": 13,
+   "won": false,
+   "turns": 10,
+   "status": "You are the cat now. Z to undo.",
+   "shot": "shot-0005.png"
+  },
+  {
+   "t": "2026-11-14T10:17:25.757Z",
+   "keys": [
+    "Left",
+    "Left",
+    "Left",
+    "Up"
+   ],
+   "note": "Testing whether the gate blocks me.",
+   "levelBefore": 13,
+   "level": 13,
+   "won": false,
+   "turns": 13,
+   "status": "Blocked: the gate is shut. A body on a plate opens it.",
+   "shot": "shot-0006.png"
+  },
+  {
+   "t": "2026-11-14T10:18:37.278Z",
+   "keys": [
+    "R",
+    "Left",
+    "Down",
+    "Left",
+    "Up",
+    "Up",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "Realised spirit can walk on its own! Restarting: spirit walks round the pocket via plate to row 0 and hops the guard from the left. Plan: guard to above cat1, hop cat1, put cat1 on plate, hop back into guard, go round to cat2.",
+   "levelBefore": 13,
+   "level": 13,
+   "won": false,
+   "turns": 6,
+   "status": "You are the guard now. Z to undo.",
+   "shot": "shot-0007.png"
+  },
+  {
+   "t": "2026-11-14T10:18:41.128Z",
+   "keys": [
+    "Left",
+    "Left",
+    "Down",
+    "Left",
+    "Up"
+   ],
+   "note": "Guard to B0, hop cat1 below, cat1 left then up onto plate.",
+   "levelBefore": 13,
+   "level": 13,
+   "won": false,
+   "turns": 11,
+   "status": "",
+   "shot": "shot-0008.png"
+  },
+  {
+   "t": "2026-11-14T10:18:44.949Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Down",
+    "Down",
+    "Down",
+    "Down",
+    "Down",
+    "Left",
+    "Left"
+   ],
+   "note": "Hop guard, walk round, hop cat2.",
+   "levelBefore": 13,
+   "level": 13,
+   "won": false,
+   "turns": 20,
+   "status": "You are the cat now. Z to undo.",
+   "shot": "shot-0009.png"
+  },
+  {
+   "t": "2026-11-14T10:18:48.399Z",
+   "keys": [
+    "Left",
+    "Left",
+    "Left",
+    "Up",
+    "Up"
+   ],
+   "note": "Cat2 to the gate and exit.",
+   "levelBefore": 13,
+   "level": 13,
+   "won": true,
+   "turns": 25,
+   "status": "Out in 25 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0010.png"
+  },
+  {
+   "t": "2026-11-14T10:18:51.825Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Par on X1. Next.",
+   "levelBefore": 13,
+   "level": 14,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0011.png"
+  },
+  {
+   "t": "2026-11-14T10:19:31.938Z",
+   "keys": [
+    "Down",
+    "Right",
+    "Right",
+    "Right",
+    "Left",
+    "Left",
+    "Left"
+   ],
+   "note": "X2: trying guard to west side, testing what happens. Also cats seem to jam the corridor; I can't see where 3 cats can park.",
+   "levelBefore": 14,
+   "level": 14,
+   "won": false,
+   "turns": 7,
+   "status": "",
+   "shot": "shot-0012.png"
+  },
+  {
+   "t": "2026-11-14T10:19:37.818Z",
+   "keys": [
+    "Up",
+    "Left",
+    "Down",
+    "Left",
+    "Left",
+    "Up",
+    "Up"
+   ],
+   "note": "G up to (2,2), hop B, B hops C, C goes left, hops A, A up. Just probing.",
+   "levelBefore": 14,
+   "level": 14,
+   "won": false,
+   "turns": 13,
+   "status": "",
+   "shot": "shot-0013.png"
+  },
+  {
+   "t": "2026-11-14T10:19:51.849Z",
+   "keys": [
+    "ShiftN"
+   ],
+   "note": "Stuck on X2, cats jam each other. Trying skip to see what happens.",
+   "levelBefore": 14,
+   "level": 15,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0014.png"
+  }
+ ]
+}
