@@ -1,0 +1,466 @@
+{
+ "session": "maya",
+ "filter": null,
+ "started": "2026-11-14T10:16:30.912Z",
+ "calls": [
+  {
+   "t": "2026-11-14T10:16:31.545Z",
+   "keys": [
+    "Level:3"
+   ],
+   "note": "Starting the game. Skipping any tutorial reading, I just want to play. Jumping straight to level 3 as asked.",
+   "levelBefore": 1,
+   "level": 3,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0000.png"
+  },
+  {
+   "t": "2026-11-14T10:16:39.885Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Down",
+    "Right"
+   ],
+   "note": "Board is small, I can see the exit bottom right. Guard is asleep (the z). Cat is on the right side. Going to grab the orange key thing first and see what it does. Not reading the legend yet.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 3,
+   "status": "Blocked: only a guard can open the locked door.",
+   "shot": "shot-0001.png"
+  },
+  {
+   "t": "2026-11-14T10:16:44.282Z",
+   "keys": [
+    "Left"
+   ],
+   "note": "Ah, the orange thing is a locked door, and the message says only a guard can open it. The guard is right next to me on the left, so I'll hop into him. Trying it.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 4,
+   "status": "You are the guard now. Z to undo.",
+   "shot": "shot-0002.png"
+  },
+  {
+   "t": "2026-11-14T10:16:47.835Z",
+   "keys": [
+    "Right",
+    "Right"
+   ],
+   "note": "I'm the guard now. Walking right through the door to see if he can open it.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 6,
+   "status": "",
+   "shot": "shot-0003.png"
+  },
+  {
+   "t": "2026-11-14T10:16:53.001Z",
+   "keys": [
+    "Right",
+    "Down",
+    "Down"
+   ],
+   "note": "The door opened when the guard walked through, good. Now I'm heading for the sleeping cat, which is down and to the right. Hopping into it so I can use the blue bridge.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 9,
+   "status": "You are the cat now. Z to undo.",
+   "shot": "shot-0004.png"
+  },
+  {
+   "t": "2026-11-14T10:16:55.984Z",
+   "keys": [
+    "Right",
+    "Down",
+    "Right"
+   ],
+   "note": "Now I'm the cat. Going right onto the blue bridge, then down and over toward the exit.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": true,
+   "turns": 12,
+   "status": "Out in 12 turns (par 10). Press N or tap Next level.",
+   "shot": "shot-0005.png"
+  },
+  {
+   "t": "2026-11-14T10:16:58.858Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Level 3 done in 12, par was 10, close enough. Hit next.",
+   "levelBefore": 3,
+   "level": 4,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0006.png"
+  },
+  {
+   "t": "2026-11-14T10:17:07.097Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "Level 4. Exit is top right but the way in is a locked door, and there is a dark pit column. Guards are the only ones who open doors, so I'm walking to the sleeping guard in the top row and hopping into him.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": false,
+   "turns": 3,
+   "status": "You are the guard now. Z to undo.",
+   "shot": "shot-0007.png"
+  },
+  {
+   "t": "2026-11-14T10:17:10.366Z",
+   "keys": [
+    "Down",
+    "Down"
+   ],
+   "note": "I'm the guard. The pit column is to my right so I'm walking down the left side of it to see what the pink tile does.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": false,
+   "turns": 5,
+   "status": "",
+   "shot": "shot-0008.png"
+  },
+  {
+   "t": "2026-11-14T10:17:21.103Z",
+   "keys": [
+    "Down",
+    "Down"
+   ],
+   "note": "The red-ish tiles look walkable for the guard. The sleeping cat is right under me, so I'll hop into it. The cat can cross the blue dashed bridge, and I need to get somewhere next to the other guard.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": false,
+   "turns": 5,
+   "status": "Blocked: the guard sees red, so the red block is a wall to it.",
+   "shot": "shot-0009.png"
+  },
+  {
+   "t": "2026-11-14T10:17:27.947Z",
+   "keys": [
+    "Left",
+    "Down",
+    "Down",
+    "Right"
+   ],
+   "note": "Oops, red blocks are walls for the guard, and it didn't count a turn. So I need another route. I'll go around through the locked door below and hop into the cat from the side.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": false,
+   "turns": 9,
+   "status": "You are the cat now. Z to undo.",
+   "shot": "shot-0010.png"
+  },
+  {
+   "t": "2026-11-14T10:17:36.355Z",
+   "keys": [
+    "Up"
+   ],
+   "note": "Now I'm the cat, right next to the guard I left in the doorway. The red dashed squares look like a pit to me, but I'll test it since undo is there.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": false,
+   "turns": 10,
+   "status": "",
+   "shot": "shot-0011.png"
+  },
+  {
+   "t": "2026-11-14T10:17:42.342Z",
+   "keys": [
+    "Up",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "The red tile was only a wall to the guard, the cat walks through it. Going up and across the blue bridge toward the other sleeping guard by the locked door.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": false,
+   "turns": 14,
+   "status": "",
+   "shot": "shot-0012.png"
+  },
+  {
+   "t": "2026-11-14T10:17:47.153Z",
+   "keys": [
+    "Up",
+    "Left",
+    "Up"
+   ],
+   "note": "I'm right under the sleeping guard. Hopping into him, then he should be able to walk into the locked door and up toward the exit.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": true,
+   "turns": 17,
+   "status": "Out in 17 turns (par!). Chapter complete: Eyes. Press N for Leftovers.",
+   "shot": "shot-0013.png"
+  },
+  {
+   "t": "2026-11-14T10:17:51.377Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Got it in exactly par, 17. Chapter complete. Next.",
+   "levelBefore": 4,
+   "level": 5,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0014.png"
+  },
+  {
+   "t": "2026-11-14T10:17:59.783Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Level 5. Gate is the striped bars below the middle. I weigh nothing, so I need some other body to stand on a plate. The sleeping cat and guard are nearby. Stepping right to see whether a tile is a plate.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 1,
+   "status": "",
+   "shot": "shot-0015.png"
+  },
+  {
+   "t": "2026-11-14T10:18:04.937Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Hopping into the cat to the right, since I weigh nothing and the cat might be heavy enough for a plate.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 2,
+   "status": "You are the cat now. Z to undo.",
+   "shot": "shot-0016.png"
+  },
+  {
+   "t": "2026-11-14T10:18:11.975Z",
+   "keys": [
+    "Left"
+   ],
+   "note": "As the cat now. I left my white circle on the tile to my left. The gate is below that tile, so maybe that's the plate. Trying to step the cat onto it.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 3,
+   "status": "",
+   "shot": "shot-0017.png"
+  },
+  {
+   "t": "2026-11-14T10:18:27.955Z",
+   "keys": [
+    "Left"
+   ],
+   "note": "The cat is standing on the tile in front of the gate but the gate is still shut, so a body has to be left behind. I'll hop back into my white circle to the left and see if the gate opens when the cat stays put.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 4,
+   "status": "",
+   "shot": "shot-0018.png"
+  },
+  {
+   "t": "2026-11-14T10:18:35.954Z",
+   "keys": [
+    "Right",
+    "Down",
+    "Down"
+   ],
+   "note": "The gate opened. It seems the body I left on the plate holds it. Heading right then down through the gate to the exit.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 5,
+   "status": "Blocked: the gate is shut. A body on a plate opens it.",
+   "shot": "shot-0019.png"
+  },
+  {
+   "t": "2026-11-14T10:19:40.383Z",
+   "keys": [
+    "Up",
+    "Left",
+    "Down"
+   ],
+   "note": "The gate shut again when I stepped off the plate. I think the dotted tile on the left is the plate. Plan: go up, hop into the sleeping guard, and walk the guard onto the plate so the gate stays open.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 8,
+   "status": "",
+   "shot": "shot-0020.png"
+  },
+  {
+   "t": "2026-11-14T10:19:52.018Z",
+   "keys": [
+    "Right",
+    "Up",
+    "Left",
+    "Down",
+    "Right",
+    "Down",
+    "Down"
+   ],
+   "note": "Now I see it: the dotted tile is the plate and the gate only stays open while something heavy stands on it. Swapping bodies around so the cat ends up on the plate and the guard walks through the gate.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": true,
+   "turns": 15,
+   "status": "Out in 15 turns (par 9). Press N or tap Next level.",
+   "shot": "shot-0021.png"
+  },
+  {
+   "t": "2026-11-14T10:19:55.229Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Solved it, but took 15 turns when par is 9. The plate stuff was a fiddly mess and I had to think about it too long. On to the next one.",
+   "levelBefore": 5,
+   "level": 6,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0022.png"
+  },
+  {
+   "t": "2026-11-14T10:20:06.668Z",
+   "keys": [
+    "Right",
+    "Down",
+    "Down"
+   ],
+   "note": "Level 6. The sleeping guard is down and to the right, and the cat is on the same row next to him. The exit sits under a locked door. I'll get into the guard first, then move the cat out of the way.",
+   "levelBefore": 6,
+   "level": 6,
+   "won": false,
+   "turns": 3,
+   "status": "You are the guard now. Z to undo.",
+   "shot": "shot-0023.png"
+  },
+  {
+   "t": "2026-11-14T10:20:11.812Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Down",
+    "Left",
+    "Up"
+   ],
+   "note": "Hopping into the cat, then moving it down and around so it's out of the guard's row. Then I'll hop back into the guard from below.",
+   "levelBefore": 6,
+   "level": 6,
+   "won": false,
+   "turns": 8,
+   "status": "Back in the guard. Z to undo.",
+   "shot": "shot-0024.png"
+  },
+  {
+   "t": "2026-11-14T10:20:15.419Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Down",
+    "Down"
+   ],
+   "note": "Back in the guard. Running along the row to the locked door, then down through it to the exit.",
+   "levelBefore": 6,
+   "level": 6,
+   "won": true,
+   "turns": 13,
+   "status": "Out in 13 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0025.png"
+  },
+  {
+   "t": "2026-11-14T10:20:19.145Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Level 6 done, exactly par 13. This one felt clearer. Moving on.",
+   "levelBefore": 6,
+   "level": 7,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0026.png"
+  },
+  {
+   "t": "2026-11-14T10:20:32.001Z",
+   "keys": [
+    "Left",
+    "Left",
+    "Up",
+    "Left",
+    "Right",
+    "Right",
+    "Down",
+    "Down",
+    "Right"
+   ],
+   "note": "New tile is the vent that only the cat fits through. The plate is right where I'm standing, only I weigh nothing. Plan: hop into the guard, walk him onto the plate to hold the gate open, then I'll take the cat through the gate and vent.",
+   "levelBefore": 7,
+   "level": 7,
+   "won": false,
+   "turns": 9,
+   "status": "",
+   "shot": "shot-0027.png"
+  },
+  {
+   "t": "2026-11-14T10:20:36.626Z",
+   "keys": [
+    "Right",
+    "Down",
+    "Down",
+    "Down"
+   ],
+   "note": "The guard is on the plate and the gate is open. Hopping into the cat next to him, leaving the guard holding the gate, then the cat goes down through the gate and vent to the exit.",
+   "levelBefore": 7,
+   "level": 7,
+   "won": true,
+   "turns": 13,
+   "status": "Out in 13 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0028.png"
+  },
+  {
+   "t": "2026-11-14T10:20:39.826Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Level 7 solved at par 13. Good, the vent idea clicked fast. Next level.",
+   "levelBefore": 7,
+   "level": 8,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0029.png"
+  },
+  {
+   "t": "2026-11-14T10:20:53.245Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Down",
+    "Down",
+    "Down"
+   ],
+   "note": "Level 8. Gate is on the right by the exit, plate is down by the guard. I need the guard standing on the plate, which means getting into the guard. The red wall between us might let me in if I stand in it.",
+   "levelBefore": 8,
+   "level": 8,
+   "won": false,
+   "turns": 4,
+   "status": "Blocked: the spirit can't pass a red block.",
+   "shot": "shot-0030.png"
+  }
+ ]
+}
