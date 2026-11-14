@@ -109,18 +109,25 @@
     return { state: { ctrl: s.ctrl, sx: -1, sy: -1, pos }, kind: "move" };
   }
 
+  // Text for a refused press. It says the move was blocked and why; nothing ever dies.
   function blockedWhy(L, t, x, y) {
-    if (x < 0 || y < 0 || x >= L.w || y >= L.h) return "wall";
-    const ch = L.tiles[y][x], who = NAMES[t];
+    const who = `the ${NAMES[t]}`;
+    if (x < 0 || y < 0 || x >= L.w || y >= L.h) return `Blocked: ${who} can't walk through a wall.`;
+    const ch = L.tiles[y][x];
+    const col = ch === "R" || ch === "r" ? "red" : "blue";
     switch (ch) {
-      case "R": case "B": return t === "S" ? "the spirit can't pass colour" : `the ${who} sees ${ch === "R" ? "red" : "blue"}: that block is solid`;
-      case "r": case "b": return t === "S" ? "the spirit can't see bridges: it's a pit" : `the ${who} can't see ${ch === "r" ? "red" : "blue"}: that bridge is a pit`;
-      case "~": return "pit";
-      case "V": return `only the cat fits in vents`;
-      case "D": return `only the guard has the key`;
-      case "|": return "the gate is shut: weigh down a plate";
+      case "R": case "B": return t === "S"
+        ? `Blocked: the spirit can't pass a ${col} block.`
+        : `Blocked: ${who} sees ${col}, so the ${col} block is a wall to it.`;
+      case "r": case "b": return t === "S"
+        ? `Blocked: the spirit can't see bridges, so the ${col} bridge is a pit to it.`
+        : `Blocked: ${who} can't see ${col}, so the ${col} bridge is a pit to it.`;
+      case "~": return `Blocked: ${who} can't cross a pit.`;
+      case "V": return `Blocked: only a cat fits through the vent.`;
+      case "D": return `Blocked: only a guard can open the locked door.`;
+      case "|": return `Blocked: the gate is shut. A body on a plate opens it.`;
     }
-    return "wall";
+    return `Blocked: ${who} can't walk through a wall.`;
   }
 
   function won(L, s) {

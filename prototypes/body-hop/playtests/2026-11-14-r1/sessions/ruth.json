@@ -1,0 +1,263 @@
+{
+ "session": "ruth",
+ "filter": null,
+ "started": "2026-11-14T09:47:39.314Z",
+ "calls": [
+  {
+   "t": "2026-11-14T09:47:40.759Z",
+   "keys": [
+    "L"
+   ],
+   "note": "Starting. I want to read the legend first.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0000.png"
+  },
+  {
+   "t": "2026-11-14T09:47:45.361Z",
+   "keys": [
+    "L"
+   ],
+   "note": "Closing legend to see the board.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0001.png"
+  },
+  {
+   "t": "2026-11-14T09:47:49.645Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Up"
+   ],
+   "note": "Walking next to the guard then up into it to become it.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 4,
+   "status": "hopped into the guard",
+   "shot": "shot-0002.png"
+  },
+  {
+   "t": "2026-11-14T09:47:52.757Z",
+   "keys": [
+    "Down",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "Now the guard: down, then right through the door to the exit.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": true,
+   "turns": 8,
+   "status": "Out in 8 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0003.png"
+  },
+  {
+   "t": "2026-11-14T09:47:56.094Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Solved at par. Next level.",
+   "levelBefore": 1,
+   "level": 2,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0004.png"
+  },
+  {
+   "t": "2026-11-14T09:48:02.612Z",
+   "keys": [
+    "Down",
+    "Right",
+    "Right",
+    "Up",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "Hop into cat, go up and across the pink block (cat can't see red), then hop into the guard.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 7,
+   "status": "hopped into the guard",
+   "shot": "shot-0005.png"
+  },
+  {
+   "t": "2026-11-14T09:48:05.730Z",
+   "keys": [
+    "Down",
+    "Down",
+    "Down"
+   ],
+   "note": "Guard goes down through the door to exit.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": true,
+   "turns": 10,
+   "status": "Out in 10 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0006.png"
+  },
+  {
+   "t": "2026-11-14T09:48:08.914Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Level 3.",
+   "levelBefore": 2,
+   "level": 3,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0007.png"
+  },
+  {
+   "t": "2026-11-14T09:48:15.636Z",
+   "keys": [
+    "Right",
+    "Down",
+    "Right",
+    "Right",
+    "Right",
+    "Up",
+    "Right",
+    "Right"
+   ],
+   "note": "Become guard, open door, walk to cat and hop into it. Cat is needed for the bridge.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 8,
+   "status": "hopped into the cat",
+   "shot": "shot-0008.png"
+  },
+  {
+   "t": "2026-11-14T09:48:18.851Z",
+   "keys": [
+    "Down",
+    "Down",
+    "Left",
+    "Down",
+    "Down",
+    "Left"
+   ],
+   "note": "Cat crosses the bridge to the exit.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": true,
+   "turns": 14,
+   "status": "Out in 14 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0009.png"
+  },
+  {
+   "t": "2026-11-14T09:48:21.901Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Level 4.",
+   "levelBefore": 3,
+   "level": 4,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0010.png"
+  },
+  {
+   "t": "2026-11-14T09:48:32.217Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Left",
+    "Down",
+    "Down",
+    "Down",
+    "Down",
+    "Right"
+   ],
+   "note": "Hop into the left guard, take him through his key door to the cat and hop in.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": false,
+   "turns": 9,
+   "status": "hopped into the cat",
+   "shot": "shot-0011.png"
+  },
+  {
+   "t": "2026-11-14T09:48:35.166Z",
+   "keys": [
+    "Up",
+    "Up",
+    "Right",
+    "Right",
+    "Right",
+    "Up",
+    "Left",
+    "Up"
+   ],
+   "note": "Cat over red and bridge, hop into right guard, then door and exit.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": true,
+   "turns": 17,
+   "status": "Out in 17 turns (par!). Chapter complete: Eyes. Press N for Leftovers.",
+   "shot": "shot-0012.png"
+  },
+  {
+   "t": "2026-11-14T09:48:38.705Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Chapter two.",
+   "levelBefore": 4,
+   "level": 5,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0013.png"
+  },
+  {
+   "t": "2026-11-14T09:48:44.762Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Left",
+    "Left",
+    "Up",
+    "Right",
+    "Down",
+    "Down"
+   ],
+   "note": "Hop into cat, park it on the plate, hop into guard, walk through the open gate.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 8,
+   "status": "",
+   "shot": "shot-0014.png"
+  },
+  {
+   "t": "2026-11-14T09:48:49.298Z",
+   "keys": [
+    "Down"
+   ],
+   "note": "I miscounted by one; last step to exit.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": true,
+   "turns": 9,
+   "status": "Out in 9 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0015.png"
+  }
+ ]
+}

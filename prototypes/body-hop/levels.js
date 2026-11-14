@@ -44,19 +44,19 @@
     {
       name: "Cat's bridge",
       teaches: "a blue bridge exists only for the cat; the guard sees a pit",
-      aha: "The pit the guard can't cross has a bridge in it that only the cat can see, so the guard fetches the cat.",
+      aha: "The guard can't get onto the bridge, but the cat sitting right beside it can, so I hop down into the cat and walk it across.",
       wrong: "That pit is impassable.",
       hint: "The blue bridge is only there for the cat. To the guard, and to you, it is a pit.",
       map: [
         "#########",
-        "#S..#..C#",
+        "#S..#...#",
         "#.G.D...#",
         "#...#...#",
-        "#####~b~#",
-        "#####E..#",
+        "#####Cb~#",
+        "######.E#",
         "#########",
       ],
-      par: 14,
+      par: 10,
       checks: ["needs:G","needs:C","door"],
     },
     {
@@ -119,7 +119,7 @@
       teaches: "the first hop is the one move you can't undo: pick the right first body",
       aha: "The body I take first does all the walking and the other stays asleep where it is, so I wake the far guard and bring it to the plate, because the cat is already in the right spot.",
       wrong: "Any body will do to start, so I'll take the nearest one.",
-      hint: "Who is already standing where they need to be?",
+      hint: "New tile: the grey grille under the gate is a vent, and only a cat fits through it. Who is already standing where they need to be?",
       map: [
         "#######",
         "#G....#",
@@ -174,7 +174,7 @@
       teaches: "whoever hops into a boxed-in body is left in its only way out; only the spirit leaves nothing behind",
       aha: "The guard's only way out is the square you hop in from, so only the spirit, which leaves no body behind, can bring it out.",
       wrong: "Any body can enter any body.",
-      hint: "That guard has one way out. What will you leave standing in it?",
+      hint: "That guard has one way out: the tile next to it. What will you leave standing on that tile?",
       map: [
         "#######",
         "###G..#",
