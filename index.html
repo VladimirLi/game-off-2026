@@ -16,7 +16,10 @@
   canvas { background: #000; border-radius: 6px; max-width: 100%; }
   #status { min-height: 1.4em; text-align: center; font-weight: 600; }
   #status.bad { color: #ff9a8a; } #status.good { color: var(--accent); }
-  #body { display: inline-block; padding: 2px 8px; border-radius: 4px; background: var(--panel); }
+  /* The body label never wraps and is as wide for every body, so a hop never moves the turn counter
+     or the board (each line fits beside the counter at 360 px). */
+  #body { display: inline-block; padding: 2px 8px; border-radius: 4px; background: var(--panel); white-space: nowrap; min-width: 12em; text-align: center; }
+  #turns { white-space: nowrap; }
   footer { color: var(--dim); font-size: 13px; margin-top: 10px; }
   kbd { background: var(--panel); border-radius: 3px; padding: 0 5px; font: 12px ui-monospace, monospace; }
   #levels { display: flex; gap: 6px 14px; flex-wrap: wrap; margin-top: 8px; }
@@ -122,7 +125,7 @@ function setStatus(text, cls) { const el = $("status"); el.textContent = text; e
 function hud() {
   $("btnNext").disabled = !won;
   const me = BH.current(L, s);
-  const sees = me.t === "G" ? "sees red" : me.t === "C" ? "sees blue" : "sees no colour";
+  const sees = me.t === "G" ? "sees red, not blue" : me.t === "C" ? "sees blue, not red" : "sees no colour";
   $("body").textContent = `${BH.NAMES[me.t]}: ${sees}`;
   $("body").style.color = me.t === "G" ? "#ff9a8a" : me.t === "C" ? "#9ac0ff" : "#ddd";
   const par = LEVELS[idx].par;
@@ -150,7 +153,8 @@ function renderLevels() {
     b.textContent = label(i); b.title = lv.name;
     if (i === idx) b.className = "cur";
     if (done.has(lv.name)) b.classList.add("done");
-    b.onclick = () => { if (closeLegend()) return; logEnd("left"); load(i); };
+    // On the current level the button only restarts it (nothing, at turn 0).
+    b.onclick = () => { if (closeLegend(i !== idx ? `Legend closed. Press again to go to level ${label(i)}.` : history.length ? "Legend closed. Press again to restart." : "Legend closed.")) return; logEnd("left"); load(i); };
     group.appendChild(b);
   });
 }
@@ -175,7 +179,7 @@ function logEnd(how) {
 function compress(a) { const out = []; for (const k of a) { const last = out[out.length - 1]; if (last && last[0] === k) last[1]++; else out.push([k, 1]); } return out.map(([k, n]) => n > 1 ? `${k}x${n}` : k).join(" "); }
 
 function act(dir) {
-  if (closeLegend()) return;
+  if (closeLegend(!won ? "Legend closed. Press again to move." : idx < LEVELS.length - 1 ? "Legend closed. Press N for the next level." : "Legend closed.")) return;
   if (won) return;
   const before = BH.current(L, s).t;
   const r = BH.step(L, s, dir);
@@ -203,7 +207,8 @@ function act(dir) {
 // What a walk changed about plates and gates, or "" (which clears the status line, as before).
 // A hop never moves a body, so it never changes a plate or a gate, and a refused ("Blocked:") press
 // changes nothing: these lines can't coincide with a hop line or a Blocked line. Only the win line,
-// set after this, replaces one. Priority: gate change > doorstop > spirit on a plate.
+// set after this, replaces one. Priority: gate change > doorstop > spirit on a plate > unseen block.
+// The last two can't coincide (the spirit never stands on a block).
 function walkNews(prev, now) {
   const gates = L.tiles.flat().filter((c) => c === "|").length;
   const was = BH.gateOpen(L, prev), is = BH.gateOpen(L, now);
@@ -214,11 +219,17 @@ function walkNews(prev, now) {
     return `No body on a plate, but a body standing in a gate holds ${the.toLowerCase()} open.`;
   const me = BH.current(L, now);
   if (me.t === "S" && L.tiles[me.y][me.x] === "_") return "You weigh nothing: the plate stays up.";
+  // A body walked onto a block of the colour it can't see (the cat into red, the guard into blue).
+  const unseen = { C: "R", G: "B" }[me.t];
+  if (unseen && L.tiles[me.y][me.x] === unseen) {
+    const col = unseen === "R" ? "red" : "blue";
+    return `The ${BH.NAMES[me.t]} can't see ${col}: the ${col} block isn't there for it.`;
+  }
   return "";
 }
 
 function undo() {
-  if (closeLegend()) return;
+  if (closeLegend(history.length ? "Legend closed. Press again to undo." : "Legend closed.")) return;
   log.push("Z");
   if (!history.length) return;
   const before = BH.current(L, s).t;
@@ -277,9 +288,9 @@ function drawTile(x, y, ch, who, tint, gateOpen, held) {
       const col = ch === "R" ? RED : BLUE;
       const real = who === "S" || (ch === "R" ? who === "G" : who === "C");
       floor();
-      if (real && who === "S") { // the spirit sees colour as grey fog it cannot pass
-        g.fillStyle = "rgba(170,170,180,0.85)"; g.fillRect(px + 2, py + 2, T - 4, T - 4);
-        g.fillStyle = col; g.globalAlpha = 0.35; g.fillRect(px + 2, py + 2, T - 4, T - 4); g.globalAlpha = 1;
+      if (real && who === "S") { // the spirit can't pass colour: the block in its full colour under grey fog
+        g.fillStyle = col; g.fillRect(px + 2, py + 2, T - 4, T - 4);
+        fog(px + 2, py + 2, T - 4, T - 4);
       } else if (real) { g.fillStyle = col; g.fillRect(px + 2, py + 2, T - 4, T - 4); g.fillStyle = "rgba(0,0,0,0.18)"; g.fillRect(px + 2, py + T - 10, T - 4, 8); }
       else { ghost(px, py, col); }
       return;
@@ -326,6 +337,15 @@ function drawTile(x, y, ch, who, tint, gateOpen, held) {
   }
 }
 
+// Grey fog over a coloured block, as the spirit sees it: diagonal grey bands, so the block keeps its
+// full colour (it reads as "red block" or "blue block") but is marked as something the spirit can't pass.
+function fog(x, y, w, h) {
+  g.save(); g.beginPath(); g.rect(x, y, w, h); g.clip();
+  g.strokeStyle = "rgba(205,207,215,0.6)"; g.lineWidth = 5;
+  for (let d = -h; d < w; d += 12) { g.beginPath(); g.moveTo(x + d, y + h); g.lineTo(x + d + h, y); g.stroke(); }
+  g.restore();
+}
+
 // A thing this body cannot see: a faint dashed outline, so the player still knows it is there for others.
 function ghost(px, py, col) {
   g.save(); g.setLineDash([5, 5]); g.strokeStyle = col; g.globalAlpha = 0.55; g.lineWidth = 2;
@@ -364,13 +384,13 @@ function chevron(x, y, dx, dy) {
 // ---------- legend ----------
 // An HTML overlay on the board. Each body's rows draw the tiles exactly as that body sees them.
 const LEGEND_BODIES = [
-  { t: "S", title: "Spirit (white circle): sees no colour, weighs nothing on plates",
+  { t: "S", title: "Spirit (white circle): sees no colour, so a red block or blue block is fog to it (grey bands) that it can't pass; weighs nothing on plates",
     can: [[".", "floor"], ["_", "plate"], ["E", "exit"], ["|o", "open gate"]],
     cannot: [["R", "red block"], ["B", "blue block"], ["r", "red bridge"], ["b", "blue bridge"], ["D", "locked door"], ["V", "vent"], ["~", "pit"], ["|", "shut gate"]] },
-  { t: "G", title: "Guard (big red G): sees red, carries the key",
+  { t: "G", title: "Guard (big red G): sees red, not blue; carries the key",
     can: [["B", "blue block"], ["r", "red bridge"], ["D", "locked door"]], also: "floor, plates, open gates, exit",
     cannot: [["R", "red block"], ["b", "blue bridge"], ["V", "vent"], ["~", "pit"], ["|", "shut gate"]] },
-  { t: "C", title: "Cat (small blue C): sees blue, fits through vents",
+  { t: "C", title: "Cat (small blue C): sees blue, not red; fits through vents",
     can: [["R", "red block"], ["b", "blue bridge"], ["V", "vent"]], also: "floor, plates, open gates, exit",
     cannot: [["B", "blue block"], ["r", "red bridge"], ["D", "locked door"], ["~", "pit"], ["|", "shut gate"]] },
 ];
@@ -434,15 +454,18 @@ function toggleLegend(open = !legendOpen) {
 }
 
 // While the legend is open, every game input (move, undo, restart, next, skip, level button) only
-// closes it, so nothing happens on a board you cannot see. Returns true if it closed the legend.
-function closeLegend() {
+// closes it, so nothing happens on a board you cannot see. The status line then says so (`msg`), so a
+// press that did nothing on the board is never silent. Returns true if it closed the legend.
+function closeLegend(msg) {
   if (!legendOpen) return false;
   toggleLegend(false);
+  setStatus(msg || "Legend closed.");
   return true;
 }
 
-function restart() { if (closeLegend()) return; logEnd("restarted"); log.push("R"); load(idx); }
-function next() { if (closeLegend()) return; if (won && idx < LEVELS.length - 1) load(idx + 1); }
+// At turn 0 a restart changes nothing on the board, so the close message promises nothing.
+function restart() { if (closeLegend(history.length ? "Legend closed. Press again to restart." : "Legend closed.")) return; logEnd("restarted"); log.push("R"); load(idx); }
+function next() { if (closeLegend(won && idx < LEVELS.length - 1 ? "Legend closed. Press again for the next level." : "Legend closed.")) return; if (won && idx < LEVELS.length - 1) load(idx + 1); }
 
 // On-screen controls. pointerdown (not click) so taps feel instant and double-tap never zooms.
 for (const b of document.querySelectorAll("#pad button")) {
@@ -471,7 +494,7 @@ addEventListener("keydown", (e) => {
   if (KEYS[e.key]) { e.preventDefault(); act(KEYS[e.key]); return; }
   if (e.key === "z" || e.key === "Z" || e.key === "Backspace") { e.preventDefault(); undo(); return; }
   if (e.key === "r" || e.key === "R") { restart(); return; }
-  if (e.key === "N" && e.shiftKey) { if (closeLegend()) return; logEnd("SKIPPED"); load(idx + 1); return; }
+  if (e.key === "N" && e.shiftKey) { if (closeLegend("Legend closed. Press again to skip this level.")) return; logEnd("SKIPPED"); load(idx + 1); return; }
   if (e.key === "n") { next(); return; }
   if (e.key === "l" || e.key === "L") { toggleLegend(); return; }
 });
