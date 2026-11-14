@@ -38,6 +38,23 @@
   #acts button:disabled { opacity: 0.4; }
   #touchToggle { background: none; border: 1px solid #3a3e46; color: var(--dim); border-radius: 4px; padding: 2px 8px; font: inherit; font-size: 13px; cursor: pointer; }
   button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  /* Legend: an overlay on the board, opened and closed with L (or the Legend button). It is never
+     taller than the board, or 200 px on a tiny board, and never more than 40 px past the board, so it
+     can cover the status line but never the touch pad. Longer content scrolls inside it. */
+  #legend { display: none; position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 5; width: min(620px, 100%); box-sizing: border-box; max-height: min(calc(100% + 40px), max(100%, 200px)); overflow-y: auto; overscroll-behavior: contain; padding: 0 12px 8px; background: rgba(10,10,14,0.97); border: 1px solid #3a3e46; border-radius: 6px; font-size: 12.5px; line-height: 1.3; cursor: pointer; }
+  #legend.open { display: block; }
+  #legend .top { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 0 4px; background: rgb(10,10,14); }
+  #legend .top b { font-size: 13px; }
+  #legend .top span { color: var(--dim); font-weight: 400; }
+  #legend button { background: var(--panel); color: var(--text); border: 1px solid #3a3e46; border-radius: 4px; padding: 2px 10px; font: inherit; cursor: pointer; }
+  #legend .who { margin: 6px 0 1px; font-weight: 600; }
+  #legend .row { display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: center; margin-left: 6px; }
+  #legend .row .lbl { color: var(--dim); min-width: 44px; }
+  #legend .row.list { flex-direction: column; align-items: flex-start; }
+  #legend .item { display: inline-flex; align-items: center; gap: 3px; }
+  #legend canvas { width: 20px; height: 20px; border-radius: 2px; background: none; flex: none; outline: 1px solid #3a3e46; }
+  #legend p { margin: 6px 0 0; color: var(--dim); }
+  #legendBtn { background: none; border: 1px solid #3a3e46; color: var(--dim); border-radius: 4px; padding: 2px 8px; font: inherit; font-size: 13px; cursor: pointer; }
   #levels button.done::after { content: " ✓"; color: var(--accent); }
 </style>
 </head>
@@ -48,7 +65,7 @@
     <div><span id="body">spirit</span> <span id="turns"></span></div>
   </header>
   <div id="hint"></div>
-  <div id="stage"><canvas id="c"></canvas></div>
+  <div id="stage"><canvas id="c"></canvas><div id="legend" role="dialog" aria-label="Legend"></div></div>
   <div id="status"></div>
   <div id="touch">
     <div id="pad">
@@ -67,7 +84,7 @@
   <footer>
     <kbd>←↑→↓</kbd>/<kbd>WASD</kbd> move, or walk into a body to hop into it ·
     <kbd>Z</kbd>/<kbd>Backspace</kbd> undo · <kbd>R</kbd> restart · <kbd>N</kbd> next level (after a win) · <kbd>Shift+N</kbd> skip ·
-    <kbd>L</kbd> legend · <button id="touchToggle">Touch controls</button>
+    <button id="legendBtn"><kbd>L</kbd> legend</button> · <button id="touchToggle">Touch controls</button>
   </footer>
 </div>
 <script src="engine.js"></script>
@@ -76,14 +93,15 @@
 "use strict";
 const BH = window.BodyHop, LEVELS = window.BODY_HOP_LEVELS;
 const T = 56; // tile size in px
-const cv = document.getElementById("c"), g = cv.getContext("2d");
+const cv = document.getElementById("c");
+let g = cv.getContext("2d"); // swapped briefly to draw legend icons
 const $ = (id) => document.getElementById(id);
 
 // Each form tints the whole world; hopping cross-fades between tints ("shifting").
 const TINT = { S: [150, 150, 165], G: [235, 110, 95], C: [95, 150, 235] };
 const RED = "#d94a3a", BLUE = "#3a78d9";
 
-let idx = 0, L, s, history, turns, startTime, log, won, flash = null, shiftT = 1, shiftFrom = "S", showLegend = false;
+let idx = 0, L, s, history, turns, startTime, log, won, flash = null, shiftT = 1, shiftFrom = "S";
 const done = new Set();
 try { for (const n of JSON.parse(localStorage.getItem("bodyhop-done") || "[]")) done.add(n); } catch (e) { /* storage unavailable */ }
 
@@ -132,7 +150,7 @@ function renderLevels() {
     b.textContent = label(i); b.title = lv.name;
     if (i === idx) b.className = "cur";
     if (done.has(lv.name)) b.classList.add("done");
-    b.onclick = () => { logEnd("left"); load(i); };
+    b.onclick = () => { if (closeLegend()) return; logEnd("left"); load(i); };
     group.appendChild(b);
   });
 }
@@ -157,13 +175,20 @@ function logEnd(how) {
 function compress(a) { const out = []; for (const k of a) { const last = out[out.length - 1]; if (last && last[0] === k) last[1]++; else out.push([k, 1]); } return out.map(([k, n]) => n > 1 ? `${k}x${n}` : k).join(" "); }
 
 function act(dir) {
+  if (closeLegend()) return;
   if (won) return;
   const before = BH.current(L, s).t;
   const r = BH.step(L, s, dir);
   log.push(dir[0].toUpperCase());
   if (!r.state) { setStatus(r.why, "bad"); flash = { t: performance.now(), dir }; draw(); return; }
   history.push(s); s = r.state; turns++;
-  setStatus(r.kind === "hop" ? `hopped into the ${BH.NAMES[BH.current(L, s).t]}` : "");
+  // A hop says which body you are in now, and whether you have been in it before, so an
+  // accidental hop back into a parked body is never silent.
+  if (r.kind === "hop") {
+    const name = BH.NAMES[BH.current(L, s).t];
+    const again = history.some((h) => h.ctrl === s.ctrl);
+    setStatus(again ? `Back in the ${name}. Z to undo.` : `You are the ${name} now. Z to undo.`);
+  } else setStatus("");
   if (r.kind === "hop") { shiftFrom = before; shiftT = 0; animate(); }
   if (BH.won(L, s)) {
     won = true; done.add(LEVELS[idx].name);
@@ -176,6 +201,7 @@ function act(dir) {
 }
 
 function undo() {
+  if (closeLegend()) return;
   log.push("Z");
   if (!history.length) return;
   const before = BH.current(L, s).t;
@@ -214,7 +240,6 @@ function draw() {
     g.strokeRect((me.x + dx) * T + 4, (me.y + dy) * T + 4, T - 8, T - 8);
     setTimeout(draw, 260);
   }
-  if (showLegend) drawLegend();
 }
 
 function drawTile(x, y, ch, who, tint, gateOpen) {
@@ -305,20 +330,84 @@ function chevron(x, y, dx, dy) {
   g.fill();
 }
 
-function drawLegend() {
-  const lines = ["Guard (G): sees red. Red blocks are walls, red bridges are floor. Has the key for doors.",
-    "Cat (C): sees blue. Blue blocks are walls, blue bridges are floor. Fits through vents.",
-    "Spirit: sees no colour. Colour is fog it cannot pass. Weighs nothing.",
-    "Dashed outline: there for others, not for you. Plates hold gates open while a body stands on them.",
-    "A body standing in any gate holds every gate open. Parked bodies block the way.", "L to close"];
-  const w = Math.min(cv.width - 20, 620), h = lines.length * 20 + 20;
-  g.fillStyle = "rgba(10,10,14,0.92)"; g.fillRect(10, 10, w, h);
-  g.fillStyle = "#e8e8ea"; g.font = "13px system-ui"; g.textAlign = "left"; g.textBaseline = "top";
-  lines.forEach((l, i) => g.fillText(l, 20, 20 + i * 20, w - 20));
+// ---------- legend ----------
+// An HTML overlay on the board. Each body's rows draw the tiles exactly as that body sees them.
+const LEGEND_BODIES = [
+  { t: "S", title: "Spirit (white circle): sees no colour, weighs nothing on plates",
+    can: [[".", "floor"], ["_", "plate"], ["E", "exit"], ["|o", "open gate"]],
+    cannot: [["R", "red block"], ["B", "blue block"], ["r", "red bridge"], ["b", "blue bridge"], ["D", "locked door"], ["V", "vent"], ["~", "pit"]] },
+  { t: "G", title: "Guard (big red G): sees red, carries the key",
+    can: [["B", "blue block"], ["r", "red bridge"], ["D", "locked door"]], also: "floor, plates, open gates, exit",
+    cannot: [["R", "red block"], ["b", "blue bridge"], ["V", "vent"], ["~", "pit"]] },
+  { t: "C", title: "Cat (small blue C): sees blue, fits through vents",
+    can: [["R", "red block"], ["b", "blue bridge"], ["V", "vent"]], also: "floor, plates, open gates, exit",
+    cannot: [["B", "blue block"], ["r", "red bridge"], ["D", "locked door"], ["~", "pit"]] },
+];
+const LEGEND_TILES = [["V", "vent (grey grille): cat only"], ["D", "locked door: guard only"],
+  ["_", "plate: a body on it opens every gate"], ["|", "gate (bars): open while a plate is held or a body stands in any gate"]];
+let legendOpen = false;
+
+function tileIcon(ch, who) {
+  const c = document.createElement("canvas"); c.width = c.height = T;
+  const keep = g; g = c.getContext("2d");
+  const open = ch === "|o"; // "|o" draws an open gate, "|" a shut one
+  try { drawTile(0, 0, open ? "|" : ch, who, TINT[who], open); } finally { g = keep; }
+  return c;
 }
 
-function restart() { logEnd("restarted"); log.push("R"); load(idx); }
-function next() { if (won && idx < LEVELS.length - 1) load(idx + 1); }
+function legendRow(label, items, who, also) {
+  const row = document.createElement("div"); row.className = "row";
+  if (label) { const head = document.createElement("span"); head.className = "lbl"; head.textContent = label; row.appendChild(head); }
+  else row.classList.add("list");
+  for (const [ch, name] of items) {
+    const it = document.createElement("span"); it.className = "item";
+    it.appendChild(tileIcon(ch, who)); it.appendChild(document.createTextNode(name)); row.appendChild(it);
+  }
+  if (also) { const a = document.createElement("span"); a.textContent = "and " + also; row.appendChild(a); }
+  return row;
+}
+
+function buildLegend() {
+  const box = $("legend"); box.innerHTML = "";
+  const top = document.createElement("div"); top.className = "top";
+  const h = document.createElement("b"); h.textContent = "Legend ";
+  const how = document.createElement("span"); how.textContent = "tap or L closes"; h.appendChild(how);
+  const close = document.createElement("button"); close.textContent = "Close";
+  top.append(h, close); box.appendChild(top); // a click anywhere on the panel closes it, the button included
+  for (const b of LEGEND_BODIES) {
+    const who = document.createElement("div"); who.className = "who"; who.textContent = b.title;
+    who.style.color = b.t === "G" ? "#ff9a8a" : b.t === "C" ? "#9ac0ff" : "#ddd";
+    box.append(who, legendRow("Can:", b.can, b.t, b.also), legendRow("Can't:", b.cannot, b.t));
+  }
+  const tw = document.createElement("div"); tw.className = "who"; tw.textContent = "Special tiles";
+  box.append(tw, legendRow("", LEGEND_TILES, "S"));
+  const p = document.createElement("p");
+  p.textContent = "Each tile is drawn as that body sees it: a dashed outline is not there for that body. " +
+    "Sleeping bodies block the way. Walk into a body to hop into it; Z undoes a hop.";
+  box.appendChild(p);
+}
+
+function toggleLegend(open = !legendOpen) {
+  legendOpen = open;
+  const box = $("legend");
+  if (open) buildLegend();
+  box.classList.toggle("open", open);
+  if (open) { // say so when the panel is shorter than its content (overlay scrollbars are easy to miss)
+    box.scrollTop = 0;
+    box.querySelector(".top span").textContent = (box.scrollHeight > box.clientHeight + 2 ? "scroll for more · " : "") + "tap or L closes";
+  }
+}
+
+// While the legend is open, every game input (move, undo, restart, next, skip, level button) only
+// closes it, so nothing happens on a board you cannot see. Returns true if it closed the legend.
+function closeLegend() {
+  if (!legendOpen) return false;
+  toggleLegend(false);
+  return true;
+}
+
+function restart() { if (closeLegend()) return; logEnd("restarted"); log.push("R"); load(idx); }
+function next() { if (closeLegend()) return; if (won && idx < LEVELS.length - 1) load(idx + 1); }
 
 // On-screen controls. pointerdown (not click) so taps feel instant and double-tap never zooms.
 for (const b of document.querySelectorAll("#pad button")) {
@@ -327,6 +416,13 @@ for (const b of document.querySelectorAll("#pad button")) {
 $("btnUndo").addEventListener("pointerdown", (e) => { e.preventDefault(); undo(); });
 $("btnRestart").addEventListener("pointerdown", (e) => { e.preventDefault(); restart(); });
 $("btnNext").addEventListener("pointerdown", (e) => { e.preventDefault(); next(); });
+$("legendBtn").addEventListener("click", () => toggleLegend());
+// A click or tap anywhere on the legend closes it, except on its scrollbar (a drag there scrolls it).
+$("legend").addEventListener("click", (e) => {
+  const box = e.currentTarget, r = box.getBoundingClientRect();
+  if (e.clientX > r.left + box.clientLeft + box.clientWidth) return;
+  toggleLegend(false);
+});
 $("touchToggle").addEventListener("click", () => {
   const coarse = matchMedia("(pointer: coarse)").matches;
   const shown = document.body.classList.contains("touch") || (coarse && !document.body.classList.contains("no-touch"));
@@ -340,9 +436,9 @@ addEventListener("keydown", (e) => {
   if (KEYS[e.key]) { e.preventDefault(); act(KEYS[e.key]); return; }
   if (e.key === "z" || e.key === "Z" || e.key === "Backspace") { e.preventDefault(); undo(); return; }
   if (e.key === "r" || e.key === "R") { restart(); return; }
-  if (e.key === "N" && e.shiftKey) { logEnd("SKIPPED"); load(idx + 1); return; }
+  if (e.key === "N" && e.shiftKey) { if (closeLegend()) return; logEnd("SKIPPED"); load(idx + 1); return; }
   if (e.key === "n") { next(); return; }
-  if (e.key === "l" || e.key === "L") { showLegend = !showLegend; draw(); return; }
+  if (e.key === "l" || e.key === "L") { toggleLegend(); return; }
 });
 
 const q = Number(new URLSearchParams(location.search).get("level"));

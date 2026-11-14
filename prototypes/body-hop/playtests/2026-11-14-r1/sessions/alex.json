@@ -1,0 +1,229 @@
+{
+ "session": "alex",
+ "filter": null,
+ "started": "2026-11-14T09:47:39.961Z",
+ "calls": [
+  {
+   "t": "2026-11-14T09:47:40.750Z",
+   "keys": [
+    "L"
+   ],
+   "note": "Starting. Checking legend first.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0000.png"
+  },
+  {
+   "t": "2026-11-14T09:47:45.291Z",
+   "keys": [
+    "L"
+   ],
+   "note": "Close legend.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0001.png"
+  },
+  {
+   "t": "2026-11-14T09:47:48.921Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Up",
+    "Down",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "Hop guard, then walk through door to exit.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": true,
+   "turns": 8,
+   "status": "Out in 8 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0002.png"
+  },
+  {
+   "t": "2026-11-14T09:47:51.867Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Next.",
+   "levelBefore": 1,
+   "level": 2,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0003.png"
+  },
+  {
+   "t": "2026-11-14T09:47:57.081Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Down",
+    "Up",
+    "Right",
+    "Right",
+    "Right",
+    "Down",
+    "Down",
+    "Down"
+   ],
+   "note": "Become cat, cross red block, hop guard, go down through door.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": true,
+   "turns": 10,
+   "status": "Out in 10 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0004.png"
+  },
+  {
+   "t": "2026-11-14T09:47:59.953Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Next.",
+   "levelBefore": 2,
+   "level": 3,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0005.png"
+  },
+  {
+   "t": "2026-11-14T09:48:06.666Z",
+   "keys": [
+    "Right",
+    "Down",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Up",
+    "Left",
+    "Down",
+    "Down",
+    "Down",
+    "Down",
+    "Down",
+    "Left"
+   ],
+   "note": "Guard opens door, hop cat, cross bridge.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": true,
+   "turns": 14,
+   "status": "Out in 14 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0006.png"
+  },
+  {
+   "t": "2026-11-14T09:48:09.772Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Next.",
+   "levelBefore": 3,
+   "level": 4,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0007.png"
+  },
+  {
+   "t": "2026-11-14T09:48:19.349Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Left",
+    "Down",
+    "Down",
+    "Down",
+    "Down",
+    "Right",
+    "Up",
+    "Up",
+    "Right",
+    "Right",
+    "Right",
+    "Up",
+    "Left",
+    "Up"
+   ],
+   "note": "Guard to doorway, hop cat, cat via bridge and red, hop other guard, door, exit.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": true,
+   "turns": 17,
+   "status": "Out in 17 turns (par!). Chapter complete: Eyes. Press N for Leftovers.",
+   "shot": "shot-0008.png"
+  },
+  {
+   "t": "2026-11-14T09:48:23.247Z",
+   "keys": [
+    "Level:12"
+   ],
+   "note": "Trying to jump to the last level to break sequencing.",
+   "levelBefore": 4,
+   "level": 12,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0009.png"
+  },
+  {
+   "t": "2026-11-14T09:48:56.537Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Up",
+    "Left",
+    "Down",
+    "Right",
+    "Right",
+    "Up",
+    "Left",
+    "Down",
+    "Right",
+    "Up",
+    "Up",
+    "Up",
+    "Left",
+    "Left"
+   ],
+   "note": "Skipped ahead to 12 to poke at ordering. Worked out a chain of parked cats to hold the plate.",
+   "levelBefore": 12,
+   "level": 12,
+   "won": true,
+   "turns": 19,
+   "status": "Out in 19 turns (par!). That's the whole main game. Night shift has harder levels if you want more: press N.",
+   "shot": "shot-0010.png"
+  },
+  {
+   "t": "2026-11-14T09:48:59.862Z",
+   "keys": [
+    "Level:99",
+    "Level:0",
+    "N"
+   ],
+   "note": "Trying invalid level numbers to break it.",
+   "levelBefore": 12,
+   "level": 18,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0011.png"
+  }
+ ]
+}
