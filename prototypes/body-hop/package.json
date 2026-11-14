@@ -1,0 +1,6 @@
+{
+  "name": "body-hop",
+  "private": true,
+  "description": "Dev tools only: tools/bot.js and the persona play harness need Playwright. The game itself needs no install.",
+  "devDependencies": { "playwright": "1.64.1" }
+}

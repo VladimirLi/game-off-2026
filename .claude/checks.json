@@ -1,0 +1,11 @@
+{
+  "_doc": "Stop hook config: when files under a listed folder changed (since the last passing commit, or uncommitted), every check for it runs before the agent may stop. Commands run in that folder; non-zero exit = fail; exit 3 = skipped (reported, never a pass).",
+  "ignore": ["*.md", "playtests/*"],
+  "prototypes": {
+    "prototypes/body-hop": [
+      "node tools/solve.js",
+      "T=\"$(git rev-parse --git-path claude-checks)/inline.js\" && python3 -I -c \"import re,sys;open(sys.argv[1],'w').write('\\n'.join(re.findall(r'<script>(.*?)</script>',open('index.html').read(),re.S)))\" \"$T\" && node --check \"$T\"",
+      "[ -d node_modules/playwright ] || { echo 'browser replay (tools/bot.js) SKIPPED: run npm install in prototypes/body-hop'; exit 3; }; node tools/bot.js"
+    ]
+  }
+}

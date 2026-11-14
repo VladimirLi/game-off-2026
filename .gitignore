@@ -5,5 +5,8 @@ export/
 *.pck
 # OS
 .DS_Store
-# Agent scratch
-.claude/
+# Agent scratch (the shared setup in .claude/ is committed)
+.claude/settings.local.json
+.claude/worktrees/
+# Node
+node_modules/
