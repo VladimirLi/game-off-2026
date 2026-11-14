@@ -1,0 +1,246 @@
+{
+ "session": "jonas",
+ "filter": null,
+ "started": "2026-11-14T10:45:30.269Z",
+ "calls": [
+  {
+   "t": "2026-11-14T10:45:31.070Z",
+   "keys": [
+    "Level:14"
+   ],
+   "note": "Starting at level 14 as asked. Let's see what this is.",
+   "levelBefore": 1,
+   "level": 14,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0000.png"
+  },
+  {
+   "t": "2026-11-14T10:45:35.859Z",
+   "keys": [
+    "L"
+   ],
+   "note": "No tutorial for this level; checking legend.",
+   "levelBefore": 14,
+   "level": 14,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0001.png"
+  },
+  {
+   "t": "2026-11-14T10:45:44.426Z",
+   "keys": [
+    "L",
+    "Down",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "Spirit hops into bodies. Blue block near exit blocks spirit/cat, guard can pass. Plan: walk spirit to guard G and hop in.",
+   "levelBefore": 14,
+   "level": 14,
+   "won": false,
+   "turns": 4,
+   "status": "You are the guard now. Z to undo.",
+   "shot": "shot-0002.png"
+  },
+  {
+   "t": "2026-11-14T10:45:50.517Z",
+   "keys": [
+    "Left",
+    "Left",
+    "Left",
+    "Left"
+   ],
+   "note": "Guard walks left then hops into the cat in its way. Curious what happens to the guard body.",
+   "levelBefore": 14,
+   "level": 14,
+   "won": false,
+   "turns": 8,
+   "status": "You are the cat now. Z to undo.",
+   "shot": "shot-0003.png"
+  },
+  {
+   "t": "2026-11-14T10:46:28.614Z",
+   "keys": [
+    "Right",
+    "Up",
+    "Left",
+    "Left",
+    "Down"
+   ],
+   "note": "Plan: guard parks at (2,2); cats get shuffled out of row 2. Hop guard, step up, hop cat B, hop cat C, move C down.",
+   "levelBefore": 14,
+   "level": 14,
+   "won": false,
+   "turns": 13,
+   "status": "",
+   "shot": "shot-0004.png"
+  },
+  {
+   "t": "2026-11-14T10:46:32.180Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Left",
+    "Left",
+    "Left",
+    "Left",
+    "Up",
+    "Down",
+    "Right",
+    "Right"
+   ],
+   "note": "Hop cat A, send it to the far right, walk back, hop cat B, drop it down and right out of row 2.",
+   "levelBefore": 14,
+   "level": 14,
+   "won": false,
+   "turns": 26,
+   "status": "",
+   "shot": "shot-0005.png"
+  },
+  {
+   "t": "2026-11-14T10:46:36.632Z",
+   "keys": [
+    "Left",
+    "Left",
+    "Up",
+    "Down",
+    "Right",
+    "Up",
+    "Left",
+    "Left",
+    "Up",
+    "Up",
+    "Right"
+   ],
+   "note": "Walk back, hop B, bring it down to row 3, then hop guard at (2,2) and run left, up to the exit.",
+   "levelBefore": 14,
+   "level": 14,
+   "won": false,
+   "turns": 35,
+   "status": "Blocked: the cat can't walk through a wall.",
+   "shot": "shot-0006.png"
+  },
+  {
+   "t": "2026-11-14T10:46:40.701Z",
+   "keys": [
+    "Down",
+    "Right",
+    "Right",
+    "Left",
+    "Left",
+    "Up",
+    "Up",
+    "Right"
+   ],
+   "note": "Cats are cleared from row 2. Cat walks to guard, hops in, guard heads to the exit via the blue block.",
+   "levelBefore": 14,
+   "level": 14,
+   "won": false,
+   "turns": 41,
+   "status": "Blocked: the cat can't walk through a wall.",
+   "shot": "shot-0007.png"
+  },
+  {
+   "t": "2026-11-14T10:46:45.537Z",
+   "keys": [
+    "Down"
+   ],
+   "note": "Single step to see what the cat does.",
+   "levelBefore": 14,
+   "level": 14,
+   "won": false,
+   "turns": 42,
+   "status": "",
+   "shot": "shot-0008.png"
+  },
+  {
+   "t": "2026-11-14T10:46:49.305Z",
+   "keys": [
+    "Right",
+    "Right"
+   ],
+   "note": "Cat to (1,2) then hop guard at (2,2).",
+   "levelBefore": 14,
+   "level": 14,
+   "won": false,
+   "turns": 44,
+   "status": "Back in the guard. Z to undo.",
+   "shot": "shot-0009.png"
+  },
+  {
+   "t": "2026-11-14T10:46:54.730Z",
+   "keys": [
+    "Left",
+    "Down",
+    "Right",
+    "Up",
+    "Left",
+    "Left",
+    "Up",
+    "Up",
+    "Right"
+   ],
+   "note": "Hop the cat blocking (1,2), drop it down, hop via the cat below the guard, back into guard, then go to exit.",
+   "levelBefore": 14,
+   "level": 14,
+   "won": true,
+   "turns": 53,
+   "status": "Out in 53 turns (par 23). Press N or tap Next level.",
+   "shot": "shot-0010.png"
+  },
+  {
+   "t": "2026-11-14T10:46:58.401Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Solved X2 at 53 turns, par 23. Next.",
+   "levelBefore": 14,
+   "level": 15,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0011.png"
+  },
+  {
+   "t": "2026-11-14T10:47:23.318Z",
+   "keys": [
+    "Right",
+    "Left",
+    "Up",
+    "Down",
+    "Down",
+    "Down",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "X3 looks like a hard one. Plan: park cat1 out of the way at top-left, then carry the guard along the red bridges to the exit. Moving spirit->cat1->park->walk to the bottom guard.",
+   "levelBefore": 15,
+   "level": 15,
+   "won": false,
+   "turns": 9,
+   "status": "",
+   "shot": "shot-0012.png"
+  },
+  {
+   "t": "2026-11-14T10:47:37.098Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Hopping into the bottom guard just to see how the board looks from his eyes.",
+   "levelBefore": 15,
+   "level": 15,
+   "won": false,
+   "turns": 10,
+   "status": "You are the guard now. Z to undo.",
+   "shot": "shot-0013.png"
+  }
+ ]
+}
