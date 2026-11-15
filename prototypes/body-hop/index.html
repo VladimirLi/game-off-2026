@@ -215,7 +215,7 @@ function walkNews(prev, now) {
   const was = BH.gateOpen(L, prev), is = BH.gateOpen(L, now);
   const the = gates > 1 ? "The gates" : "The gate";
   if (gates && !was && is) return gates > 1 ? "The gates open." : "The gate opens.";
-  if (gates && was && !is) return gates > 1 ? "The gates shut: no body on a plate." : "The gate shuts: no body on a plate.";
+  if (gates && was && !is) return gates > 1 ? "The gates shut: no body on a plate or in a gate." : "The gate shuts: no body on a plate or in a gate.";
   if (gates && is && BH.platesHeld(L, prev) && !BH.platesHeld(L, now))
     return `No body on a plate, but a body standing in a gate holds ${the.toLowerCase()} open.`;
   const me = BH.current(L, now);
@@ -268,7 +268,7 @@ function draw() {
   for (let y = 0; y < L.h; y++) for (let x = 0; x < L.w; x++) drawTile(x, y, L.tiles[y][x], me.t, tint, gateOpen, held);
   // Bodies. The body you most recently hopped out of carries a footprint, so walking back into it is never a surprise.
   const left = lastLeft();
-  s.pos.forEach(([x, y], i) => drawBody(x, y, L.types[i], i === s.ctrl, i === left));
+  s.pos.forEach(([x, y], i) => drawBody(x, y, L.types[i], i === s.ctrl, i === left, L.tiles[y][x]));
   if (s.ctrl < 0) drawSpirit(s.sx, s.sy);
   // Hop targets: every body next to you, which your next press that way hops into. Yellow corner
   // brackets on its tile and an arrow on the shared edge (shape, not colour, tells them from the
@@ -317,9 +317,23 @@ function drawTile(x, y, ch, who, tint, gateOpen, held) {
       else ghost(px, py, col);
       return;
     }
-    case "D":
-      floor(); g.fillStyle = "#8a5a2b"; g.fillRect(px + 6, py + 4, T - 12, T - 8);
-      g.fillStyle = "#e0b040"; g.beginPath(); g.arc(px + T / 2, py + T / 2 - 4, 5, 0, 7); g.fill(); g.fillRect(px + T / 2 - 2, py + T / 2, 4, 10); return;
+    case "D": {
+      // A locked door: a dark frame (two jambs and a lintel) round a plank door that fills the tile to
+      // the floor, two iron bands across it and a padlock hung on the upper band. It is built into the
+      // tile, so it reads as a shut door in the wall line, not as a key lying on the floor to pick up.
+      floor();
+      const cx = px + T / 2;
+      g.fillStyle = "#3b2a1b"; g.fillRect(px + 1, py + 1, T - 2, T - 1);           // frame
+      g.fillStyle = "#8a5a2b"; g.fillRect(px + 7, py + 7, T - 14, T - 7);          // door leaf
+      g.fillStyle = "#5c3a1a"; for (const sx of [17, 27, 38]) g.fillRect(px + sx, py + 7, 2, T - 7); // plank seams
+      g.fillStyle = "#4b5059"; g.fillRect(px + 7, py + 15, T - 14, 4); g.fillRect(px + 7, py + T - 12, T - 14, 4); // iron bands
+      // Padlock: a steel shackle through the upper band, a steel body with a dark keyhole.
+      g.strokeStyle = "#d4d8e0"; g.lineWidth = 3; g.beginPath(); g.arc(cx, py + 22, 6, 0, 7); g.stroke();
+      g.fillStyle = "#1d1f24"; g.fillRect(cx - 10, py + 21, 20, 17);
+      g.fillStyle = "#aeb4be"; g.fillRect(cx - 9, py + 22, 18, 15);
+      g.fillStyle = "#1d1f24"; g.beginPath(); g.arc(cx, py + 28, 2.5, 0, 7); g.fill(); g.fillRect(cx - 1, py + 29, 2, 5);
+      return;
+    }
     case "V": {
       // A vent is round: a grey rim around a dark hole with horizontal slats. A gate is square with
       // vertical bars, so the two never look alike, whatever the colours.
@@ -333,35 +347,71 @@ function drawTile(x, y, ch, who, tint, gateOpen, held) {
     }
     case "_": {
       floor();
-      // A wide frame, so a plate stays visible around a body standing on it (a body covers the middle).
-      // Up (empty): a raised grey plate, light top-left edge, dark bottom-right edge, grey button.
-      // Held: sunk in (edges swapped) and the frame lit, in the same colour as an open gate.
+      // A plate is a square slab set into the floor in a dark groove: the same on all four sides, so a body
+      // standing on it is ringed all round (an open gate is two posts and a top beam, open at the bottom).
+      // Up (empty): raised grey, light top-left edge, dark bottom-right edge, grey button.
+      // Held: sunk in (edges swapped), the slab lit in the same colour as an open gate, and a dark
+      // diagonal in each corner (the bevel of a pressed-in tray), which shows beside a body on it.
       // White stays reserved for "this is you".
-      g.fillStyle = held ? LIT : "#c9ced8"; g.fillRect(px + 2, py + 2, T - 4, T - 4);
-      g.fillStyle = held ? "rgba(0,0,0,0.45)" : "rgba(255,255,255,0.7)"; g.fillRect(px + 2, py + 2, T - 4, 3); g.fillRect(px + 2, py + 2, 3, T - 4);
-      g.fillStyle = held ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.45)"; g.fillRect(px + 2, py + T - 5, T - 4, 3); g.fillRect(px + T - 5, py + 2, 3, T - 4);
-      g.fillStyle = held ? "#1f3a1f" : "#2e3138"; g.fillRect(px + 12, py + 12, T - 24, T - 24);
+      g.fillStyle = "#121317"; g.fillRect(px + 1, py + 1, T - 2, T - 2); // the groove
+      g.fillStyle = held ? LIT : "#c9ced8"; g.fillRect(px + 3, py + 3, T - 6, T - 6);
+      g.fillStyle = held ? "rgba(0,0,0,0.45)" : "rgba(255,255,255,0.7)"; g.fillRect(px + 3, py + 3, T - 6, 3); g.fillRect(px + 3, py + 3, 3, T - 6);
+      g.fillStyle = held ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.45)"; g.fillRect(px + 3, py + T - 6, T - 6, 3); g.fillRect(px + T - 6, py + 3, 3, T - 6);
+      if (held) {
+        g.strokeStyle = "rgba(0,0,0,0.55)"; g.lineWidth = 2; g.beginPath();
+        for (const [ax, ay, bx, by] of [[3, 3, 13, 13], [T - 3, 3, T - 13, 13], [3, T - 3, 13, T - 13], [T - 3, T - 3, T - 13, T - 13]]) {
+          g.moveTo(px + ax, py + ay); g.lineTo(px + bx, py + by);
+        }
+        g.stroke();
+      }
+      g.fillStyle = held ? "#1f3a1f" : "#2e3138"; g.fillRect(px + 13, py + 13, T - 26, T - 26);
       g.beginPath(); g.arc(px + T / 2, py + T / 2, held ? 5 : 8, 0, 7); g.fillStyle = held ? LIT : "#9aa1ad"; g.fill(); return;
     }
     case "|": {
-      // A gate is a frame (two posts and a top beam) with bars. Shut: grey, bars down to the floor.
-      // Open: the frame is lit (as a held plate is) and the bars are pulled up into the beam, so the
-      // floor shows through. The posts sit at the tile edges, so they stay visible around a body in the gate.
+      // A gate is a frame (two posts and a top beam, open at the bottom) with spiked bars: a portcullis.
+      // Shut: grey, bars down to the floor. Open: the frame is lit (as a held plate is) and the bars are
+      // pulled up under the beam with their spikes showing, so the floor shows through. The posts sit at the
+      // tile edges, and a body standing in an open gate gets the raised bars drawn again over its head
+      // (gateTop, from drawBody), so it reads as "under a raised gate", never as "on a held plate".
       floor();
       const col = gateOpen ? LIT : "#c9ced8";
       if (!gateOpen) { g.fillStyle = "rgba(0,0,0,0.35)"; g.fillRect(px + 6, py + 9, T - 12, T - 11); }
-      g.fillStyle = col; g.fillRect(px + 1, py + 1, 5, T - 2); g.fillRect(px + T - 6, py + 1, 5, T - 2); g.fillRect(px + 1, py + 1, T - 2, 8);
+      g.fillStyle = "rgba(0,0,0,0.5)"; g.fillRect(px + 6, py + 1, 2, T - 1); g.fillRect(px + T - 8, py + 1, 2, T - 1); // post shadows
+      g.fillStyle = col; g.fillRect(px + 1, py + 1, 5, T - 1); g.fillRect(px + T - 6, py + 1, 5, T - 1);
+      if (gateOpen) { gateTop(px, py); return; }
+      g.fillRect(px + 1, py + 1, T - 2, 8);
       g.strokeStyle = col; g.lineWidth = 4;
       for (let i = 0; i < 4; i++) {
         const gx = px + 12 + i * 10.7;
-        g.beginPath(); g.moveTo(gx, py + 8); g.lineTo(gx, gateOpen ? py + 15 : py + T - 10); g.stroke();
-        // Shut, each bar ends in a spike near the floor (a portcullis), unlike the round, slatted vent.
-        if (!gateOpen) { g.fillStyle = col; g.beginPath(); g.moveTo(gx - 4, py + T - 11); g.lineTo(gx + 4, py + T - 11); g.lineTo(gx, py + T - 3); g.fill(); }
+        g.beginPath(); g.moveTo(gx, py + 8); g.lineTo(gx, py + T - 10); g.stroke();
+        // Shut, each bar ends in a spike near the floor, unlike the round, slatted vent.
+        g.fillStyle = col; g.beginPath(); g.moveTo(gx - 4, py + T - 11); g.lineTo(gx + 4, py + T - 11); g.lineTo(gx, py + T - 3); g.fill();
       }
-      if (gateOpen) { g.fillStyle = "rgba(127,210,127,0.5)"; g.fillRect(px + 6, py + T - 4, T - 12, 3); } // lit threshold
       return;
     }
   }
+}
+
+// The top of an open gate: the lit beam and the four bars pulled up under it, each ending in a spike
+// (the same spikes a shut gate shows at the floor). Drawn on the gate tile, and again over a body standing
+// in the gate, so that body shows the raised bars over its head (a body on a held plate shows a closed ring).
+function gateTop(px, py) {
+  g.fillStyle = "rgba(0,0,0,0.6)"; g.fillRect(px + 1, py + 9, T - 2, 2); // shadow under the beam
+  g.fillStyle = LIT; g.fillRect(px + 1, py + 1, T - 2, 8);
+  for (let i = 0; i < 4; i++) {
+    const gx = px + 12 + i * 10.7;
+    g.fillStyle = "rgba(0,0,0,0.6)"; g.beginPath(); g.moveTo(gx - 5.5, py + 12); g.lineTo(gx + 5.5, py + 12); g.lineTo(gx, py + 21.5); g.closePath(); g.fill();
+    g.fillStyle = LIT; g.fillRect(gx - 2, py + 8, 4, 6);
+    g.beginPath(); g.moveTo(gx - 4, py + 13); g.lineTo(gx + 4, py + 13); g.lineTo(gx, py + 20); g.closePath(); g.fill();
+  }
+}
+
+// The front lip of a held plate, drawn over the feet of the body standing on it: a flat lit strip across
+// the bottom of the tile with a dark top edge, so the body stands sunk in a tray (no posts, no spikes).
+function plateLip(px, py) {
+  g.fillStyle = "rgba(0,0,0,0.6)"; g.fillRect(px + 3, py + T - 13, T - 6, 2);
+  g.fillStyle = LIT; g.fillRect(px + 3, py + T - 11, T - 6, 8);
+  g.fillStyle = "rgba(255,255,255,0.35)"; g.fillRect(px + 3, py + T - 6, T - 6, 3);
 }
 
 // Grey fog over a coloured block, as the spirit sees it: diagonal grey bands, so the block keeps its
@@ -379,7 +429,10 @@ function ghost(px, py, col) {
   g.strokeRect(px + 5, py + 5, T - 10, T - 10); g.restore();
 }
 
-function drawBody(x, y, t, active, last) {
+// under: the tile the body stands on. In a gate (always open with a body in it) the gate's raised bars are
+// drawn over the body's head; on a plate (always held with a body on it) the plate's front lip is drawn
+// over its feet. So the two read apart by shape: spikes over the head, or a flat tray round the feet.
+function drawBody(x, y, t, active, last, under) {
   const px = x * T, py = y * T, cx = px + T / 2, cy = py + T / 2;
   const col = t === "G" ? RED : BLUE;
   const size = t === "G" ? T - 14 : T - 24; // the cat is small (it fits in vents)
@@ -388,6 +441,8 @@ function drawBody(x, y, t, active, last) {
   g.fillStyle = "#fff"; g.font = `bold ${t === "G" ? 20 : 15}px system-ui`; g.textAlign = "center"; g.textBaseline = "middle";
   g.fillText(t, cx, cy + 1);
   g.globalAlpha = 1;
+  if (under === "|") gateTop(px, py);
+  if (under === "_") plateLip(px, py);
   if (active) { g.strokeStyle = "#fff"; g.lineWidth = 3; g.strokeRect(cx - size / 2 - 4, cy - size / 2 - 4, size + 8, size + 8); }
   else { g.fillStyle = "rgba(255,255,255,0.8)"; g.font = "bold 12px system-ui"; g.fillText("z", px + T - 9, py + 10); }
   if (last) footprint(px, py);
@@ -456,11 +511,14 @@ const LEGEND_BODIES = [
     can: [["R", "red block"], ["b", "blue bridge"], ["V", "vent"]], also: "floor, plates, open gates, exit",
     cannot: [["B", "blue block"], ["r", "red bridge"], ["D", "locked door"], ["~", "pit"], ["|", "shut gate"]] },
 ];
-const LEGEND_TILES = [["V", "vent (round grey grille, flat slats): cat only"], ["D", "locked door: guard only"],
-  ["_", "plate, up (grey): no body on it. The spirit weighs nothing"],
-  ["_h", "plate, held (lit green): a body stands on it, so every gate is open"],
-  ["|", "gate, shut (square frame, grey spiked bars down): no body on a plate"],
-  ["|o", "gate, open (lit green, bars up): while any plate is held, or a body stands in any gate"]];
+const LEGEND_TILES = [["V", "vent (round grey grille, flat slats): cat only"],
+  ["D", "locked door (plank door with a padlock): guard only. Nothing to pick up: the guard already carries the key"],
+  ["_", "plate, up (raised grey square): no body on it. The spirit weighs nothing"],
+  ["_h", "plate, held (sunk in, lit green square): a body stands on it, so every gate is open"],
+  ["_hG", "body on a held plate: a closed green square all round it"],
+  ["|", "gate, shut (two posts and a beam, grey spiked bars down to the floor): no body on a plate or in a gate"],
+  ["|o", "gate, open (lit green posts and beam, bars pulled up): while any plate is held, or a body stands in any gate"],
+  ["|oG", "body in an open gate: posts at its sides, the raised spiked bars over its head, open at the bottom"]];
 // Board markers. "@x" items draw a marker icon instead of a tile.
 const LEGEND_MARKS = [["@you", "white outline: the body you are in"],
   ["@sleep", "z: an asleep body. It blocks the way"],
@@ -472,8 +530,12 @@ function tileIcon(ch, who) {
   const c = document.createElement("canvas"); c.width = c.height = T;
   const keep = g; g = c.getContext("2d");
   // "|o" draws an open gate and "|" a shut one; "_h" a held plate and "_" an empty one.
-  const open = ch === "|o", held = ch === "_h";
-  try { drawTile(0, 0, ch[0], who, TINT[who], open, held); } finally { g = keep; }
+  // A third letter puts an asleep body of that type on the tile ("_hG", "|oG").
+  const open = ch.startsWith("|o"), held = ch.startsWith("_h");
+  try {
+    drawTile(0, 0, ch[0], who, TINT[who], open, held);
+    if (ch[2]) drawBody(0, 0, ch[2], false, false, ch[0]);
+  } finally { g = keep; }
   return c;
 }
 
