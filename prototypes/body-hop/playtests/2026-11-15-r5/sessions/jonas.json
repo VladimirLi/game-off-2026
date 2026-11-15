@@ -1,0 +1,238 @@
+{
+ "session": "jonas",
+ "filter": null,
+ "started": "2026-11-15T08:13:47.610Z",
+ "calls": [
+  {
+   "t": "2026-11-15T08:13:48.483Z",
+   "keys": [],
+   "note": "Starting fresh, let me see what this is.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0000.png"
+  },
+  {
+   "t": "2026-11-15T08:13:53.998Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Up",
+    "Down",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "Hop into guard, then take key to the door and exit.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": true,
+   "turns": 8,
+   "status": "Out in 8 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0001.png"
+  },
+  {
+   "t": "2026-11-15T08:13:56.948Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Solved level 1 at par. Next.",
+   "levelBefore": 1,
+   "level": 2,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0002.png"
+  },
+  {
+   "t": "2026-11-15T08:14:02.983Z",
+   "keys": [
+    "Down",
+    "Down",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Up",
+    "Up"
+   ],
+   "note": "Guard opens gate, then hop into cat to cross the red barrier (cat sees it as dashed).",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 8,
+   "status": "You are the cat now. Z to undo.",
+   "shot": "shot-0003.png"
+  },
+  {
+   "t": "2026-11-15T08:14:06.471Z",
+   "keys": [
+    "Down",
+    "Down",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "Cat walks through red to exit, hopefully the key persists.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 10,
+   "status": "Blocked: the guard sees red, so the red block is a wall to it.",
+   "shot": "shot-0004.png"
+  },
+  {
+   "t": "2026-11-15T08:14:15.684Z",
+   "keys": [
+    "Z",
+    "Z",
+    "Z",
+    "Down",
+    "Right",
+    "Right",
+    "Down"
+   ],
+   "note": "Oops, I hopped back into the guard by walking down. Undo and go around through row 1 as cat.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 9,
+   "status": "",
+   "shot": "shot-0005.png"
+  },
+  {
+   "t": "2026-11-15T08:14:22.493Z",
+   "keys": [
+    "Up",
+    "Up",
+    "Up",
+    "Right",
+    "Right",
+    "Down",
+    "Down"
+   ],
+   "note": "Guard up to cat, hop, cat walks along top row through red to exit.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": true,
+   "turns": 16,
+   "status": "Out in 16 turns (par 12). Press N or tap Next level.",
+   "shot": "shot-0006.png"
+  },
+  {
+   "t": "2026-11-15T08:14:25.530Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Level 2 done, over par but fine. Next.",
+   "levelBefore": 2,
+   "level": 3,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0007.png"
+  },
+  {
+   "t": "2026-11-15T08:14:30.180Z",
+   "keys": [
+    "Down",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Down",
+    "Down",
+    "Right",
+    "Down",
+    "Right"
+   ],
+   "note": "Guard through gate to cat, cat crosses bridge to exit.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": true,
+   "turns": 10,
+   "status": "Out in 10 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0008.png"
+  },
+  {
+   "t": "2026-11-15T08:14:33.046Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Par. Next.",
+   "levelBefore": 3,
+   "level": 4,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0009.png"
+  },
+  {
+   "t": "2026-11-15T08:14:42.224Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Down",
+    "Down",
+    "Left",
+    "Down",
+    "Down",
+    "Right",
+    "Up",
+    "Up",
+    "Right",
+    "Right",
+    "Right",
+    "Up",
+    "Left",
+    "Up"
+   ],
+   "note": "Plan: guard to cat via gate, cat over bridge and through red to hop second guard next to gate, then exit.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": true,
+   "turns": 17,
+   "status": "Out in 17 turns (par!). Chapter complete: Eyes. Press N for Leftovers.",
+   "shot": "shot-0010.png"
+  },
+  {
+   "t": "2026-11-15T08:14:45.939Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Chapter 1 done at par. Continuing.",
+   "levelBefore": 4,
+   "level": 5,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0011.png"
+  },
+  {
+   "t": "2026-11-15T08:14:51.985Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Left",
+    "Left",
+    "Down",
+    "Right",
+    "Right",
+    "Down",
+    "Down"
+   ],
+   "note": "Guard parks on the plate, I hop into the cat and walk it out through the open gate.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": true,
+   "turns": 10,
+   "status": "Out in 10 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0012.png"
+  }
+ ]
+}

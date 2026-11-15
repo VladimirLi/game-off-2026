@@ -125,7 +125,7 @@
       case "~": return `Blocked: ${who} can't cross a pit.`;
       case "V": return `Blocked: only a cat fits through the vent.`;
       case "D": return `Blocked: only a guard can open the locked door.`;
-      case "|": return `Blocked: the gate is shut. A body on a plate opens it.`;
+      case "|": return `Blocked: the gate is shut. A body on a plate, or standing in a gate, opens it.`;
     }
     return `Blocked: ${who} can't walk through a wall.`;
   }
