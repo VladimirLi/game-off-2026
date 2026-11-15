@@ -1,0 +1,517 @@
+{
+ "session": "theo",
+ "filter": null,
+ "started": "2026-11-15T08:44:37.126Z",
+ "calls": [
+  {
+   "t": "2026-11-15T08:44:37.737Z",
+   "keys": [
+    "Level:5"
+   ],
+   "note": "Okay, starting at level 5. Let's just see what this thing looks like and poke at it.",
+   "levelBefore": 1,
+   "level": 5,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0000.png"
+  },
+  {
+   "t": "2026-11-15T08:44:43.233Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Down"
+   ],
+   "note": "Mashing arrows to see what happens. I'm the white circle. There's a square thing with a dot next to me, maybe a plate. Let's go right and see.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 3,
+   "status": "",
+   "shot": "shot-0001.png"
+  },
+  {
+   "t": "2026-11-15T08:44:49.850Z",
+   "keys": [
+    "Left",
+    "Up"
+   ],
+   "note": "I walked into the blue C and I think I hopped into it. Now I'm going up, hoping the blue body can stand on the plate above it and hold the gate open.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 5,
+   "status": "The gate opens.",
+   "shot": "shot-0002.png"
+  },
+  {
+   "t": "2026-11-15T08:44:56.703Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "The gate opened! I'm the blue guy on the plate now. I don't know where my white circle went, so I'm poking Right to see if anything happens. Probably the gate shuts when I leave the plate.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 6,
+   "status": "The gate shuts: no body on a plate or in a gate.",
+   "shot": "shot-0003.png"
+  },
+  {
+   "t": "2026-11-15T08:45:34.316Z",
+   "keys": [
+    "Z",
+    "Z",
+    "Z"
+   ],
+   "note": "Ugh the gate shut when I stepped off. Undoing back to before I hopped into the blue guy. I think the white circle needs to end up next to the plate, and the red one can help move the blue one there. Trying undo three times.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 3,
+   "status": "",
+   "shot": "shot-0004.png"
+  },
+  {
+   "t": "2026-11-15T08:45:37.283Z",
+   "keys": [
+    "Z",
+    "Z",
+    "Z"
+   ],
+   "note": "Going all the way back to the start so I can try a different plan. The red one is asleep on the top right. I'm going to walk over and bump into him.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0005.png"
+  },
+  {
+   "t": "2026-11-15T08:45:40.697Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "Walking right twice then bumping into the red guy. Idea: I jump into red, he walks left onto the plate. Hoping the white circle stays next to the plate where I left it.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 3,
+   "status": "You are the guard now. Z to undo.",
+   "shot": "shot-0006.png"
+  },
+  {
+   "t": "2026-11-15T08:45:43.570Z",
+   "keys": [
+    "Down",
+    "Left",
+    "Left"
+   ],
+   "note": "I'm the guard now, the red one. Going down then left, then I'll bump the blue one to take over it. Hopefully the blue one can go up onto the plate.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 6,
+   "status": "You are the cat now. Z to undo.",
+   "shot": "shot-0007.png"
+  },
+  {
+   "t": "2026-11-15T08:45:52.732Z",
+   "keys": [
+    "Up"
+   ],
+   "note": "I'm the blue cat now. Going up onto the plate to hold the gate. Not sure exactly where my white circle ended up, it looks squished near the red guy. Let's see.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 7,
+   "status": "The gate opens.",
+   "shot": "shot-0008.png"
+  },
+  {
+   "t": "2026-11-15T08:45:59.455Z",
+   "keys": [
+    "L"
+   ],
+   "note": "The gate is open but I can't tell where my white circle went. There's a little white dot thing stuck on the red guy. Pressing L to see what the symbols mean.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 7,
+   "status": "The gate opens.",
+   "shot": "shot-0009.png"
+  },
+  {
+   "t": "2026-11-15T08:46:05.894Z",
+   "keys": [
+    "L",
+    "Right"
+   ],
+   "note": "Legend didn't say anything about the little white dot. Closing it. I'm going to step right off the plate to see what's to the right, I'll undo if it's dumb.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 8,
+   "status": "The gate shuts: no body on a plate or in a gate.",
+   "shot": "shot-0010.png"
+  },
+  {
+   "t": "2026-11-15T08:46:20.527Z",
+   "keys": [
+    "Down",
+    "Left",
+    "Up"
+   ],
+   "note": "New idea: I'll hop into the red guy, walk him onto the plate, then hop back into the blue cat, who can walk through the open gate. The cat can use open gates, I read that in the legend. Going down, left, up.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 11,
+   "status": "The gate opens.",
+   "shot": "shot-0011.png"
+  },
+  {
+   "t": "2026-11-15T08:46:23.410Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Guard is on the plate and the gate is open. Hopping over into the blue cat, who is right next to the plate on the right.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 12,
+   "status": "Back in the cat. Z to undo.",
+   "shot": "shot-0012.png"
+  },
+  {
+   "t": "2026-11-15T08:46:26.179Z",
+   "keys": [
+    "Right",
+    "Down",
+    "Down",
+    "Down"
+   ],
+   "note": "I'm the cat again. Going right, then down through the gate to the exit. The guard stays on the plate holding it open.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": true,
+   "turns": 16,
+   "status": "Out in 16 turns (par 10). Press N or tap Next level.",
+   "shot": "shot-0013.png"
+  },
+  {
+   "t": "2026-11-15T08:46:29.655Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Yes! Level 5 done. It took me 16 turns and the par was 10 so I wasted a bunch, whatever. On to the next one.",
+   "levelBefore": 5,
+   "level": 6,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0014.png"
+  },
+  {
+   "t": "2026-11-15T08:48:41.677Z",
+   "keys": [
+    "Down",
+    "Down",
+    "Right"
+   ],
+   "note": "This one is confusing, the cat is in the middle of the hallway and the red guy is in the way. I'm just going to mash and see what happens. Down Down then Right into the red guy.",
+   "levelBefore": 6,
+   "level": 6,
+   "won": false,
+   "turns": 3,
+   "status": "You are the guard now. Z to undo.",
+   "shot": "shot-0015.png"
+  },
+  {
+   "t": "2026-11-15T08:48:45.754Z",
+   "keys": [
+    "Right",
+    "Down",
+    "Right",
+    "Up"
+   ],
+   "note": "I'm the guard now. Going right, down under the blue cat, then right and up to grab the cat. Then I'll shove the cat out of the hallway, I guess that's what step aside means.",
+   "levelBefore": 6,
+   "level": 6,
+   "won": false,
+   "turns": 5,
+   "status": "Blocked: the cat can't walk through a wall.",
+   "shot": "shot-0016.png"
+  },
+  {
+   "t": "2026-11-15T08:48:58.375Z",
+   "keys": [
+    "Right",
+    "Right"
+   ],
+   "note": "The cat keeps getting stuck and the red guy is blocking the hallway. I've been moving for ages and I still don't get the trick. Last try going right with the cat.",
+   "levelBefore": 6,
+   "level": 6,
+   "won": false,
+   "turns": 7,
+   "status": "",
+   "shot": "shot-0017.png"
+  },
+  {
+   "t": "2026-11-15T08:49:02.182Z",
+   "keys": [
+    "ShiftN"
+   ],
+   "note": "Ugh, this one is way too hard for me, I don't get the whole swapping thing. Skipping it. Boring.",
+   "levelBefore": 6,
+   "level": 7,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0018.png"
+  },
+  {
+   "t": "2026-11-15T08:49:12.003Z",
+   "keys": [
+    "Left",
+    "Left",
+    "Left",
+    "Up",
+    "Right",
+    "Right"
+   ],
+   "note": "New tile is a vent that only the cat fits through. So the cat needs to go down the vent but the gate needs something heavy on the plate, and that has to be the red guy. I'm going to walk over, hop into him, and walk him onto the plate. Left, left, left, up to bump him.",
+   "levelBefore": 7,
+   "level": 7,
+   "won": false,
+   "turns": 6,
+   "status": "",
+   "shot": "shot-0019.png"
+  },
+  {
+   "t": "2026-11-15T08:49:15.861Z",
+   "keys": [
+    "Down",
+    "Down",
+    "Right",
+    "Right"
+   ],
+   "note": "I'm the guard now. Going down twice and then right onto the plate. Then I'll hop over into the blue cat that's right next to the plate.",
+   "levelBefore": 7,
+   "level": 7,
+   "won": false,
+   "turns": 10,
+   "status": "You are the cat now. Z to undo.",
+   "shot": "shot-0020.png"
+  },
+  {
+   "t": "2026-11-15T08:49:18.682Z",
+   "keys": [
+    "Down",
+    "Down",
+    "Down"
+   ],
+   "note": "I'm the cat now. Going down through the gate and down the vent to the exit. Hopefully the red guy is holding the gate open.",
+   "levelBefore": 7,
+   "level": 7,
+   "won": true,
+   "turns": 13,
+   "status": "Out in 13 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0021.png"
+  },
+  {
+   "t": "2026-11-15T08:49:21.753Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Yes, level 7 done at par. That one felt good, the vent thing made sense once I saw the cat fits. Next.",
+   "levelBefore": 7,
+   "level": 8,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0022.png"
+  },
+  {
+   "t": "2026-11-15T08:49:43.999Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Down",
+    "Down",
+    "Down"
+   ],
+   "note": "The guard is the only one who can cross the red bridge in the middle, I think. So I'm going to try walking the white circle down onto the bridge and see if I can hop into the red guy from there. Right, right, right, down, down, down.",
+   "levelBefore": 8,
+   "level": 8,
+   "won": false,
+   "turns": 4,
+   "status": "Blocked: the spirit can't pass a red block.",
+   "shot": "shot-0023.png"
+  },
+  {
+   "t": "2026-11-15T08:49:54.146Z",
+   "keys": [
+    "Left",
+    "Down"
+   ],
+   "note": "The white circle can't go on the bridge, it's a red block to me. So I'm going to hop into the blue cat next to me and try going down from there, mashing to see what the cat can reach.",
+   "levelBefore": 8,
+   "level": 8,
+   "won": false,
+   "turns": 5,
+   "status": "Blocked: the cat can't walk through a wall.",
+   "shot": "shot-0024.png"
+  },
+  {
+   "t": "2026-11-15T08:49:57.505Z",
+   "keys": [
+    "ShiftN"
+   ],
+   "note": "Level 8 is making me mad. The guard is stuck on the other side of the bridge and I can't get to him. Skipping.",
+   "levelBefore": 8,
+   "level": 9,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0025.png"
+  },
+  {
+   "t": "2026-11-15T08:50:16.129Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Down",
+    "Down",
+    "Right"
+   ],
+   "note": "Okay new level. The red guy holds the plate if he stands on it, and then the gates open. I'll walk over, grab the red guy, walk him onto the plate and then into the gate below it so the gate stays open, then hop into the blue cat. Right, right, down, down, then right to grab the cat.",
+   "levelBefore": 9,
+   "level": 9,
+   "won": false,
+   "turns": 5,
+   "status": "You are the cat now. Z to undo.",
+   "shot": "shot-0026.png"
+  },
+  {
+   "t": "2026-11-15T08:50:19.351Z",
+   "keys": [
+    "Up",
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "I'm the cat now. Going up, then right through the gate, through the vent and out to the exit. The guard is holding the gate open from the gate below.",
+   "levelBefore": 9,
+   "level": 9,
+   "won": true,
+   "turns": 9,
+   "status": "Out in 9 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0027.png"
+  },
+  {
+   "t": "2026-11-15T08:50:22.497Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Level 9 done at par! I liked that one, the gate that is also a plate thing clicked once I thought about it. Going to level 10.",
+   "levelBefore": 9,
+   "level": 10,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0028.png"
+  },
+  {
+   "t": "2026-11-15T08:50:38.669Z",
+   "keys": [
+    "Up",
+    "Up",
+    "Left",
+    "Right",
+    "Right",
+    "Down"
+   ],
+   "note": "The cat is stuck in the corner. I'm going to go up onto the plate, hop into the cat, walk it across the plate to the far side, then I need to bring the red guy onto the plate after the cat's gone. Up, up, left into the cat, right, right, then down into the guard.",
+   "levelBefore": 10,
+   "level": 10,
+   "won": false,
+   "turns": 6,
+   "status": "You are the guard now. Z to undo.",
+   "shot": "shot-0029.png"
+  },
+  {
+   "t": "2026-11-15T08:50:41.551Z",
+   "keys": [
+    "Left",
+    "Up"
+   ],
+   "note": "I'm the guard now. Going left, then up onto the plate so the gate opens, then I'll hop back into the cat which should be right next to me.",
+   "levelBefore": 10,
+   "level": 10,
+   "won": false,
+   "turns": 8,
+   "status": "The gate opens.",
+   "shot": "shot-0030.png"
+  },
+  {
+   "t": "2026-11-15T08:50:44.468Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "Gate is open with the guard on the plate. Hopping into the cat which is right next to the plate on the right side.",
+   "levelBefore": 10,
+   "level": 10,
+   "won": false,
+   "turns": 9,
+   "status": "Back in the cat. Z to undo.",
+   "shot": "shot-0031.png"
+  },
+  {
+   "t": "2026-11-15T08:50:47.319Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "I'm the cat again. Right through the gate, into the vent, and out to the exit, the guard keeps the gate open from the plate.",
+   "levelBefore": 10,
+   "level": 10,
+   "won": true,
+   "turns": 12,
+   "status": "Out in 12 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0032.png"
+  },
+  {
+   "t": "2026-11-15T08:50:50.695Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Level 10 done at par too. I'm having fun now. Let's see level 11.",
+   "levelBefore": 10,
+   "level": 11,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0033.png"
+  },
+  {
+   "t": "2026-11-15T08:51:11.688Z",
+   "keys": [
+    "Up",
+    "Down"
+   ],
+   "note": "There's two blue cats and the red guy is stuck under the blue bridge. I'm the white circle, the only thing I can do is bump the guard. Hopping into him and then trying to move him down.",
+   "levelBefore": 11,
+   "level": 11,
+   "won": false,
+   "turns": 2,
+   "status": "",
+   "shot": "shot-0034.png"
+  }
+ ]
+}
