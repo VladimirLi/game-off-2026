@@ -56,6 +56,7 @@
   #legend .row.list { flex-direction: column; align-items: flex-start; }
   #legend .item { display: inline-flex; align-items: center; gap: 3px; }
   #legend canvas { width: 20px; height: 20px; border-radius: 2px; background: none; flex: none; outline: 1px solid #3a3e46; }
+  #legend canvas.mark { width: 36px; height: 36px; }
   #legend p { margin: 6px 0 0; color: var(--dim); }
   #legendBtn { background: none; border: 1px solid #3a3e46; color: var(--dim); border-radius: 4px; padding: 2px 8px; font: inherit; font-size: 13px; cursor: pointer; }
   #levels button.done::after { content: " ✓"; color: var(--accent); }
@@ -249,18 +250,31 @@ function animate() {
 function mix(a, b, t) { return a.map((v, i) => Math.round(v + (b[i] - v) * t)); }
 function rgb(c, a = 1) { return `rgba(${c[0]},${c[1]},${c[2]},${a})`; }
 
+// The body you most recently hopped out of, or -1 (none yet, or the last hop was the spirit's, which leaves
+// no body). Read from the undo history, so undo, restart and a level change keep it right.
+function lastLeft() {
+  for (let i = history.length - 1; i >= 0; i--) {
+    const next = i === history.length - 1 ? s : history[i + 1];
+    if (history[i].ctrl !== next.ctrl) return history[i].ctrl;
+  }
+  return -1;
+}
+
 function draw() {
   const me = BH.current(L, s);
   const tint = mix(TINT[shiftFrom], TINT[me.t], shiftT);
   const gateOpen = BH.gateOpen(L, s), held = BH.platesHeld(L, s);
   g.clearRect(0, 0, cv.width, cv.height);
   for (let y = 0; y < L.h; y++) for (let x = 0; x < L.w; x++) drawTile(x, y, L.tiles[y][x], me.t, tint, gateOpen, held);
-  // Bodies
-  s.pos.forEach(([x, y], i) => drawBody(x, y, L.types[i], i === s.ctrl, me));
+  // Bodies. The body you most recently hopped out of carries a footprint, so walking back into it is never a surprise.
+  const left = lastLeft();
+  s.pos.forEach(([x, y], i) => drawBody(x, y, L.types[i], i === s.ctrl, i === left));
   if (s.ctrl < 0) drawSpirit(s.sx, s.sy);
-  // Hop affordance: a small chevron toward each adjacent body.
-  for (const [dx, dy] of Object.values(BH.DIRS)) {
-    if (BH.bodyAt(s, me.x + dx, me.y + dy) >= 0) chevron(me.x, me.y, dx, dy);
+  // Hop targets: every body next to you, which your next press that way hops into. Yellow corner
+  // brackets on its tile and an arrow on the shared edge (shape, not colour, tells them from the
+  // white "you" outline, the green plate and gate frames and the red blocked flash).
+  if (!won) for (const [dx, dy] of Object.values(BH.DIRS)) {
+    if (BH.bodyAt(s, me.x + dx, me.y + dy) >= 0) { hopCorners(me.x + dx, me.y + dy); hopArrow(me.x, me.y, dx, dy); }
   }
   if (flash && performance.now() - flash.t < 250) {
     const [dx, dy] = BH.DIRS[flash.dir];
@@ -306,9 +320,17 @@ function drawTile(x, y, ch, who, tint, gateOpen, held) {
     case "D":
       floor(); g.fillStyle = "#8a5a2b"; g.fillRect(px + 6, py + 4, T - 12, T - 8);
       g.fillStyle = "#e0b040"; g.beginPath(); g.arc(px + T / 2, py + T / 2 - 4, 5, 0, 7); g.fill(); g.fillRect(px + T / 2 - 2, py + T / 2, 4, 10); return;
-    case "V":
-      floor(); g.fillStyle = "#555a63"; g.fillRect(px + 6, py + 6, T - 12, T - 12);
-      g.fillStyle = "#23252a"; for (let i = 0; i < 5; i++) g.fillRect(px + 10, py + 11 + i * 8, T - 20, 4); return;
+    case "V": {
+      // A vent is round: a grey rim around a dark hole with horizontal slats. A gate is square with
+      // vertical bars, so the two never look alike, whatever the colours.
+      floor();
+      const cx = px + T / 2, cy = py + T / 2, r = T / 2 - 8;
+      g.fillStyle = "#8a909a"; g.beginPath(); g.arc(cx, cy, r + 4, 0, 7); g.fill();
+      g.fillStyle = "#16181c"; g.beginPath(); g.arc(cx, cy, r, 0, 7); g.fill();
+      g.save(); g.beginPath(); g.arc(cx, cy, r, 0, 7); g.clip();
+      g.fillStyle = "#5d636d"; for (let i = -2; i <= 2; i++) g.fillRect(cx - r, cy + i * 8 - 2, 2 * r, 4);
+      g.restore(); return;
+    }
     case "_": {
       floor();
       // A wide frame, so a plate stays visible around a body standing on it (a body covers the middle).
@@ -330,7 +352,12 @@ function drawTile(x, y, ch, who, tint, gateOpen, held) {
       if (!gateOpen) { g.fillStyle = "rgba(0,0,0,0.35)"; g.fillRect(px + 6, py + 9, T - 12, T - 11); }
       g.fillStyle = col; g.fillRect(px + 1, py + 1, 5, T - 2); g.fillRect(px + T - 6, py + 1, 5, T - 2); g.fillRect(px + 1, py + 1, T - 2, 8);
       g.strokeStyle = col; g.lineWidth = 4;
-      for (let i = 0; i < 4; i++) { const gx = px + 12 + i * 10.7; g.beginPath(); g.moveTo(gx, py + 8); g.lineTo(gx, gateOpen ? py + 15 : py + T - 2); g.stroke(); }
+      for (let i = 0; i < 4; i++) {
+        const gx = px + 12 + i * 10.7;
+        g.beginPath(); g.moveTo(gx, py + 8); g.lineTo(gx, gateOpen ? py + 15 : py + T - 10); g.stroke();
+        // Shut, each bar ends in a spike near the floor (a portcullis), unlike the round, slatted vent.
+        if (!gateOpen) { g.fillStyle = col; g.beginPath(); g.moveTo(gx - 4, py + T - 11); g.lineTo(gx + 4, py + T - 11); g.lineTo(gx, py + T - 3); g.fill(); }
+      }
       if (gateOpen) { g.fillStyle = "rgba(127,210,127,0.5)"; g.fillRect(px + 6, py + T - 4, T - 12, 3); } // lit threshold
       return;
     }
@@ -352,7 +379,7 @@ function ghost(px, py, col) {
   g.strokeRect(px + 5, py + 5, T - 10, T - 10); g.restore();
 }
 
-function drawBody(x, y, t, active, me) {
+function drawBody(x, y, t, active, last) {
   const px = x * T, py = y * T, cx = px + T / 2, cy = py + T / 2;
   const col = t === "G" ? RED : BLUE;
   const size = t === "G" ? T - 14 : T - 24; // the cat is small (it fits in vents)
@@ -363,6 +390,23 @@ function drawBody(x, y, t, active, me) {
   g.globalAlpha = 1;
   if (active) { g.strokeStyle = "#fff"; g.lineWidth = 3; g.strokeRect(cx - size / 2 - 4, cy - size / 2 - 4, size + 8, size + 8); }
   else { g.fillStyle = "rgba(255,255,255,0.8)"; g.font = "bold 12px system-ui"; g.fillText("z", px + T - 9, py + 10); }
+  if (last) footprint(px, py);
+}
+
+// The body you just hopped out of: a white disc with a dark footprint in the top-left corner of its tile.
+// A shape, not a word, so it reads on a phone (the board can scale to about 0.65). It sits on the tile
+// diagonal, where nothing else is drawn: the yellow hop arrows sit at the middle of an edge and narrow
+// toward the tile centre, the hop corner brackets hug the tile corners, and the "z" is top right.
+// Disc centre (16.5, 16.5), radius 9.5: at least 1 px clear of every arrow and corner bracket, each with its
+// dark edge and line cap (the arrow from the top or left edge and the near bracket are the tightest).
+function footprint(px, py) {
+  const cx = px + 16.5, cy = py + 16.5;
+  g.fillStyle = "rgba(0,0,0,0.75)"; g.beginPath(); g.arc(cx, cy, 9.5, 0, 7); g.fill();
+  g.fillStyle = "#fff"; g.beginPath(); g.arc(cx, cy, 8, 0, 7); g.fill();
+  g.fillStyle = "#1d1f24"; // a left foot: sole, heel, toes
+  for (const [x, y, r] of [[0.6, -1.4, 3], [-0.4, 0.8, 2.6], [-0.8, 3.8, 2.2], [-1.1, -5.2, 1.2], [1.1, -5.3, 1.05], [3, -4.3, 0.95]]) {
+    g.beginPath(); g.arc(cx + x, cy + y, r, 0, 7); g.fill();
+  }
 }
 
 function drawSpirit(x, y) {
@@ -371,22 +415,40 @@ function drawSpirit(x, y) {
   g.strokeStyle = "rgba(255,255,255,0.4)"; g.lineWidth = 2; g.beginPath(); g.arc(cx, cy, T / 4 + 6, 0, 7); g.stroke();
 }
 
-function chevron(x, y, dx, dy) {
-  const cx = x * T + T / 2 + dx * T * 0.5, cy = y * T + T / 2 + dy * T * 0.5;
-  g.fillStyle = "rgba(255,255,255,0.85)"; g.beginPath();
-  const a = Math.atan2(dy, dx), r = 7;
+// Hop target marks, in HOP yellow with a dark edge so they read on any tile (a light plate, a red block).
+const HOP = "#f0d060";
+function hopCorners(x, y) {
+  const a = 3, b = T - 3, n = 11, px = x * T, py = y * T;
+  const path = () => {
+    g.beginPath();
+    for (const [cx, cy, sx, sy] of [[a, a, 1, 1], [b, a, -1, 1], [a, b, 1, -1], [b, b, -1, -1]]) {
+      g.moveTo(px + cx + sx * n, py + cy); g.lineTo(px + cx, py + cy); g.lineTo(px + cx, py + cy + sy * n);
+    }
+  };
+  g.save(); g.lineCap = "square";
+  path(); g.strokeStyle = "rgba(0,0,0,0.75)"; g.lineWidth = 6; g.stroke();
+  path(); g.strokeStyle = HOP; g.lineWidth = 3; g.stroke();
+  g.restore();
+}
+// An arrow on the edge between you (x, y) and the body in direction (dx, dy), pointing into it.
+function hopArrow(x, y, dx, dy) {
+  const cx = x * T + T / 2 + dx * (T / 2 + 3), cy = y * T + T / 2 + dy * (T / 2 + 3);
+  const a = Math.atan2(dy, dx), r = 9;
+  g.save(); g.beginPath();
   g.moveTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
-  g.lineTo(cx + Math.cos(a + 2.4) * r, cy + Math.sin(a + 2.4) * r);
-  g.lineTo(cx + Math.cos(a - 2.4) * r, cy + Math.sin(a - 2.4) * r);
-  g.fill();
+  g.lineTo(cx + Math.cos(a + 2.3) * r, cy + Math.sin(a + 2.3) * r);
+  g.lineTo(cx + Math.cos(a - 2.3) * r, cy + Math.sin(a - 2.3) * r);
+  g.closePath();
+  g.lineJoin = "round"; g.strokeStyle = "rgba(0,0,0,0.75)"; g.lineWidth = 3; g.stroke();
+  g.fillStyle = HOP; g.fill(); g.restore();
 }
 
 // ---------- legend ----------
 // An HTML overlay on the board. Each body's rows draw the tiles exactly as that body sees them.
 const LEGEND_BODIES = [
-  { t: "S", title: "Spirit (white circle): sees no colour, so a red block or blue block is fog to it (grey bands) that it can't pass; weighs nothing on plates",
+  { t: "S", title: "Spirit (white circle): sees no colour, so every red or blue block is fog (grey bands), and fog is a wall to the spirit; weighs nothing on plates",
     can: [[".", "floor"], ["_", "plate"], ["E", "exit"], ["|o", "open gate"]],
-    cannot: [["R", "red block"], ["B", "blue block"], ["r", "red bridge"], ["b", "blue bridge"], ["D", "locked door"], ["V", "vent"], ["~", "pit"], ["|", "shut gate"]] },
+    cannot: [["R", "red block (fog: a wall to the spirit)"], ["B", "blue block (fog: a wall to the spirit)"], ["r", "red bridge"], ["b", "blue bridge"], ["D", "locked door"], ["V", "vent"], ["~", "pit"], ["|", "shut gate"]] },
   { t: "G", title: "Guard (big red G): sees red, not blue; carries the key",
     can: [["B", "blue block"], ["r", "red bridge"], ["D", "locked door"]], also: "floor, plates, open gates, exit",
     cannot: [["R", "red block"], ["b", "blue bridge"], ["V", "vent"], ["~", "pit"], ["|", "shut gate"]] },
@@ -394,11 +456,16 @@ const LEGEND_BODIES = [
     can: [["R", "red block"], ["b", "blue bridge"], ["V", "vent"]], also: "floor, plates, open gates, exit",
     cannot: [["B", "blue block"], ["r", "red bridge"], ["D", "locked door"], ["~", "pit"], ["|", "shut gate"]] },
 ];
-const LEGEND_TILES = [["V", "vent (grey grille): cat only"], ["D", "locked door: guard only"],
+const LEGEND_TILES = [["V", "vent (round grey grille, flat slats): cat only"], ["D", "locked door: guard only"],
   ["_", "plate, up (grey): no body on it. The spirit weighs nothing"],
   ["_h", "plate, held (lit green): a body stands on it, so every gate is open"],
-  ["|", "gate, shut (grey bars down): no body on a plate"],
+  ["|", "gate, shut (square frame, grey spiked bars down): no body on a plate"],
   ["|o", "gate, open (lit green, bars up): while any plate is held, or a body stands in any gate"]];
+// Board markers. "@x" items draw a marker icon instead of a tile.
+const LEGEND_MARKS = [["@you", "white outline: the body you are in"],
+  ["@sleep", "z: an asleep body. It blocks the way"],
+  ["@last", "footprint (top left): the body you just hopped out of"],
+  ["@hop", "yellow corners and arrow: your next step that way hops into this body"]];
 let legendOpen = false;
 
 function tileIcon(ch, who) {
@@ -410,13 +477,25 @@ function tileIcon(ch, who) {
   return c;
 }
 
+// A marker icon for the legend: a guard on floor, drawn as the board draws it.
+function markerIcon(kind) {
+  const c = document.createElement("canvas"); c.width = c.height = T; c.className = "mark";
+  const keep = g; g = c.getContext("2d");
+  try {
+    drawTile(0, 0, ".", "S", TINT.S, false, false);
+    drawBody(0, 0, "G", kind === "you", kind === "last");
+    if (kind === "hop") { hopCorners(0, 0); hopArrow(-1, 0, 1, 0); }
+  } finally { g = keep; }
+  return c;
+}
+
 function legendRow(label, items, who, also) {
   const row = document.createElement("div"); row.className = "row";
   if (label) { const head = document.createElement("span"); head.className = "lbl"; head.textContent = label; row.appendChild(head); }
   else row.classList.add("list");
   for (const [ch, name] of items) {
     const it = document.createElement("span"); it.className = "item";
-    it.appendChild(tileIcon(ch, who)); it.appendChild(document.createTextNode(name)); row.appendChild(it);
+    it.appendChild(ch[0] === "@" ? markerIcon(ch.slice(1)) : tileIcon(ch, who)); it.appendChild(document.createTextNode(name)); row.appendChild(it);
   }
   if (also) { const a = document.createElement("span"); a.textContent = "and " + also; row.appendChild(a); }
   return row;
@@ -436,9 +515,11 @@ function buildLegend() {
   }
   const tw = document.createElement("div"); tw.className = "who"; tw.textContent = "Special tiles";
   box.append(tw, legendRow("", LEGEND_TILES, "S"));
+  const mk = document.createElement("div"); mk.className = "who"; mk.textContent = "Bodies on the board";
+  box.append(mk, legendRow("", LEGEND_MARKS, "S"));
   const p = document.createElement("p");
   p.textContent = "Each tile is drawn as that body sees it: a dashed outline is not there for that body. " +
-    "Sleeping bodies block the way. Walk into a body to hop into it; Z undoes a hop.";
+    "Walk into a body to hop into it; Z undoes a hop.";
   box.appendChild(p);
 }
 

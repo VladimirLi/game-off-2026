@@ -1,0 +1,538 @@
+{
+ "session": "theo",
+ "filter": null,
+ "started": "2026-11-14T11:32:01.944Z",
+ "calls": [
+  {
+   "t": "2026-11-14T11:32:02.602Z",
+   "keys": [
+    "Up",
+    "Down",
+    "Left",
+    "Right"
+   ],
+   "note": "Okay, the game started. I'm just mashing arrow keys to see what happens. Let's see what moves.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 3,
+   "status": "",
+   "shot": "shot-0000.png"
+  },
+  {
+   "t": "2026-11-14T11:32:08.597Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Up"
+   ],
+   "note": "The white circle is me. The red G guard is up and to the right. I'm just going for it, walking right and then up into the G.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 6,
+   "status": "You are the guard now. Z to undo.",
+   "shot": "shot-0001.png"
+  },
+  {
+   "t": "2026-11-14T11:32:11.517Z",
+   "keys": [
+    "Down",
+    "Right",
+    "Right"
+   ],
+   "note": "I'm the guard now, the key is with me. I think I need to open the brown door next to me. I'll try going down then right through it.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": false,
+   "turns": 9,
+   "status": "",
+   "shot": "shot-0002.png"
+  },
+  {
+   "t": "2026-11-14T11:32:16.399Z",
+   "keys": [
+    "Right"
+   ],
+   "note": "The guard is next to the EXIT now. I'll just walk right into it.",
+   "levelBefore": 1,
+   "level": 1,
+   "won": true,
+   "turns": 10,
+   "status": "Out in 10 turns (par 8). Press N or tap Next level.",
+   "shot": "shot-0003.png"
+  },
+  {
+   "t": "2026-11-14T11:32:18.906Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Yes, first one done! Going to the next one with N.",
+   "levelBefore": 1,
+   "level": 2,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0004.png"
+  },
+  {
+   "t": "2026-11-14T11:32:24.578Z",
+   "keys": [
+    "Down",
+    "Down",
+    "Right",
+    "Right"
+   ],
+   "note": "New level. The guard G has the key, so I want to hop into it. I'm the white circle, going down and then right at the guard. Mashing it.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 4,
+   "status": "You are the guard now. Z to undo.",
+   "shot": "shot-0005.png"
+  },
+  {
+   "t": "2026-11-14T11:32:30.429Z",
+   "keys": [
+    "Right",
+    "Right"
+   ],
+   "note": "I'm the guard now. The door is right there so I'll just go through it. Red blocks look like walls to me, so I'll see where it goes.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 6,
+   "status": "",
+   "shot": "shot-0006.png"
+  },
+  {
+   "t": "2026-11-14T11:32:36.106Z",
+   "keys": [
+    "Up",
+    "Up"
+   ],
+   "note": "The red wall blocks me from the exit, guard can't go through red. I think I need the cat, it can walk through red since it can't see it. Going up to the blue C.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": false,
+   "turns": 8,
+   "status": "You are the cat now. Z to undo.",
+   "shot": "shot-0007.png"
+  },
+  {
+   "t": "2026-11-14T11:32:39.810Z",
+   "keys": [
+    "Right",
+    "Down",
+    "Down",
+    "Right"
+   ],
+   "note": "I'm the cat now. The red stuff is just dashed lines for me, so I should walk right through it to the exit. Going right, down, down, right.",
+   "levelBefore": 2,
+   "level": 2,
+   "won": true,
+   "turns": 12,
+   "status": "Out in 12 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0008.png"
+  },
+  {
+   "t": "2026-11-14T11:32:42.959Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Got it, par exactly. The cat walked right through the red. Next!",
+   "levelBefore": 2,
+   "level": 3,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0009.png"
+  },
+  {
+   "t": "2026-11-14T11:32:50.389Z",
+   "keys": [
+    "Down",
+    "Right",
+    "Right",
+    "Right",
+    "Right",
+    "Down",
+    "Down"
+   ],
+   "note": "Level 3. Going to grab the guard with the key first, then through the door, then I'll hop into the cat which is down there by the blue bridge. Just going.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": false,
+   "turns": 7,
+   "status": "You are the cat now. Z to undo.",
+   "shot": "shot-0010.png"
+  },
+  {
+   "t": "2026-11-14T11:32:54.723Z",
+   "keys": [
+    "Right",
+    "Down",
+    "Right"
+   ],
+   "note": "I'm the cat now, the blue stripes are a bridge for me. Walking across it, then down and right at the EXIT. Pretty sure this is it.",
+   "levelBefore": 3,
+   "level": 3,
+   "won": true,
+   "turns": 10,
+   "status": "Out in 10 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0011.png"
+  },
+  {
+   "t": "2026-11-14T11:32:57.375Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Level 3 done, par again. I didn't even think about the door, the key thing didn't matter. Next.",
+   "levelBefore": 3,
+   "level": 4,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0012.png"
+  },
+  {
+   "t": "2026-11-14T11:33:08.457Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "Level 4. The EXIT is up top past a black gap and a door. I'll hop into the guard next to the wall first, that's the nearest body. Mashing right.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": false,
+   "turns": 3,
+   "status": "You are the guard now. Z to undo.",
+   "shot": "shot-0013.png"
+  },
+  {
+   "t": "2026-11-14T11:33:12.161Z",
+   "keys": [
+    "Down",
+    "Down"
+   ],
+   "note": "I'm the guard now next to the black gap. The exit is at the top right past the gap, so I'm going down to see how to get around it.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": false,
+   "turns": 5,
+   "status": "",
+   "shot": "shot-0014.png"
+  },
+  {
+   "t": "2026-11-14T11:33:21.061Z",
+   "keys": [
+    "Left",
+    "Down",
+    "Down",
+    "Right"
+   ],
+   "note": "Red blocks me going right, and the dashed bit is a cat bridge so I can't cross it. The cat is down there at the bottom. I'll go around through the door below and hop into the cat.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": false,
+   "turns": 9,
+   "status": "You are the cat now. Z to undo.",
+   "shot": "shot-0015.png"
+  },
+  {
+   "t": "2026-11-14T11:33:24.513Z",
+   "keys": [
+    "Up",
+    "Up",
+    "Right",
+    "Right",
+    "Up",
+    "Up"
+   ],
+   "note": "I'm the cat now. The cat walks through red for me, so going up, across the dashed bridge, then up through the door to the EXIT. Let's see if the door stops me.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": false,
+   "turns": 13,
+   "status": "Blocked: only a guard can open the locked door.",
+   "shot": "shot-0016.png"
+  },
+  {
+   "t": "2026-11-14T11:33:30.798Z",
+   "keys": [
+    "Right",
+    "Up",
+    "Left",
+    "Up"
+   ],
+   "note": "The locked door only opens for a guard. The other guard is up and to the right of the cat, so I'll step right, hop up into that guard, then go left through the door and up to the EXIT.",
+   "levelBefore": 4,
+   "level": 4,
+   "won": true,
+   "turns": 17,
+   "status": "Out in 17 turns (par!). Chapter complete: Eyes. Press N for Leftovers.",
+   "shot": "shot-0017.png"
+  },
+  {
+   "t": "2026-11-14T11:33:33.774Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Level 4 done at par 17. Chapter Eyes complete, now Leftovers. Pressing N.",
+   "levelBefore": 4,
+   "level": 5,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0018.png"
+  },
+  {
+   "t": "2026-11-14T11:34:06.635Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Left",
+    "Left",
+    "Down"
+   ],
+   "note": "Level 5 Paperweight. The gate is between me and exit and a plate holds it open. Plan: hop into the guard, walk the guard onto the plate, then hop from the guard into the cat so the guard stays on the plate and the cat walks through. Let's try.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": false,
+   "turns": 6,
+   "status": "You are the cat now. Z to undo.",
+   "shot": "shot-0019.png"
+  },
+  {
+   "t": "2026-11-14T11:34:11.103Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Down",
+    "Down"
+   ],
+   "note": "It worked! The guard is sitting on the plate and the gate is green. I'm the cat now so I just walk right, down through the open gate, and down to the exit.",
+   "levelBefore": 5,
+   "level": 5,
+   "won": true,
+   "turns": 10,
+   "status": "Out in 10 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0020.png"
+  },
+  {
+   "t": "2026-11-14T11:34:14.262Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Level 5 solved at par 10. That one took some thinking, I had to hop twice so the guard stayed on the plate. Next.",
+   "levelBefore": 5,
+   "level": 6,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0021.png"
+  },
+  {
+   "t": "2026-11-14T11:34:30.546Z",
+   "keys": [
+    "Down",
+    "Down",
+    "Right",
+    "Right",
+    "Right",
+    "Down",
+    "Left",
+    "Up"
+   ],
+   "note": "Level 6. The cat is blocking the guard's hallway. Plan: hop into guard, hop into cat, step the cat down and left onto the red so it's below the guard, then hop back up into the guard and run it to the door and exit.",
+   "levelBefore": 6,
+   "level": 6,
+   "won": false,
+   "turns": 8,
+   "status": "Back in the guard. Z to undo.",
+   "shot": "shot-0022.png"
+  },
+  {
+   "t": "2026-11-14T11:34:36.347Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right",
+    "Down",
+    "Down"
+   ],
+   "note": "I'm the guard again, the cat is down below on the red. Hallway is clear, so run right, then down through the locked door and out.",
+   "levelBefore": 6,
+   "level": 6,
+   "won": true,
+   "turns": 13,
+   "status": "Out in 13 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0023.png"
+  },
+  {
+   "t": "2026-11-14T11:34:38.926Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Level 6 done at par 13. Good, that was just like a puzzle. Next level.",
+   "levelBefore": 6,
+   "level": 7,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0024.png"
+  },
+  {
+   "t": "2026-11-14T11:34:49.220Z",
+   "keys": [
+    "Up",
+    "Left",
+    "Left",
+    "Left",
+    "Right",
+    "Right",
+    "Right",
+    "Down",
+    "Down"
+   ],
+   "note": "Level 7. The vent only fits a cat, and the gate is above it. So the cat goes through and the guard has to sit on the plate to keep the gate open. Going to the guard in the corner, then walking it down to the plate.",
+   "levelBefore": 7,
+   "level": 7,
+   "won": false,
+   "turns": 9,
+   "status": "The gate opens.",
+   "shot": "shot-0025.png"
+  },
+  {
+   "t": "2026-11-14T11:34:52.843Z",
+   "keys": [
+    "Right",
+    "Down",
+    "Down",
+    "Down"
+   ],
+   "note": "The gate opened, so the guard is holding the plate. I'll hop from the guard into the cat next to it, and the guard stays on the plate. Then the cat goes down through the gate, the vent, and out.",
+   "levelBefore": 7,
+   "level": 7,
+   "won": true,
+   "turns": 13,
+   "status": "Out in 13 turns (par!). Press N or tap Next level.",
+   "shot": "shot-0026.png"
+  },
+  {
+   "t": "2026-11-14T11:34:55.896Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Level 7 done, par 13. I'm getting the hang of hopping and parking the guard on the plate. Next.",
+   "levelBefore": 7,
+   "level": 8,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0027.png"
+  },
+  {
+   "t": "2026-11-14T11:35:36.259Z",
+   "keys": [
+    "Right",
+    "Down",
+    "Right",
+    "Right",
+    "Down",
+    "Down",
+    "Left"
+   ],
+   "note": "Level 8. Bucket brigade. Plan: hop into the cat up top, walk it down over the red into the guard, then swap so a second cat sits on the plate, then the first cat runs round to the exit. Doing the first bit.",
+   "levelBefore": 8,
+   "level": 8,
+   "won": false,
+   "turns": 7,
+   "status": "You are the cat now. Z to undo.",
+   "shot": "shot-0028.png"
+  },
+  {
+   "t": "2026-11-14T11:35:42.616Z",
+   "keys": [
+    "Down",
+    "Right",
+    "Up",
+    "Up",
+    "Up",
+    "Right",
+    "Right",
+    "Down",
+    "Down"
+   ],
+   "note": "Okay I'm the cat on the left next to the guard, which is good. Going down and onto the plate with this cat, then up into the guard, up into the top cat, and the top cat runs around to the exit.",
+   "levelBefore": 8,
+   "level": 8,
+   "won": true,
+   "turns": 16,
+   "status": "Out in 16 turns (par!). Chapter complete: Leftovers. Press N for Gates.",
+   "shot": "shot-0029.png"
+  },
+  {
+   "t": "2026-11-14T11:35:45.403Z",
+   "keys": [
+    "N"
+   ],
+   "note": "Level 8 at par 16, chapter Leftovers complete. Now there are Gates. Pressing N.",
+   "levelBefore": 8,
+   "level": 9,
+   "won": false,
+   "turns": 0,
+   "status": "",
+   "shot": "shot-0030.png"
+  },
+  {
+   "t": "2026-11-14T11:35:58.446Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Down",
+    "Right"
+   ],
+   "note": "Level 9, two gates. The cat is already in the green gate square next to the exit path. I'll hop into the guard, walk it down, and hop into the cat, then run the cat right to the exit.",
+   "levelBefore": 9,
+   "level": 9,
+   "won": false,
+   "turns": 4,
+   "status": "You are the cat now. Z to undo.",
+   "shot": "shot-0031.png"
+  },
+  {
+   "t": "2026-11-14T11:36:03.984Z",
+   "keys": [
+    "Right",
+    "Right",
+    "Right"
+   ],
+   "note": "I'm the cat now. Running right toward the EXIT, the gate in front of me should be open.",
+   "levelBefore": 9,
+   "level": 9,
+   "won": false,
+   "turns": 5,
+   "status": "Blocked: the gate is shut. A body on a plate opens it.",
+   "shot": "shot-0032.png"
+  },
+  {
+   "t": "2026-11-14T11:37:45.779Z",
+   "keys": [
+    "Left",
+    "Down",
+    "Left",
+    "Up"
+   ],
+   "note": "Ugh, I walked off the plate by accident and the gate shut. I'm the cat again. Let me try the vent: step onto the plate, down into the vent, then left and up into the guard. Mashing it to see.",
+   "levelBefore": 9,
+   "level": 9,
+   "won": false,
+   "turns": 9,
+   "status": "Back in the guard. Z to undo.",
+   "shot": "shot-0033.png"
+  }
+ ]
+}
