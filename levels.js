@@ -25,10 +25,10 @@
     },
     {
       name: "Dashed means not there",
-      teaches: "the guard sees red, so a red block is a wall to it (and fog to you); the cat can't see red, so to the cat it is a dashed outline that isn't there",
+      teaches: "a red block is a wall to the guard (it sees red) and to you (fog is a wall to the spirit); the cat can't see red, so to the cat it is a dashed outline that isn't there",
       aha: "The red wall that stopped me, and stopped the guard, is only a dashed outline to the cat, so the cat walks straight through it.",
       wrong: "A wall is a wall for everyone (dashed means wall).",
-      hint: "The guard sees red, so red blocks are walls to it, and fog to you. The cat can't see red: to the cat they are only dashed outlines.",
+      hint: "Red blocks are walls to you (fog) and to the guard (it sees red). The cat can't see red: to the cat they are only dashed outlines.",
       map: [
         "#########",
         "#S..RCR.#",
@@ -225,7 +225,7 @@
       aha: "The cat above you must end up on the plate, and the only body that can take control back from it there is the guard. So the spirit's one hop goes to the guard: walk across the plate (you weigh nothing) and wake it first. The guard then walks the cat onto the plate, takes control back, and carries it down the side to the cat at the bottom.",
       wrong: "The nearest body is the right first hop; the guard, being nearest the plate, should hold it.",
       trap: "Press Up and hop into the cat right above you. Dead end: firstHop(cat C1) is unsolvable from the start, while firstHop(guard G0) solves in 25. Second trap, 'the guard holds the plate': with no cat ever allowed on the plate the level is unsolvable.",
-      hint: "After your first hop, who will be next to whom?",
+      hint: "Before your first hop, plan ahead: who will later need to stand next to whom, and where?",
       map: [
         "########",
         "###_..G#",
