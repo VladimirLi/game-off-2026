@@ -6,7 +6,7 @@ This is a browser game in plain HTML and JavaScript. It needs no build step and 
 
 ## Run
 
-Open `index.html` in a browser (double-click works). `index.html?level=7` opens a level directly.
+Open `index.html` in a browser (double-click works). `index.html?level=7` opens a level directly. To deploy, copy `index.html`, `engine.js`, `levels.js` and `audio.js` together (or build one self-contained page with `node tools/build-page.js out.html`, which inlines all three scripts).
 
 ## Controls
 
@@ -15,6 +15,7 @@ Open `index.html` in a browser (double-click works). `index.html?level=7` opens 
 - **N:** next level, after a win. **Shift+N:** skip a level (playtest aid; it logs SKIPPED).
 - **L** (or the legend button in the footer): open the legend over the board. For each body it lists the tiles it can and cannot pass, drawn as that body sees them, it names the special tiles (wall, pit, vent, locked door, plate, gate, plus a body on a held plate next to a body in an open gate, so the two can be compared), and it shows the body markers (your white outline, "z" for asleep, the footprints and the yellow hop corners). It lies over the board (on a small board it may also cover the status line, never the touch pad) and scrolls inside itself if it does not fit. Press L again, or click or tap anywhere on it, to close it. While it is open every other game input (arrow, Z, R, N, Shift+N, a level button or a touch pad button) only closes it and does nothing else, so nothing happens on a board you cannot see. The status line then says so: "Legend closed. Press again to move." (or "to undo", "to restart", "for the next level", "to skip this level", "to go to level N"; the button for the level you are on says "to restart"; after a win an arrow gives "Legend closed. Press N for the next level.", and a key that would do nothing anyway just "Legend closed.", such as Z, R or the current level's button at turn 0). L and a click on the legend close it without a message.
 - **Touch:** on a phone or tablet an arrow pad and Undo, Restart and Next level buttons appear under the board. Tap an arrow to move or hop. On a laptop, the "Touch controls" button in the footer shows them too.
+- **M** (or the "Music on/off" button in the footer): music on or off. The "Sound on/off" button switches the sound effects. Both are saved on this machine. M is not a game input, so it never closes the legend.
 - The level buttons under the board jump to any level. A tick means solved on this machine.
 
 The body you are in has a white outline; every other body is asleep (a small "z"). Walking into a body always hops into it, so the board marks before you press which steps would hop: every body next to you gets yellow corner brackets on its tile and a yellow arrow on the edge between you, pointing into it (both have a dark edge, so they read on any tile). The body you most recently hopped out of carries a pair of white footprints with a dark edge in the top-left corner of its tile, so walking back into it is never a surprise, and the hop's status line says so (see below). Two feet replaced a single foot on a white disc: one AI persona (theo, round 6) read that as "a little white dot", and another (ruth, round 5) saw "a small circle" she did not understand at first. It is a shape, not a word, so it still reads on a phone, where the widest board scales to about 0.65; it sits on the tile diagonal, where it never touches a hop arrow (edge middles), a corner bracket or the "z" (top right). The footprints move to the new body on every hop, come back with undo, and are gone after a restart or a level change (a hop out of the spirit leaves no footprints: the spirit leaves no body). These marks differ from the white "you" outline, the green plate and gate frames and the red blocked flash by shape (corners, arrow, footprints), not by colour alone. After a win the hop marks are hidden. Things your current body cannot see are drawn as a dashed outline in their colour, so you still know they are there for others. The spirit sees no colour, so it can pass nothing coloured: it sees a red block or blue block in its full colour under grey diagonal bands (fog), and fog is a wall to the spirit. The legend says so: "red block (fog: a wall to the spirit)". The header names your body and what it sees: "guard: sees red, not blue", "cat: sees blue, not red", "spirit: sees no colour". The label keeps one width for every body, so a hop never moves the turn counter or the board. The legend and the messages always say "red block" and "blue block". The whole board takes on the tint of the body you are in, and the tint cross-fades on every hop.
@@ -101,7 +102,31 @@ The checks a level can declare: `needs:G` and `needs:C` (unsolvable without hopp
 
 `tools/analyze-playtest.js` replays each session's keys through the engine, with the legend modelled as the page does it (while open, any key but L only closes it). Sessions played before 14 Nov 2026 (every run in `playtests/` up to `2026-11-14-r1`) were on a build where keys still acted under the legend: add `--old-legend` for those.
 
-`tools/bot.js` uses Playwright. It replays the solver's route for each level as real key presses, checks the game reports a win in exactly par turns, then undoes every turn and checks it is back at the start. It also fails on any page error.
+`tools/bot.js` uses Playwright. It replays the solver's route for each level as real key presses, checks the game reports a win in exactly par turns, and checks that `window.BodyHopAudio.log` holds a `win` cue and, when the route hops, a `hop:` cue (it reads which cues were requested; it can't hear them). Then it undoes every turn and checks it is back at the start. It also fails on any page error.
+
+## Sound
+
+All sound is made in code by `audio.js`: no audio files, nothing downloaded. Browsers allow sound only after a user gesture, so it starts on the first key press, click or tap. It pauses while the tab is hidden.
+
+**Sound effects** are [ZzFX](https://github.com/KilledByAPixel/ZzFX) sounds (by Frank Force, MIT licence; its notice is kept in `audio.js`). Each is a parameter array in the `SOUNDS` table at the top of `audio.js`, and `CUES` maps game events to them. A walk plays the step plus at most one extra, the most specific one (gate change, then plate, then door, vent or unseen block).
+
+| Cue | When |
+|---|---|
+| `step:S`, `step:G`, `step:C` | a walk: a soft breath for the spirit, a low thud for the guard, a light patter for the cat (slightly different pitch every time) |
+| `hop:G`, `hop:C` | a hop: a whoosh that lands on a low D (guard) or a high D (cat); `hop:G:back` and `hop:C:back` ("Back in the ...") land on the D and rise to the A |
+| `blocked` | a refused press: a soft dull bump |
+| `gate-open`, `gate-shut` | the gates open (rising) or shut (falling) |
+| `plate-down`, `plate-up` | a body steps onto a plate, or off it |
+| `plate-ghost` | the spirit on a plate ("You weigh nothing"): a faint hollow tick |
+| `shimmer` | the cat walks into red, or the guard into blue |
+| `door`, `vent` | the guard through a locked door (key click), the cat into a vent (tinny echo) |
+| `win`, `start`, `restart`, `undo`, `ui` | a low D major arpeggio (D3 to D4) over a gentle swell of the music, a soft low level-start chime (A3, D4), a rewind sweep, a descending blip, a very quiet tick (legend, level buttons, sound switches) |
+
+To tune a sound, paste its array into the [ZzFX designer](https://killedbyapixel.github.io/ZzFX) as `zzfx(...[ ... ])`, change it there, and copy the array back. The randomness value (second number) is applied as a small pitch change each time the sound plays. Keep repeated sounds (steps, blocked) quieter than rare ones.
+
+**Music** is one calm ambient track generated live (no loop, so no seam): a soft pad and sparse slow notes from D major pentatonic at 72 bpm, through a generated reverb. It stays low and mellow: sines and low-passed triangles, slow note attacks, no note above 800 Hz. Each body has its own layer in about the same register, told apart mainly by colour, and a hop drifts to it over about 2 s: the spirit's is plain sines on D3/A3/D4 with long gaps; the guard's is the darkest, triangles on D3/A3 under a low low-pass with a hint of sub bass and slow notes; the cat's is the brightest but still mellow, on A3/D4/F#4 with a more open low-pass and slightly more frequent notes. A level change (next, skip, restart, a level button) never cuts the music: it dips by about 6 dB and comes back over about 2 s while it drifts to the spirit's layer. A win swells it gently for a couple of seconds. The music sits well under the sound effects. Its layers are the `LAYERS` table in `audio.js`.
+
+`window.BodyHopAudio.log` lists the last 100 cues the game requested (plus `body:G` and the like when the music changes body), for automated checks.
 
 ## Test question
 

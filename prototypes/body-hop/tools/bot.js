@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Browser check: replays each level's solver route as real key presses in Chromium and
-// checks the game reports a win in exactly par turns. Optional screenshots for eyeballing.
+// checks the game reports a win in exactly par turns, and that the sound cues for the hop and
+// the win were requested (window.BodyHopAudio.log). Optional screenshots for eyeballing.
 //   node tools/bot.js [screenshot-dir]
 const path = require("path");
 const { chromium } = require("playwright");
@@ -28,9 +29,14 @@ const KEY = { U: "ArrowUp", D: "ArrowDown", L: "ArrowLeft", R: "ArrowRight" };
       }
     }
     const st = await page.evaluate(() => ({ won: window.__bodyhop.won, turns: window.__bodyhop.turns }));
-    const ok = st.won && st.turns === LEVELS[i].par;
+    const cues = await page.evaluate(() => window.BodyHopAudio.log.slice());
+    const missing = [];
+    if (!cues.includes("win")) missing.push("win");
+    if (r.hops > 0 && !cues.some((c) => c.startsWith("hop:"))) missing.push("hop:");
+    const ok = st.won && st.turns === LEVELS[i].par && !missing.length;
     if (!ok) bad++;
-    console.log(`${i + 1} ${LEVELS[i].name.padEnd(22)} ${ok ? "ok" : "FAIL"} won=${st.won} turns=${st.turns} par=${LEVELS[i].par}`);
+    console.log(`${i + 1} ${LEVELS[i].name.padEnd(22)} ${ok ? "ok" : "FAIL"} won=${st.won} turns=${st.turns} par=${LEVELS[i].par}` +
+      (missing.length ? ` missing cues: ${missing.join(", ")}` : ""));
     // Undo everything and check we are back at the start state.
     for (let k = 0; k < r.moves.length; k++) await page.keyboard.press("z");
     const back = await page.evaluate(() => window.__bodyhop.turns);

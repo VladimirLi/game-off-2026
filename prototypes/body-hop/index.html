@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Body Hop (grey box)</title>
+<title>Body Hop</title>
 <style>
   :root { --bg: #1d1f24; --panel: #2a2d34; --text: #e8e8ea; --dim: #9a9ca3; --accent: #f0d060; }
   html, body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.4 system-ui, sans-serif; }
@@ -63,7 +63,7 @@
   #legend canvas { width: 20px; height: 20px; border-radius: 2px; background: none; flex: none; outline: 1px solid #3a3e46; }
   #legend canvas.mark { width: 36px; height: 36px; }
   #legend p { margin: 6px 0 0; color: var(--dim); }
-  #legendBtn { background: none; border: 1px solid #3a3e46; color: var(--dim); border-radius: 4px; padding: 2px 8px; font: inherit; font-size: 13px; cursor: pointer; }
+  #legendBtn, #sfxBtn, #musicBtn { background: none; border: 1px solid #3a3e46; color: var(--dim); border-radius: 4px; padding: 2px 8px; font: inherit; font-size: 13px; cursor: pointer; }
   #levels button.done::after { content: " ✓"; color: var(--accent); }
 </style>
 </head>
@@ -93,14 +93,16 @@
   <footer>
     <kbd>←↑→↓</kbd>/<kbd>WASD</kbd> move, or walk into a body to hop into it ·
     <kbd>Z</kbd>/<kbd>Backspace</kbd> undo · <kbd>R</kbd> restart · <kbd>N</kbd> next level (after a win) · <kbd>Shift+N</kbd> skip ·
-    <button id="legendBtn"><kbd>L</kbd> legend</button> · <button id="touchToggle">Touch controls</button>
+    <button id="legendBtn"><kbd>L</kbd> legend</button> · <button id="touchToggle">Touch controls</button> ·
+    <button id="sfxBtn">Sound on</button> · <button id="musicBtn"><kbd>M</kbd> Music on</button>
   </footer>
 </div>
 <script src="engine.js"></script>
 <script src="levels.js"></script>
+<script src="audio.js"></script>
 <script>
 "use strict";
-const BH = window.BodyHop, LEVELS = window.BODY_HOP_LEVELS;
+const BH = window.BodyHop, LEVELS = window.BODY_HOP_LEVELS, SND = window.BodyHopAudio;
 const T = 56; // tile size in px
 const cv = document.getElementById("c");
 let g = cv.getContext("2d"); // swapped briefly to draw legend icons
@@ -114,7 +116,8 @@ let idx = 0, L, s, history, turns, startTime, log, won, flash = null, shiftT = 1
 const done = new Set();
 try { for (const n of JSON.parse(localStorage.getItem("bodyhop-done") || "[]")) done.add(n); } catch (e) { /* storage unavailable */ }
 
-function load(i) {
+// `cue` is the sound for this load: the level-start chime, or the rewind sweep on a restart.
+function load(i, cue = "start") {
   idx = (i + LEVELS.length) % LEVELS.length;
   L = BH.parse(LEVELS[idx]);
   s = L.start; history = []; turns = 0; won = false; log = []; startTime = performance.now();
@@ -124,6 +127,7 @@ function load(i) {
   $("hint").textContent = LEVELS[idx].hint || "";
   setStatus("");
   renderLevels(); draw(); hud();
+  SND.levelChange(); SND.setBody("S"); SND.play(cue);
 }
 
 function setStatus(text, cls) { const el = $("status"); el.textContent = text; el.className = cls || ""; }
@@ -160,7 +164,7 @@ function renderLevels() {
     if (i === idx) b.className = "cur";
     if (done.has(lv.name)) b.classList.add("done");
     // On the current level the button only restarts it (nothing, at turn 0).
-    b.onclick = () => { if (closeLegend(i !== idx ? `Legend closed. Press again to go to level ${label(i)}.` : history.length ? "Legend closed. Press again to restart." : "Legend closed.")) return; logEnd("left"); load(i); };
+    b.onclick = () => { SND.play("ui"); if (closeLegend(i !== idx ? `Legend closed. Press again to go to level ${label(i)}.` : history.length ? "Legend closed. Press again to restart." : "Legend closed.")) return; logEnd("left"); load(i); };
     group.appendChild(b);
   });
 }
@@ -190,7 +194,7 @@ function act(dir) {
   const before = BH.current(L, s).t;
   const r = BH.step(L, s, dir);
   log.push(dir[0].toUpperCase());
-  if (!r.state) { setStatus(r.why, "bad"); flash = { t: performance.now(), dir }; draw(); return; }
+  if (!r.state) { setStatus(r.why, "bad"); flash = { t: performance.now(), dir }; draw(); SND.play("blocked"); return; }
   history.push(s); s = r.state; turns++;
   // A hop says which body you are in now, and whether you have been in it before, so an
   // accidental hop back into a parked body is never silent.
@@ -199,19 +203,36 @@ function act(dir) {
     // footprints, so the mark is explained the moment it appears.
     const name = BH.NAMES[BH.current(L, s).t];
     const again = history.some((h) => h.ctrl === s.ctrl);
+    SND.play(`hop:${BH.current(L, s).t}${again ? ":back" : ""}`); SND.setBody(BH.current(L, s).t);
     const from = history[history.length - 1].ctrl;
     const left = from >= 0 ? ` Footprints mark the ${BH.NAMES[L.types[from]]} you left.` : "";
     setStatus((again ? `Back in the ${name}.` : `You are the ${name} now.`) + left + " Z to undo.");
-  } else setStatus(walkNews(history[history.length - 1], s));
+  } else { setStatus(walkNews(history[history.length - 1], s)); walkSounds(history[history.length - 1], s); }
   if (r.kind === "hop") { shiftFrom = before; shiftT = 0; animate(); }
   if (BH.won(L, s)) {
     won = true; done.add(LEVELS[idx].name);
     try { localStorage.setItem("bodyhop-done", JSON.stringify([...done])); } catch (e) { /* ignore */ }
     const par = LEVELS[idx].par;
     setStatus(`Out in ${turns} turns${par ? (turns <= par ? " (par!)" : ` (par ${par})`) : ""}.${winNext()}`, "good");
-    logEnd("complete"); renderLevels();
+    logEnd("complete"); renderLevels(); SND.play("win");
   }
   hud(); draw();
+}
+
+// The sounds of a walk: the step of the body that walked, plus at most one extra, the most specific
+// thing it changed (gate change > plate > locked door, vent or unseen block), never a pile-up.
+function walkSounds(prev, now) {
+  const me = BH.current(L, now), from = BH.current(L, prev), tile = L.tiles[me.y][me.x];
+  SND.play("step:" + me.t);
+  const gates = L.tiles.some((row) => row.includes("|"));
+  const was = BH.gateOpen(L, prev), is = BH.gateOpen(L, now);
+  if (gates && !was && is) return SND.play("gate-open");
+  if (gates && was && !is) return SND.play("gate-shut");
+  if (tile === "_") return SND.play(me.t === "S" ? "plate-ghost" : "plate-down");
+  if (L.tiles[from.y][from.x] === "_" && me.t !== "S") return SND.play("plate-up");
+  if (tile === "D") return SND.play("door");
+  if (tile === "V") return SND.play("vent");
+  if (tile === { C: "R", G: "B" }[me.t]) SND.play("shimmer");
 }
 
 // What a walk changed about plates and gates, or "" (which clears the status line, as before).
@@ -242,10 +263,12 @@ function undo() {
   if (closeLegend(history.length ? "Legend closed. Press again to undo." : "Legend closed.")) return;
   log.push("Z");
   if (!history.length) return;
+  SND.play("undo");
   const before = BH.current(L, s).t;
   s = history.pop(); turns--; won = false; setStatus("");
   const after = BH.current(L, s).t;
   if (after !== before) { shiftFrom = before; shiftT = 0; animate(); }
+  SND.setBody(after);
   hud(); draw();
 }
 
@@ -646,6 +669,7 @@ function buildLegend() {
 }
 
 function toggleLegend(open = !legendOpen) {
+  if (open !== legendOpen) SND.play("ui");
   legendOpen = open;
   const box = $("legend");
   if (open) buildLegend();
@@ -667,7 +691,7 @@ function closeLegend(msg) {
 }
 
 // At turn 0 a restart changes nothing on the board, so the close message promises nothing.
-function restart() { if (closeLegend(history.length ? "Legend closed. Press again to restart." : "Legend closed.")) return; logEnd("restarted"); log.push("R"); load(idx); }
+function restart() { if (closeLegend(history.length ? "Legend closed. Press again to restart." : "Legend closed.")) return; logEnd("restarted"); log.push("R"); load(idx, "restart"); }
 function next() { if (closeLegend(won && idx < LEVELS.length - 1 ? "Legend closed. Press again for the next level." : "Legend closed.")) return; if (won && idx < LEVELS.length - 1) load(idx + 1); }
 
 // On-screen controls. pointerdown (not click) so taps feel instant and double-tap never zooms.
@@ -690,6 +714,16 @@ $("touchToggle").addEventListener("click", () => {
   document.body.classList.toggle("touch", !shown);
   document.body.classList.toggle("no-touch", shown);
 });
+// Sound and music switches (saved on this machine). M toggles music; it is not a game input, so it
+// never closes the legend.
+function soundButtons() {
+  $("sfxBtn").textContent = `Sound ${SND.sfx ? "on" : "off"}`;
+  $("musicBtn").innerHTML = `<kbd>M</kbd> Music ${SND.music ? "on" : "off"}`;
+}
+function toggleMusic() { SND.setMusic(!SND.music); SND.play("ui"); soundButtons(); }
+$("sfxBtn").addEventListener("click", () => { SND.setSfx(!SND.sfx); SND.play("ui"); soundButtons(); });
+$("musicBtn").addEventListener("click", toggleMusic);
+soundButtons();
 
 const KEYS = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right", w: "up", s: "down", a: "left", d: "right", W: "up", S: "down", A: "left", D: "right" };
 addEventListener("keydown", (e) => {
@@ -700,6 +734,7 @@ addEventListener("keydown", (e) => {
   if (e.key === "N" && e.shiftKey) { if (closeLegend("Legend closed. Press again to skip this level.")) return; logEnd("SKIPPED"); load(idx + 1); return; }
   if (e.key === "n") { next(); return; }
   if (e.key === "l" || e.key === "L") { toggleLegend(); return; }
+  if (e.key === "m" || e.key === "M") { toggleMusic(); return; }
 });
 
 const q = Number(new URLSearchParams(location.search).get("level"));

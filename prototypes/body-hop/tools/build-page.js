@@ -1,12 +1,13 @@
 #!/usr/bin/env node
-// Builds one self-contained HTML page (engine + levels inlined) for sharing the grey box as a web page.
+// Builds one self-contained HTML page (engine, levels and audio inlined) for sharing the game as a web page.
 //   node tools/build-page.js <out.html>
 const fs = require("fs"), path = require("path");
 const dir = path.resolve(__dirname, "..");
 let html = fs.readFileSync(path.join(dir, "index.html"), "utf8");
 const inline = (f) => `<script>\n${fs.readFileSync(path.join(dir, f), "utf8")}\n</script>`;
 html = html.replace('<script src="engine.js"></script>', () => inline("engine.js"))
-           .replace('<script src="levels.js"></script>', () => inline("levels.js"));
+           .replace('<script src="levels.js"></script>', () => inline("levels.js"))
+           .replace('<script src="audio.js"></script>', () => inline("audio.js"));
 // The host wraps the page in its own document skeleton: keep only the title, style and body content.
 const title = '<title>Body Hop</title>\n<meta name="claude:viewport-fit-sides" content="cover">';
 const style = html.match(/<style>[\s\S]*?<\/style>/)[0]
