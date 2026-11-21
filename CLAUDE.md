@@ -29,7 +29,7 @@ Solo entry for GitHub Game Off 2026, theme **SHIFT**. The owner is new to game d
 ## Milestones
 - Feature freeze 24 Nov. Then juice, audio, menus, the itch page and a README GIF.
 - Last two days: bugs only, and test the uploaded build in Chrome and Firefox. Submit 30 Nov.
-- Done 21 Nov: sound (`prototypes/body-hop/audio.js`: code-generated effects and per-body music; the owner listened and approved it). Done 21 Nov: 8-bit art and animation (`prototypes/body-hop/pixel-art.js`, tuned over five blind AI persona rounds) and the colour-only tile set (doors, vents, bridges and pits cut; the owner approved). Not started as of 21 Nov: a title screen and an end screen, a human playtest, the itch.io upload. GitHub Pages serves a build from loop round 6 (`gh-pages` branch), behind `main`. Check `git log` for later progress.
+- Done 21 Nov: sound (`prototypes/body-hop/audio.js`: code-generated effects and per-body music; the owner listened and approved it). Done 21 Nov: 8-bit art and animation (`prototypes/body-hop/pixel-art.js`, tuned over five blind AI persona rounds) and the colour-only tile set (doors, vents, bridges and pits cut; the owner approved). Not started as of 21 Nov: a title screen and an end screen, a human playtest, the itch.io upload. GitHub Pages (`gh-pages` branch: `index.html`, `engine.js`, `levels.js`, `audio.js`, `pixel-art.js` copied from `prototypes/body-hop/`) serves main 54cdff2 as of 21 Nov. Check `git log` for later progress.
 - A SessionStart hook prints today's date and the days left. After the freeze, flag any new mechanic or level to the owner before starting it.
 
 ## Running the team (main session only; subagents ignore this section)
