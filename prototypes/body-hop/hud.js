@@ -244,7 +244,7 @@
     const dir = (d, gx, gy, glyph) => button(glyph, x + gx * c, y + gy * c, c - 2, c - 2, "pad-" + d, () => o.act("move", d));
     dir("up", 1, 0, "↑"); dir("left", 0, 1, "←"); dir("right", 2, 1, "→"); dir("down", 1, 2, "↓");
   };
-  const showHint = () => { hintOpen = !hintOpen; o.SND.play("ui"); };
+  const showHint = () => { hintOpen = !hintOpen; o.SND.play("ui"); if (hintOpen && o.track) o.track("hint_opened"); };
   // Tall: on a touch screen the arrow pad and buttons; with a keyboard, the keys.
   function tallPad() {
     const y = LAY.pad.y;
@@ -300,13 +300,16 @@
   function openMenu(kind) { menu = kind; sel = 0; hintOpen = false; if (kind === "levels") lvSel = o.current(); o.SND.play("ui"); }
   const menuOpen = () => menu;
   function pauseItems() {
+    const stats = o.stats ? o.stats() : null; // null: stats can't be sent here (a file, automation, Do Not Track), so no switch
     return [
       ["Resume", () => { menu = null; }],
       ["Restart level", () => { menu = null; o.act("restart"); }],
       ["Level select", () => openMenu("levels")],
       ["How to play", () => { menu = null; o.act("legend"); }],
+      ["Send feedback", () => { menu = null; o.act("feedback"); }],
       [`Music: ${o.music() ? "on" : "off"}`, () => o.act("music"), true],
       [`Sound: ${o.sfx() ? "on" : "off"}`, () => o.act("sound"), true],
+      ...(stats === null ? [] : [[`Play stats: ${stats ? "on" : "off"}`, () => o.act("stats"), true]]),
       ["Title screen", () => { menu = null; o.act("title"); }],
     ];
   }

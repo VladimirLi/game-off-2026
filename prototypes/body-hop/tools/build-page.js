@@ -10,7 +10,8 @@ html = html.replace('<script src="engine.js"></script>', () => inline("engine.js
            .replace('<script src="audio.js"></script>', () => inline("audio.js"))
            .replace('<script src="pixel-art.js"></script>', () => inline("pixel-art.js"))
            .replace('<script src="screens.js"></script>', () => inline("screens.js"))
-           .replace('<script src="hud.js"></script>', () => inline("hud.js"));
+           .replace('<script src="hud.js"></script>', () => inline("hud.js"))
+           .replace('<script src="analytics.js"></script>', () => inline("analytics.js"));
 // The host wraps the page in its own document skeleton: keep only the title, style and body content.
 const title = '<title>Body Hop</title>\n<meta name="claude:viewport-fit-sides" content="cover">';
 const style = html.match(/<style>[\s\S]*?<\/style>/)[0].replace("html, body {", "html, body { color-scheme: dark;");

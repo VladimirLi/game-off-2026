@@ -143,7 +143,7 @@
     shiftingLogo("BODY HOP", 8, 1.5, now, [[-1e9, "S"], [cyc + 1500, "G"], [cyc + 3500, "C"], [cyc + LIGHTS_OUT + 350, "S"], [cyc + P + 1500, "G"]]);
     const sub = "EACH BODY SEES ONE COLOUR"; PX.text(q, sub, Math.round((W - PX.textWidth(sub)) / 2), 31, "#a4a4c8", 1, INK);
     menu(now);
-    footer(now, [touch() ? "TAP START TO PLAY" : "ARROWS + ENTER - M: MUSIC", "GAME OFF 2026 - THEME: SHIFT", "BY VLADIMIR LI"]);
+    footer(now, [touch() ? "TAP START TO PLAY" : "ARROWS + ENTER - M: MUSIC", "GAME OFF 2026 - THEME: SHIFT", "BY VLADIMIR LI", ...(o.statsOn && o.statsOn() ? ["ANONYMOUS PLAY STATS - SEE MENU"] : [])]);
   }
 
   // ---------- end screens: out of the exit at dawn ----------

@@ -6,7 +6,7 @@ This is a browser game in plain HTML and JavaScript. It needs no build step and 
 
 ## Run
 
-Open `index.html` in a browser (double-click works). `index.html?level=7` opens a level directly. To deploy, copy `index.html`, `engine.js`, `levels.js`, `audio.js`, `pixel-art.js`, `screens.js` and `hud.js` together (or build one self-contained page with `node tools/build-page.js out.html`, which inlines all six scripts).
+Open `index.html` in a browser (double-click works). `index.html?level=7` opens a level directly. To deploy, copy `index.html`, `engine.js`, `levels.js`, `audio.js`, `pixel-art.js`, `screens.js`, `hud.js` and `analytics.js` together (or build one self-contained page with `node tools/build-page.js out.html`, which inlines all seven scripts).
 
 ## Controls
 
@@ -17,11 +17,19 @@ The game screen is one pixel-art canvas (`hud.js`) and changes with the device. 
 - **N** (or Enter or Space, or the Next button): next level, after a win. **Shift+N:** skip a level (playtest aid; it logs SKIPPED).
 - **L:** How to play, over the whole screen: what each body makes of red blocks, blue blocks and plates, drawn as that body sees them, plus gates, hopping and the exit. L, Escape or a click or tap closes it. While it is open every other game input (arrow, Z, R, N, Shift+N) only closes it and does nothing else, so nothing happens on a board you cannot see; the message line then says so ("Closed How to play. Press again to move.", or "to undo", "to restart", "to go on", "to skip this level").
 - **H:** the level's hint over the board (with a keyboard the hint is also always in the side panel).
-- **Escape or P:** the pause menu: Resume, Restart level, Level select, How to play, Music, Sound, Title screen. Level select shows a tile per level by chapter, filled green when solved on this machine and starred at par.
+- **Escape or P:** the pause menu: Resume, Restart level, Level select, How to play, Send feedback, Music, Sound, Play stats (where stats can be sent), Title screen. Level select shows a tile per level by chapter, filled green when solved on this machine and starred at par.
 - **M:** music on or off (also in the pause menu, with the sound effects switch). Both are saved on this machine. M is not a game input, so it never closes How to play.
 - **Title and end screens.** A plain visit opens on the title screen (`?level=N` skips it, as the bot and the persona harness do). Up and Down (or W and S) choose; Enter, Space, Z or Right choose that line; the mouse works too. "Start your shift", or "Continue - level N" once something is solved on this machine, starts at the first unsolved level; "New game" starts at level 1; "Music" switches it. The first key also unlocks sound, so the music starts on the title. After the last main level, N (or Next level) opens the end screen: the shift report (levels solved and at par on this machine) and the credits; N there starts the Night shift, Escape goes to the title. After the last Night shift level, N opens the final screen. M switches the music on every screen; the pause menu's "Title screen" goes back to the title. The fewest turns per level is saved on this machine (`bodyhop-best`, next to `bodyhop-done`).
 
 The side panel names your body in the logo font, shows how it sees a red and a blue block ("solid", "walk in", or "fog" for the spirit), the turns against par with a pip per turn (gold up to par, red past it) and your best, and the hint. After a win it shows "OUT!", the result, a "PAR!" stamp at par, and a big Next button; the board's frame turns gold. Each level opens with a ribbon naming its chapter, number and name; any key cuts it short. A hop shakes the board by a pixel and flashes it, as on the title screen. The same text is kept in a visually hidden block for screen readers and the test tools.
+
+## Play stats
+
+`analytics.js` sends anonymous play events to the "Body Hop" project in PostHog (EU cloud, project 361888), for testers and for jam players alike, so we can see where people get stuck. There is no PostHog script and no cookie: each event goes straight to PostHog's capture endpoint with a random id kept in this tab's session storage, marked as anonymous (no person profile), and the project discards client IP addresses. The title screen says "Anonymous play stats - see menu", and the pause menu's "Play stats" switches them off (saved on this machine). Nothing is sent from a file (`file://`), under automation (the bot and the persona harness), when the browser asks not to be tracked, or after the player switches stats off.
+
+- Events (all named `bodyhop_*`): `session_start` (device, touch or not, screen size, language, referrer site), `level_start`, `level_end` (outcome: complete, left, restarted, skipped or closed; turns, par, at par, seconds, undos, restarts, and the key sequence), `how_to_play`, `hint_opened`, `screen` (title, end, final) and `feedback` (the player's note from "Send feedback", at most 1000 characters).
+- Every event carries `mode`: "playtest" when the address has `?playtest=1` (the link we give testers), "dev" when the page is served from this machine (localhost), otherwise "public". Testers', jam players' and our own test data can be told apart that way.
+- With stats off, "Send feedback" copies the note instead, to paste to the developer.
 
 ## Art
 

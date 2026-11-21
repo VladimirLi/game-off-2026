@@ -18,6 +18,17 @@
   #screen.leaving { opacity: 0; transition: opacity 0.25s ease-in; }
   #screen canvas { display: block; background: none; border-radius: 0; max-width: 100%; touch-action: manipulation; }
   @keyframes screen-in { from { opacity: 0; } to { opacity: 1; } }
+  /* Feedback: a plain form over the game, drawn to match the pixel panels. */
+  #feedback { position: fixed; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; background: rgba(4,4,12,0.85); }
+  #feedback[hidden] { display: none; }
+  #feedback form { width: min(92vw, 520px); box-sizing: border-box; padding: 18px; background: #12122a; border: 4px solid #06060c; box-shadow: inset 0 0 0 2px #40406c; font: 16px/1.4 ui-monospace, monospace; color: #ececf8; }
+  #feedback h2 { margin: 0 0 8px; font-size: 20px; color: #f8c838; letter-spacing: 1px; text-transform: uppercase; }
+  #feedback p { margin: 0 0 10px; color: #a8a8c8; }
+  #feedback textarea { width: 100%; box-sizing: border-box; min-height: 7em; padding: 8px; background: #06060c; color: #ececf8; border: 2px solid #40406c; font: inherit; resize: vertical; }
+  #feedback .row { display: flex; gap: 10px; justify-content: flex-end; margin: 12px 0 8px; }
+  #feedback button { padding: 8px 16px; font: 700 15px ui-monospace, monospace; letter-spacing: 1px; text-transform: uppercase; border: 3px solid #06060c; background: #34345a; color: #ececf8; cursor: pointer; }
+  #feedback button[type="submit"] { background: #f8c838; color: #06060c; }
+  #feedback button:focus-visible, #feedback textarea:focus-visible { outline: 2px solid #f8c838; outline-offset: 2px; }
 </style>
 </head>
 <body>
@@ -33,21 +44,31 @@
 </div>
 <div id="levels" hidden></div>
 <div id="screen" role="dialog" aria-label="Body Hop"><canvas id="screenArt"></canvas></div>
+<div id="feedback" role="dialog" aria-label="Send feedback" hidden>
+  <form>
+    <h2>Send feedback</h2>
+    <p>How did it feel? Anything confusing, too easy, too hard or broken?</p>
+    <textarea id="fbText" maxlength="1000" aria-label="Your note"></textarea>
+    <div class="row"><button type="button" id="fbCancel">Cancel</button><button type="submit" id="fbSend">Send</button></div>
+    <p id="fbNote"></p>
+  </form>
+</div>
 <script src="engine.js"></script>
 <script src="levels.js"></script>
 <script src="audio.js"></script>
 <script src="pixel-art.js"></script>
 <script src="screens.js"></script>
 <script src="hud.js"></script>
+<script src="analytics.js"></script>
 <script>
 "use strict";
 const BH = window.BodyHop, LEVELS = window.BODY_HOP_LEVELS, SND = window.BodyHopAudio;
-const PX = window.PixelArt, HUD = window.BodyHopHUD;
+const PX = window.PixelArt, HUD = window.BodyHopHUD, AN = window.BodyHopAnalytics;
 const cv = document.getElementById("c"); // the whole game screen (hud.js draws it)
 const boardCv = document.createElement("canvas"); // the board at 1x, drawn by pixel-art.js and framed by the HUD
 const $ = (id) => document.getElementById(id);
 
-let idx = 0, L, s, history, turns, startTime, log, won, flash = null, status = { text: "", cls: "", at: 0 };
+let idx = 0, L, s, history, turns, startTime, log, won, flash = null, status = { text: "", cls: "", at: 0 }, started = false;
 const done = new Set();
 try { for (const n of JSON.parse(localStorage.getItem("bodyhop-done") || "[]")) done.add(n); } catch (e) { /* storage unavailable */ }
 
@@ -63,6 +84,7 @@ function load(i, cue = "start") {
   renderLevels(); draw(); hud();
   SND.levelChange(); SND.setBody("S"); SND.play(cue);
   if (cue !== "restart") HUD.intro(performance.now(), introInfo(idx));
+  if (started) AN.track("level_start", { level: label(idx), index: idx + 1, name: LEVELS[idx].name, chapter: chapterOf(idx), restart: cue === "restart" });
 }
 
 // What the intro ribbon says: the chapter, the level's number and its name.
@@ -127,6 +149,8 @@ function logEnd(how) {
   const secs = ((performance.now() - startTime) / 1000).toFixed(1);
   const par = LEVELS[idx].par;
   console.log(`Level ${idx + 1} ${how} | turns ${turns} (par ${par}) | time ${secs} s | undos ${log.filter((x) => x === "Z").length} | keys ${compress(log)}`);
+  AN.track("level_end", { level: label(idx), index: idx + 1, name: LEVELS[idx].name, outcome: how.toLowerCase(), turns, par, at_par: how === "complete" && turns <= par,
+    secs: +secs, undos: log.filter((x) => x === "Z").length, restarts: log.filter((x) => x === "R").length, keys: compress(log).slice(0, 600) });
 }
 function compress(a) { const out = []; for (const k of a) { const last = out[out.length - 1]; if (last && last[0] === k) last[1]++; else out.push([k, 1]); } return out.map(([k, n]) => n > 1 ? `${k}x${n}` : k).join(" "); }
 
@@ -306,7 +330,7 @@ requestAnimationFrame(loop);
 
 // ---------- How to play: hud.js draws it over the game while legendOpen ----------
 let legendOpen = false;
-function toggleLegend(open = !legendOpen) { if (open !== legendOpen) SND.play("ui"); legendOpen = open; }
+function toggleLegend(open = !legendOpen) { if (open !== legendOpen) { SND.play("ui"); if (open) AN.track("how_to_play", { level: label(idx) }); } legendOpen = open; }
 
 // While How to play is open, every game input (move, undo, restart, next, skip, level button) only
 // closes it, so nothing happens on a board you cannot see. The status line then says so (`msg`), so a
@@ -350,17 +374,38 @@ const best = {}; // fewest turns per level name, saved on this machine
 try { Object.assign(best, JSON.parse(localStorage.getItem("bodyhop-best") || "{}")); } catch (e) { /* storage unavailable */ }
 const firstUnsolved = () => { const i = LEVELS.findIndex((lv) => !done.has(lv.name)); return i < 0 ? 0 : i; };
 const SCR = window.BodyHopScreens;
-SCR.init({ PX, SND, el: $("screen"), canvas: $("screenArt"), levels: LEVELS, mainCount, label, firstUnsolved,
+SCR.init({ PX, SND, el: $("screen"), canvas: $("screenArt"), levels: LEVELS, mainCount, label, firstUnsolved, statsOn: () => AN.enabled(),
   progress: () => ({ done, best }), music: () => SND.music, toggleMusic, start: (i) => SCR.leave(() => load(i)) });
-function showScreen(kind) { legendOpen = false; HUD.closeMenu(); SCR.show(kind); }
+function showScreen(kind) { legendOpen = false; HUD.closeMenu(); SCR.show(kind); AN.track("screen", { kind }); }
 HUD.init({ PX, SND, canvas: cv, levels: LEVELS, mainCount, label, chapterOf, current: () => idx,
   isDone: (i) => done.has(LEVELS[i].name), atPar: (i) => best[LEVELS[i].name] <= LEVELS[i].par, best: (i) => best[LEVELS[i].name],
-  music: () => SND.music, sfx: () => SND.sfx,
+  music: () => SND.music, sfx: () => SND.sfx, stats: () => AN.available() ? AN.enabled() : null,
+  track: (event, props) => AN.track(event, { level: label(idx), ...props }),
   act: (name, arg) => ({ undo, restart, next, move: act, legend: () => toggleLegend(), music: toggleMusic, sound: toggleSfx,
+    stats: () => { AN.setEnabled(!AN.enabled()); SND.play("ui"); }, feedback: openFeedback,
     title: () => { SND.play("ui"); logEnd("left"); showScreen("title"); }, level: (i) => { logEnd("left"); load(i); } })[name](arg) });
+
+// ---------- feedback: a note from the player, sent with the play stats (or copied when stats can't be sent) ----------
+let feedbackOpen = false;
+function openFeedback() {
+  feedbackOpen = true; const box = $("feedback"); box.hidden = false;
+  $("fbNote").textContent = AN.enabled() ? "Sent anonymously with your play stats." : "Play stats are off, so Send copies your note to paste to the developer.";
+  $("fbSend").textContent = AN.enabled() ? "Send" : "Copy";
+  $("fbText").value = ""; $("fbText").focus();
+}
+function closeFeedback() { feedbackOpen = false; $("feedback").hidden = true; cv.focus && cv.focus(); }
+$("fbCancel").addEventListener("click", closeFeedback);
+$("feedback").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const text = $("fbText").value.trim(); if (!text) { closeFeedback(); return; }
+  if (AN.enabled()) { AN.track("feedback", { text: text.slice(0, 1000), level: label(idx), turns }); AN.flush(); setStatus("Thanks! Your note was sent.", "good"); }
+  else { (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(() => setStatus("Your note is copied. Paste it to the developer.", "good"), () => setStatus("Couldn't copy the note.", "bad")); }
+  closeFeedback();
+});
 
 const KEYS = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right", w: "up", s: "down", a: "left", d: "right", W: "up", S: "down", A: "left", D: "right" };
 addEventListener("keydown", (e) => {
+  if (feedbackOpen) { if (e.key === "Escape") closeFeedback(); return; } // typing a note never moves the game
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   if (SCR.open()) { SCR.key(e); return; }
   if (HUD.key(e)) return; // the pause menu and level select take every key while open
@@ -376,8 +421,13 @@ addEventListener("keydown", (e) => {
 });
 
 const q = Number(new URLSearchParams(location.search).get("level"));
+AN.init({ levels: LEVELS.length, start: q > 0 ? "level-link" : "title" });
 load(q > 0 ? q - 1 : 0);
+started = true; // from here on, loading a level counts as a level start (the startup load sits behind the title)
+if (q > 0) AN.track("level_start", { level: label(idx), index: idx + 1, name: LEVELS[idx].name, chapter: chapterOf(idx), restart: false });
 if (!(q > 0)) showScreen("title");
+// A level left by closing or hiding the page still gets its line.
+addEventListener("pagehide", () => { if (!won) logEnd("closed"); AN.flush(); });
 window.__bodyhop = { get state() { return s; }, get level() { return idx; }, get won() { return won; }, get turns() { return turns; } };
 </script>
 </body>
