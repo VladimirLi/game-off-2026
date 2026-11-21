@@ -5,7 +5,8 @@
 //   - the browser asks not to be tracked (Do Not Track),
 //   - the page runs from a file (file://) or under automation (the bot and the AI persona harness),
 //   - no project key is set.
-// ?playtest=1 in the address marks the session as a playtest (property mode = "playtest"), otherwise "public".
+// ?playtest=1 in the address marks the session as a playtest (property mode = "playtest"); ?dev=1, or a page served from
+// this machine, marks it as our own test (mode = "dev", left out of the dashboard); otherwise "public".
 //   BodyHopAnalytics.init(info); track(event, props); flush(); enabled(); setEnabled(on)
 (function (root) {
   "use strict";
@@ -21,8 +22,9 @@
     try { sid = sessionStorage.getItem("bodyhop-sid"); if (!sid) { sid = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()); sessionStorage.setItem("bodyhop-sid", sid); } }
     catch (e) { sid = String(Math.random()).slice(2) + Date.now(); }
     const q = new URLSearchParams(location.search);
-    const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname); // our own test runs, kept apart from players
-    base = { mode: local ? "dev" : q.get("playtest") ? "playtest" : "public", build: BUILD, host: location.hostname, touch: matchMedia("(hover: none) and (pointer: coarse)").matches,
+    // our own test runs (this machine, or ?dev=1 on the live site) are kept apart from players
+    const dev = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || q.get("dev") === "1";
+    base = { mode: dev ? "dev" : q.get("playtest") ? "playtest" : "public", build: BUILD, host: location.hostname, touch: matchMedia("(hover: none) and (pointer: coarse)").matches,
       screen: `${screen.width}x${screen.height}`, lang: navigator.language, $process_person_profile: false, ...info };
     track("session_start", { referrer: document.referrer ? new URL(document.referrer).hostname : "" });
     addEventListener("pagehide", flush);
