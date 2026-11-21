@@ -9,60 +9,14 @@
   "use strict";
   const W = 192, H = 144;
   let o, PX, PAL, el, cv, q, art, kind = null, sel = 0, items = [], shownAt = 0, stamped = false;
-  const BODY = { S: ["#f4f4fc", "#8a8aa4", "#ffffff"], G: ["#f87858", "#a81000", "#fcc8b8"], C: ["#5cbcfc", "#0050c8", "#c8ecfc"] }; // face, shade, light
   const INK = "#06060c";
   const hash = (x, y) => ((x * 73856093) ^ (y * 19349663)) >>> 0;
   const rect = (x, y, w, h, col) => { q.fillStyle = col; q.fillRect(Math.round(x), Math.round(y), w, h); };
   const prog = (t, a, d) => Math.min(1, Math.max(0, (t - a) / d));
   const mix = (a, b, k) => { const p = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16)), A = p(a), B = p(b); return "#" + A.map((v, i) => Math.round(v + (B[i] - v) * k).toString(16).padStart(2, "0")).join(""); };
 
-  // ---------- the logo font: hand-pixelled 9 x 11 letters with 3-pixel strokes ----------
-  const R = (s, n) => Array(n).fill(s);
-  const LOGO = {
-    B: ["11111111.", "111111111", "111...111", "111...111", "11111111.", "11111111.", "111...111", "111...111", "111...111", "111111111", "11111111."],
-    O: [".1111111.", "111111111", ...R("111...111", 7), "111111111", ".1111111."],
-    D: ["11111111.", "111111111", ...R("111...111", 7), "111111111", "11111111."],
-    Y: [...R("111...111", 3), ".111.111.", "..11111..", ...R("...111...", 6)],
-    H: [...R("111...111", 4), "111111111", "111111111", ...R("111...111", 5)],
-    P: ["11111111.", "111111111", "111...111", "111...111", "111111111", "11111111.", ...R("111......", 5)],
-    U: [...R("111...111", 9), "111111111", ".1111111."],
-    G: [".1111111.", "111111111", "111......", "111......", "111.11111", "111.11111", "111...111", "111...111", "111...111", "111111111", ".1111111."],
-    T: ["111111111", "111111111", ...R("...111...", 9)],
-    A: [".1111111.", "111111111", "111...111", "111...111", "111111111", "111111111", ...R("111...111", 5)],
-    L: [...R("111......", 9), "111111111", "111111111"],
-    N: ["111...111", "1111..111", "11111.111", "111111111", "111.11111", "111..1111", ...R("111...111", 5)],
-    E: ["111111111", "111111111", "111......", "111......", "11111111.", "11111111.", "111......", "111......", "111......", "111111111", "111111111"],
-    "!": [...R("111", 7), "...", "...", "111", "111"],
-  };
-  // The glyphs are drawn larger by repeating rows and columns of the 3-pixel strokes (size 2: every one twice;
-  // size 1.5: 3-pixel strokes become 4), while outline, bevel and extrusion stay 1 pixel: one pixel grid throughout.
-  const ROW15 = [0, 0, 1, 2, 3, 4, 4, 5, 6, 7, 8, 9, 9, 10];
-  const grow = (g, size) => {
-    const w = g[0].length, nw = Math.round(w * size), rows = size === 2 ? g.flatMap((r) => [r, r]) : ROW15.map((r) => g[r]);
-    return rows.map((row) => Array.from({ length: nw }, (_, c) => row[Math.floor(c * w / nw)]).join(""));
-  };
-  const SIZED = { 2: {}, 1.5: {} };
-  for (const size of [2, 1.5]) for (const ch in LOGO) SIZED[size][ch] = grow(LOGO[ch], size);
-  const advance = (ch, size) => ch === " " ? Math.round(5 * size) : SIZED[size][ch][0].length + Math.round(size);
-  const logoWidth = (str, size) => [...str].reduce((a, ch) => a + advance(ch, size), -Math.round(size));
-  // Letters are bevelled (light top and left edges, shaded bottom), extruded 2 pixels and outlined in ink.
-  // cols(n) -> [face, shade, light]; lift(n) -> pixels the letter jumps.
-  function logo(str, y, size, cols, lift) {
-    let x = Math.round((W - logoWidth(str, size)) / 2);
-    [...str].forEach((ch, n) => {
-      const g = SIZED[size][ch]; if (!g) { x += advance(ch, size); return; }
-      const on = (i, j) => j >= 0 && j < g.length && i >= 0 && i < g[0].length && g[j][i] === "1", ly = y - lift(n), [face, shade, light] = cols(n);
-      for (let j = 0; j < g.length; j++) for (let i = 0; i < g[0].length; i++) if (on(i, j)) rect(x + i - 1, ly + j - 1, 5, 5, INK);
-      for (let j = 0; j < g.length; j++) for (let i = 0; i < g[0].length; i++) if (on(i, j)) { rect(x + i + 1, ly + j + 1, 1, 1, shade); rect(x + i + 2, ly + j + 2, 1, 1, mix(shade, INK, 0.5)); }
-      for (let j = 0; j < g.length; j++) for (let i = 0; i < g[0].length; i++) if (on(i, j)) rect(x + i, ly + j, 1, 1, !on(i, j - 1) || !on(i - 1, j) ? light : !on(i, j + 1) ? mix(face, shade, 0.5) : face);
-      x += advance(ch, size);
-    });
-  }
-  // The colour change runs along the word as a wave, each letter hopping as it changes.
-  function shiftingLogo(str, y, size, now, changes) {
-    const at = (n) => { let c = changes[0][1], h = -1e9; for (const [t, b] of changes) { const tn = t + n * 25; if (now >= tn + 40) c = b; if (now >= tn) h = tn; } return [c, h]; };
-    logo(str, y, size, (n) => BODY[at(n)[0]], (n) => { const h = now - at(n)[1]; return (h >= 0 && h < 240 ? Math.round(Math.sin(Math.PI * h / 240) * 4) : 0) + (Math.floor(now / 500 + n * 0.5) % 2); });
-  }
+  // The logo font lives in pixel-art.js; here it is centred on the screen.
+  const shiftingLogo = (str, y, size, now, changes) => PX.shiftingLogo(q, str, Math.round((W - PX.logoWidth(str, size)) / 2), y, size, now, changes);
 
   function init(opts) {
     o = opts; PX = o.PX; PAL = PX.PAL; el = o.el; cv = o.canvas;

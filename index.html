@@ -5,66 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Body Hop</title>
 <style>
-  :root { --bg: #1d1f24; --panel: #2a2d34; --text: #e8e8ea; --dim: #9a9ca3; --accent: #f0d060; }
-  html, body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.4 system-ui, sans-serif; }
-  #app { max-width: 960px; margin: 0 auto; padding: 16px; }
-  header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-  h1 { font-size: 20px; margin: 0; }
-  #turns { color: var(--dim); font-variant-numeric: tabular-nums; }
-  #hint { min-height: 1.4em; margin: 8px 0; color: var(--dim); }
-  #stage { position: relative; display: flex; justify-content: center; margin: 12px 0; }
-  canvas { background: #000; border-radius: 6px; max-width: 100%; image-rendering: pixelated; }
-  #status { min-height: 1.4em; text-align: center; font-weight: 600; }
-  #status.bad { color: #ff9a8a; } #status.good { color: var(--accent); }
-  /* While the touch pad is shown it sits right under the status line, so the line always keeps two
-     lines of room: a one-line message and a two-line one (a hop or a Blocked line wraps on a 360 px
-     phone) take the same space and the pad never jumps. Every status line fits in two lines at 360 px. */
-  body.touch #status { min-height: 2.8em; }
-  @media (pointer: coarse) { body:not(.no-touch) #status { min-height: 2.8em; } }
-  /* The body label never wraps and is as wide for every body, so a hop never moves the turn counter
-     or the board (each line fits beside the counter at 360 px). */
-  #body { display: inline-block; padding: 2px 8px; border-radius: 4px; background: var(--panel); white-space: nowrap; min-width: 12em; text-align: center; }
-  #turns { white-space: nowrap; }
-  footer { color: var(--dim); font-size: 13px; margin-top: 10px; }
-  kbd { background: var(--panel); border-radius: 3px; padding: 0 5px; font: 12px ui-monospace, monospace; }
-  #levels { display: flex; gap: 6px 14px; flex-wrap: wrap; margin-top: 8px; }
-  #levels .chapter { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
-  #levels .chapter span { color: var(--dim); font-size: 12px; margin-right: 2px; }
-  #levels button { background: var(--panel); color: var(--dim); border: 1px solid #3a3e46; border-radius: 4px; padding: 2px 8px; cursor: pointer; font: inherit; font-size: 13px; }
-  #levels button.cur { color: var(--text); border-color: var(--accent); }
-  /* Touch controls: shown on touch screens, or on demand with the "Touch controls" button. */
-  #touch { display: none; margin: 12px auto 0; max-width: 360px; gap: 12px; align-items: center; justify-content: space-between; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
-  body.touch #touch { display: flex; }
-  @media (pointer: coarse) { body:not(.no-touch) #touch { display: flex; } }
-  #pad { display: grid; grid-template-columns: repeat(3, 60px); grid-template-rows: repeat(3, 60px); gap: 6px; }
-  #pad button, #acts button { background: var(--panel); color: var(--text); border: 1px solid #3a3e46; border-radius: 10px; font: 600 22px system-ui, sans-serif; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-  #pad button:active, #acts button:active { background: #3a3e46; }
-  #pad [data-dir="up"] { grid-area: 1 / 2; } #pad [data-dir="left"] { grid-area: 2 / 1; }
-  #pad [data-dir="right"] { grid-area: 2 / 3; } #pad [data-dir="down"] { grid-area: 3 / 2; }
-  #acts { display: flex; flex-direction: column; gap: 8px; }
-  #acts button { font-size: 15px; padding: 12px 16px; min-width: 112px; }
-  #acts button:disabled { opacity: 0.4; }
-  #touchToggle { background: none; border: 1px solid #3a3e46; color: var(--dim); border-radius: 4px; padding: 2px 8px; font: inherit; font-size: 13px; cursor: pointer; }
-  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  /* Legend: an overlay on the board, opened and closed with L (or the Legend button). It is never
-     taller than the board, or 200 px on a tiny board, and never more than 40 px past the board, so it
-     can cover the status line but never the touch pad. Longer content scrolls inside it. */
-  #legend { display: none; position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 5; width: min(620px, 100%); box-sizing: border-box; max-height: min(calc(100% + 40px), max(100%, 200px)); overflow-y: auto; overscroll-behavior: contain; padding: 0 12px 8px; background: rgba(10,10,14,0.97); border: 1px solid #3a3e46; border-radius: 6px; font-size: 12.5px; line-height: 1.3; cursor: pointer; }
-  #legend.open { display: block; }
-  #legend .top { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 0 4px; background: rgb(10,10,14); }
-  #legend .top b { font-size: 13px; }
-  #legend .top span { color: var(--dim); font-weight: 400; }
-  #legend button { background: var(--panel); color: var(--text); border: 1px solid #3a3e46; border-radius: 4px; padding: 2px 10px; font: inherit; cursor: pointer; }
-  #legend .who { margin: 6px 0 1px; font-weight: 600; }
-  #legend .row { display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: center; margin-left: 6px; }
-  #legend .row .lbl { color: var(--dim); min-width: 44px; }
-  #legend .row.list { flex-direction: column; align-items: flex-start; }
-  #legend .item { display: inline-flex; align-items: center; gap: 3px; }
-  #legend canvas { width: 32px; height: 32px; border-radius: 2px; background: none; flex: none; outline: 1px solid #3a3e46; }
-  #legend canvas.mark { width: 40px; height: 40px; }
-  #legend p { margin: 6px 0 0; color: var(--dim); }
-  #legendBtn, #sfxBtn, #musicBtn, #titleBtn { background: none; border: 1px solid #3a3e46; color: var(--dim); border-radius: 4px; padding: 2px 8px; font: inherit; font-size: 13px; cursor: pointer; }
-  #levels button.done::after { content: " ✓"; color: var(--accent); }
+  /* The game is one pixel-art canvas (hud.js), centred in the window and scaled by whole numbers; the title and end
+     screens (screens.js) are another, over it. The text the canvas shows is also kept in a visually hidden block
+     (#sr) for screen readers and the test tools. */
+  html, body { margin: 0; height: 100%; background: #06060c; color: #ececf8; font: 15px/1.4 system-ui, sans-serif; }
+  #app { min-height: 100%; display: flex; align-items: center; justify-content: center; }
+  #c { display: block; image-rendering: pixelated; touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   /* Title and end screens (screens.js): one pixel-art canvas over the game, scaled by whole numbers. */
   #screen { display: none; position: fixed; inset: 0; z-index: 20; background: #06060c; align-items: center; justify-content: center; animation: screen-in 0.3s ease-out; }
   #screen.open { display: flex; }
@@ -75,48 +22,32 @@
 </head>
 <body>
 <div id="app">
-  <header>
-    <h1 id="title">Body Hop</h1>
-    <div><span id="body">spirit</span> <span id="turns"></span></div>
-  </header>
-  <div id="hint"></div>
-  <div id="stage"><canvas id="c"></canvas><div id="legend" role="dialog" aria-label="Legend"></div></div>
-  <div id="status"></div>
-  <div id="touch">
-    <div id="pad">
-      <button id="btnUp" data-dir="up" aria-label="Up">&#9650;</button>
-      <button id="btnLeft" data-dir="left" aria-label="Left">&#9664;</button>
-      <button id="btnRight" data-dir="right" aria-label="Right">&#9654;</button>
-      <button id="btnDown" data-dir="down" aria-label="Down">&#9660;</button>
-    </div>
-    <div id="acts">
-      <button id="btnUndo">Undo</button>
-      <button id="btnRestart">Restart</button>
-      <button id="btnNext" disabled>Next level</button>
-    </div>
-  </div>
-  <div id="levels"></div>
-  <footer>
-    <kbd>←↑→↓</kbd>/<kbd>WASD</kbd> move, or walk into a body to hop into it ·
-    <kbd>Z</kbd>/<kbd>Backspace</kbd> undo · <kbd>R</kbd> restart · <kbd>N</kbd> next level (after a win) · <kbd>Shift+N</kbd> skip ·
-    <button id="legendBtn"><kbd>L</kbd> legend</button> · <button id="touchToggle">Touch controls</button> ·
-    <button id="sfxBtn">Sound on</button> · <button id="musicBtn"><kbd>M</kbd> Music on</button> · <button id="titleBtn">Title screen</button>
-  </footer>
+  <canvas id="c" role="img" aria-label="Body Hop board"></canvas>
 </div>
+<div id="sr" class="sr">
+  <h1 id="title">Body Hop</h1>
+  <p id="hint"></p>
+  <p><span id="body">spirit</span> <span id="turns"></span></p>
+  <p id="status" aria-live="polite"></p>
+  <p>Arrow keys or WASD move; walking into a body hops into it. Z undo, R restart, N next level after a win, L how to play, Escape menu, M music.</p>
+</div>
+<div id="levels" hidden></div>
 <div id="screen" role="dialog" aria-label="Body Hop"><canvas id="screenArt"></canvas></div>
 <script src="engine.js"></script>
 <script src="levels.js"></script>
 <script src="audio.js"></script>
 <script src="pixel-art.js"></script>
 <script src="screens.js"></script>
+<script src="hud.js"></script>
 <script>
 "use strict";
 const BH = window.BodyHop, LEVELS = window.BODY_HOP_LEVELS, SND = window.BodyHopAudio;
-const PX = window.PixelArt, SCALE = 4, TILE = PX.K * SCALE; // 16 px art scaled 4x
-const cv = document.getElementById("c");
+const PX = window.PixelArt, HUD = window.BodyHopHUD;
+const cv = document.getElementById("c"); // the whole game screen (hud.js draws it)
+const boardCv = document.createElement("canvas"); // the board at 1x, drawn by pixel-art.js and framed by the HUD
 const $ = (id) => document.getElementById(id);
 
-let idx = 0, L, s, history, turns, startTime, log, won, flash = null;
+let idx = 0, L, s, history, turns, startTime, log, won, flash = null, status = { text: "", cls: "", at: 0 };
 const done = new Set();
 try { for (const n of JSON.parse(localStorage.getItem("bodyhop-done") || "[]")) done.add(n); } catch (e) { /* storage unavailable */ }
 
@@ -125,18 +56,25 @@ function load(i, cue = "start") {
   idx = (i + LEVELS.length) % LEVELS.length;
   L = BH.parse(LEVELS[idx]);
   s = L.start; history = []; turns = 0; won = false; log = []; startTime = performance.now();
-  cv.width = L.w * TILE; cv.height = L.h * TILE;
+  boardCv.width = L.w * PX.K; boardCv.height = L.h * PX.K;
   $("title").textContent = `${label(idx)}. ${LEVELS[idx].name}`;
   $("hint").textContent = LEVELS[idx].hint || "";
   setStatus("");
   renderLevels(); draw(); hud();
   SND.levelChange(); SND.setBody("S"); SND.play(cue);
+  if (cue !== "restart") HUD.intro(performance.now(), introInfo(idx));
 }
 
-function setStatus(text, cls) { const el = $("status"); el.textContent = text; el.className = cls || ""; }
+// What the intro ribbon says: the chapter, the level's number and its name.
+function introInfo(i) {
+  const ch = chapterOf(i), n = [...new Set(LEVELS.map((_, j) => chapterOf(j)))].indexOf(ch) + 1;
+  return { label: isBonus(i) ? `Night shift ${i - mainCount + 1} of ${LEVELS.length - mainCount}` : `Level ${i + 1} of ${mainCount}`, name: LEVELS[i].name,
+    chapter: isBonus(i) ? "Night shift: bonus levels" : `Chapter ${n}: ${ch}` };
+}
+
+function setStatus(text, cls) { const el = $("status"); el.textContent = text; el.className = cls || ""; status = { text, cls: cls || "", at: performance.now() }; }
 
 function hud() {
-  $("btnNext").disabled = !won;
   const me = BH.current(L, s);
   const sees = me.t === "G" ? "sees red, not blue" : me.t === "C" ? "sees blue, not red" : "sees no colour";
   $("body").textContent = `${BH.NAMES[me.t]}: ${sees}`;
@@ -167,7 +105,7 @@ function renderLevels() {
     if (i === idx) b.className = "cur";
     if (done.has(lv.name)) b.classList.add("done");
     // On the current level the button only restarts it (nothing, at turn 0).
-    b.onclick = () => { SND.play("ui"); if (closeLegend(i !== idx ? `Legend closed. Press again to go to level ${label(i)}.` : history.length ? "Legend closed. Press again to restart." : "Legend closed.")) return; logEnd("left"); load(i); };
+    b.onclick = () => { SND.play("ui"); if (closeLegend(i !== idx ? `Closed How to play. Press again to go to level ${label(i)}.` : history.length ? "Closed How to play. Press again to restart." : "Closed How to play.")) return; logEnd("left"); load(i); };
     group.appendChild(b);
   });
 }
@@ -190,7 +128,7 @@ function logEnd(how) {
 function compress(a) { const out = []; for (const k of a) { const last = out[out.length - 1]; if (last && last[0] === k) last[1]++; else out.push([k, 1]); } return out.map(([k, n]) => n > 1 ? `${k}x${n}` : k).join(" "); }
 
 function act(dir) {
-  if (closeLegend(!won ? "Legend closed. Press again to move." : idx < LEVELS.length - 1 ? "Legend closed. Press N for the next level." : "Legend closed.")) return;
+  if (closeLegend(!won ? "Closed How to play. Press again to move." : idx < LEVELS.length - 1 ? "Closed How to play. Press N for the next level." : "Closed How to play.")) return;
   if (won) return;
   const r = BH.step(L, s, dir);
   log.push(dir[0].toUpperCase());
@@ -254,7 +192,7 @@ function walkNews(prev, now) {
 }
 
 function undo() {
-  if (closeLegend(history.length ? "Legend closed. Press again to undo." : "Legend closed.")) return;
+  if (closeLegend(history.length ? "Closed How to play. Press again to undo." : "Closed How to play.")) return;
   log.push("Z");
   if (!history.length) return;
   SND.play("undo");
@@ -352,152 +290,52 @@ function draw(now = performance.now()) {
       const r = 6 + d / 18; for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; PX.dot(q, me.x * K + 8 + Math.cos(a) * r, me.y * K + 8 + Math.sin(a) * r, i % 2 ? PAL.Y : PAL.W); }
     }
   };
-  PX.render(cv, { map: anim.map, viewer: hop ? (k < 0.5 ? hop.from : hop.to) : me.t, from: hop ? hop.from : me.t, to: hop ? hop.to : me.t, lensT: k, t: now, bodies, hops, state, fx });
+  const viewer = hop ? (k < 0.5 ? hop.from : hop.to) : me.t, lv = LEVELS[idx], last = idx === LEVELS.length - 1;
+  PX.render(boardCv, { map: anim.map, viewer, from: hop ? hop.from : me.t, to: hop ? hop.to : me.t, lensT: k, t: now, bodies, hops, state, fx });
+  HUD.frame(now, { board: boardCv, me: viewer, label: label(idx), name: lv.name, hint: lv.hint || "", turns, par: lv.par, best: best[lv.name],
+    won, wonAt: anim.wonAt, status, hopLanded: landed, legendOpen, endMain: idx === mainCount - 1, last,
+    chapter: chapterOf(idx).replace(/ \(optional\)/, ""), chapterEnd: !last && chapterOf(idx + 1) !== chapterOf(idx), nextChapter: last ? "" : chapterOf(idx + 1).replace(/ \(optional\)/, "") });
 }
 const loop = (now) => { if (SCR.open()) SCR.draw(now); else draw(now); requestAnimationFrame(loop); };
 requestAnimationFrame(loop);
 
-// ---------- legend ----------
-// An HTML overlay on the board. Each body's rows draw the tiles exactly as that body sees them.
-const LEGEND_BODIES = [
-  { t: "S", title: "Spirit (white ghost): sees no colour, so every red or blue block is grey fog, a wall to the spirit; weighs nothing on plates",
-    can: [[".", "floor"], ["_", "plate"], ["E", "exit"], ["|o", "open gate"]],
-    cannot: [["R", "red block (fog)"], ["B", "blue block (fog)"], ["#", "wall"], ["|", "shut gate"]] },
-  { t: "G", title: "Guard (red uniform): sees red, not blue",
-    can: [["B", "blue block: not there for the guard"]], also: "floor, plates, open gates, exit",
-    cannot: [["R", "red block"], ["#", "wall"], ["|", "shut gate"]] },
-  { t: "C", title: "Cat (blue): sees blue, not red",
-    can: [["R", "red block: not there for the cat"]], also: "floor, plates, open gates, exit",
-    cannot: [["B", "blue block"], ["#", "wall"], ["|", "shut gate"]] },
-];
-// [tile, text, the body whose view the icon shows (default: the spirit's)]
-const LEGEND_TILES = [["#", "wall (bricks): no body passes"],
-  ["R", "red block (stripes): solid to the guard, not there for the cat", "G"],
-  ["B", "blue block (dots): solid to the cat, not there for the guard", "C"],
-  ["_", "plate (grey, with a ring): step a body on it. The spirit weighs nothing"],
-  ["_h", "plate, held (lit green, glowing round the body on it): every gate is open"],
-  ["|", "gate, shut (bars down, red lamps): no body on a plate or in a gate"],
-  ["|o", "gate, open (bars up, green lamps): while any plate is held, or a body stands in any gate"],
-  ["E", "exit (green EXIT sign over a lit door): reach it to win"]];
-// Board markers. "@x" items draw a marker icon instead of a tile.
-const LEGEND_MARKS = [["@you", "yellow outline and ring: the body you are in"],
-  ["@sleep", "z: an asleep body. It blocks the way"],
-  ["@hop", "yellow arrow on your edge: step that way to hop into the body there"]];
+// ---------- How to play: hud.js draws it over the game while legendOpen ----------
 let legendOpen = false;
+function toggleLegend(open = !legendOpen) { if (open !== legendOpen) SND.play("ui"); legendOpen = open; }
 
-// "|o" draws an open gate and "|" a shut one; "_h" a held plate and "_" an empty one.
-function tileIcon(ch, who) {
-  const c = document.createElement("canvas"); c.width = c.height = PX.K * 2;
-  const open = ch.startsWith("|o"), held = ch.startsWith("_h");
-  PX.render(c, { map: [ch[0]], viewer: who, t: 0, state: () => ch[0] === "|" ? { open: open ? 1 : 0, lit: open } : ch[0] === "_" ? { press: held ? 1 : 0 } : null });
-  return c;
-}
-
-// A marker icon for the legend: a guard on floor, drawn as the board draws it.
-function markerIcon(kind) {
-  const c = document.createElement("canvas"), wide = kind === "hop"; c.width = PX.K * (wide ? 4 : 2); c.height = PX.K * 2; c.className = "mark";
-  if (wide) c.style.width = "80px";
-  PX.render(c, { map: [wide ? ".." : "."], viewer: "S", t: 0, bodies: [{ t: "G", x: wide ? 1 : 0, y: 0, active: kind === "you", zz: kind !== "you" }], hops: wide ? [[0, 0, "right"]] : [] });
-  return c;
-}
-
-function legendRow(label, items, who, also) {
-  const row = document.createElement("div"); row.className = "row";
-  if (label) { const head = document.createElement("span"); head.className = "lbl"; head.textContent = label; row.appendChild(head); }
-  else row.classList.add("list");
-  for (const [ch, name, view] of items) {
-    const it = document.createElement("span"); it.className = "item";
-    it.appendChild(ch[0] === "@" ? markerIcon(ch.slice(1)) : tileIcon(ch, view || who)); it.appendChild(document.createTextNode(name)); row.appendChild(it);
-  }
-  if (also) { const a = document.createElement("span"); a.textContent = "and " + also; row.appendChild(a); }
-  return row;
-}
-
-function buildLegend() {
-  const box = $("legend"); box.innerHTML = "";
-  const top = document.createElement("div"); top.className = "top";
-  const h = document.createElement("b"); h.textContent = "Legend ";
-  const how = document.createElement("span"); how.textContent = "tap or L closes"; h.appendChild(how);
-  const close = document.createElement("button"); close.textContent = "Close";
-  top.append(h, close); box.appendChild(top); // a click anywhere on the panel closes it, the button included
-  for (const b of LEGEND_BODIES) {
-    const who = document.createElement("div"); who.className = "who"; who.textContent = b.title;
-    who.style.color = b.t === "G" ? "#ff9a8a" : b.t === "C" ? "#9ac0ff" : "#ddd";
-    box.append(who, legendRow("Can:", b.can, b.t, b.also), legendRow("Can't:", b.cannot, b.t));
-  }
-  const tw = document.createElement("div"); tw.className = "who"; tw.textContent = "Special tiles";
-  box.append(tw, legendRow("", LEGEND_TILES, "S"));
-  const mk = document.createElement("div"); mk.className = "who"; mk.textContent = "Bodies on the board";
-  box.append(mk, legendRow("", LEGEND_MARKS, "S"));
-  const p = document.createElement("p");
-  p.textContent = "Each tile is drawn as that body sees it: a dotted outline is not there for that body. " +
-    "Walk into a body to hop into it; Z undoes a hop.";
-  box.appendChild(p);
-}
-
-function toggleLegend(open = !legendOpen) {
-  if (open !== legendOpen) SND.play("ui");
-  legendOpen = open;
-  const box = $("legend");
-  if (open) buildLegend();
-  box.classList.toggle("open", open);
-  if (open) { // say so when the panel is shorter than its content (overlay scrollbars are easy to miss)
-    box.scrollTop = 0;
-    box.querySelector(".top span").textContent = (box.scrollHeight > box.clientHeight + 2 ? "scroll for more · " : "") + "tap or L closes";
-  }
-}
-
-// While the legend is open, every game input (move, undo, restart, next, skip, level button) only
+// While How to play is open, every game input (move, undo, restart, next, skip, level button) only
 // closes it, so nothing happens on a board you cannot see. The status line then says so (`msg`), so a
-// press that did nothing on the board is never silent. Returns true if it closed the legend.
+// press that did nothing on the board is never silent. Returns true if it closed How to play.
 function closeLegend(msg) {
   if (!legendOpen) return false;
   toggleLegend(false);
-  setStatus(msg || "Legend closed.");
+  setStatus(msg || "Closed How to play.");
   return true;
 }
 
 // At turn 0 a restart changes nothing on the board, so the close message promises nothing.
-function restart() { if (closeLegend(history.length ? "Legend closed. Press again to restart." : "Legend closed.")) return; logEnd("restarted"); log.push("R"); load(idx, "restart"); }
+function restart() { if (closeLegend(history.length ? "Closed How to play. Press again to restart." : "Closed How to play.")) return; logEnd("restarted"); log.push("R"); load(idx, "restart"); }
 // After the last main level, N opens the end screen; after the last level, the final screen.
 function next() {
-  if (closeLegend(won ? "Legend closed. Press again to go on." : "Legend closed.")) return;
+  if (closeLegend(won ? "Closed How to play. Press again to go on." : "Closed How to play.")) return;
   if (!won) return;
   if (idx === mainCount - 1 || idx === LEVELS.length - 1) showScreen(idx === mainCount - 1 && mainCount < LEVELS.length ? "end" : "final");
   else load(idx + 1);
 }
 
-// On-screen controls. pointerdown (not click) so taps feel instant and double-tap never zooms.
-for (const b of document.querySelectorAll("#pad button")) {
-  b.addEventListener("pointerdown", (e) => { e.preventDefault(); act(b.dataset.dir); });
-}
-$("btnUndo").addEventListener("pointerdown", (e) => { e.preventDefault(); undo(); });
-$("btnRestart").addEventListener("pointerdown", (e) => { e.preventDefault(); restart(); });
-$("btnNext").addEventListener("pointerdown", (e) => { e.preventDefault(); next(); });
-$("legendBtn").addEventListener("click", () => toggleLegend());
-// A click or tap anywhere on the legend closes it, except on its scrollbar (a drag there scrolls it).
-$("legend").addEventListener("click", (e) => {
-  const box = e.currentTarget, r = box.getBoundingClientRect();
-  if (e.clientX > r.left + box.clientLeft + box.clientWidth) return;
-  toggleLegend(false);
+// Sound and music switches (saved on this machine). M toggles music; it is not a game input, so it never closes How to play.
+function toggleMusic() { SND.setMusic(!SND.music); SND.play("ui"); }
+function toggleSfx() { SND.setSfx(!SND.sfx); SND.play("ui"); }
+// A tap or click on the board walks one tile toward that tile (along the longer distance), so the game plays with
+// a mouse or a finger too. Taps on the HUD's own buttons are handled (and marked) by hud.js first.
+cv.addEventListener("pointerdown", (e) => {
+  if (e.defaultPrevented || SCR.open() || HUD.menuOpen() || legendOpen) return;
+  const t = HUD.tileAt(e); if (!t) return;
+  const me = BH.current(L, s), dx = t[0] - me.x, dy = t[1] - me.y;
+  if (!dx && !dy) return;
+  e.preventDefault();
+  act(Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? "right" : "left") : (dy > 0 ? "down" : "up"));
 });
-$("touchToggle").addEventListener("click", () => {
-  const coarse = matchMedia("(pointer: coarse)").matches;
-  const shown = document.body.classList.contains("touch") || (coarse && !document.body.classList.contains("no-touch"));
-  document.body.classList.toggle("touch", !shown);
-  document.body.classList.toggle("no-touch", shown);
-});
-// Sound and music switches (saved on this machine). M toggles music; it is not a game input, so it
-// never closes the legend.
-function soundButtons() {
-  $("sfxBtn").textContent = `Sound ${SND.sfx ? "on" : "off"}`;
-  $("musicBtn").innerHTML = `<kbd>M</kbd> Music ${SND.music ? "on" : "off"}`;
-}
-function toggleMusic() { SND.setMusic(!SND.music); SND.play("ui"); soundButtons(); }
-$("sfxBtn").addEventListener("click", () => { SND.setSfx(!SND.sfx); SND.play("ui"); soundButtons(); });
-$("musicBtn").addEventListener("click", toggleMusic);
-soundButtons();
-$("titleBtn").addEventListener("click", () => { SND.play("ui"); logEnd("left"); showScreen("title"); });
 
 // ---------- title and end screens (screens.js) ----------
 // The title shows on a plain visit (a ?level=N link, as the test tools use, goes straight to that level). The
@@ -509,21 +347,26 @@ const firstUnsolved = () => { const i = LEVELS.findIndex((lv) => !done.has(lv.na
 const SCR = window.BodyHopScreens;
 SCR.init({ PX, SND, el: $("screen"), canvas: $("screenArt"), levels: LEVELS, mainCount, label, firstUnsolved,
   progress: () => ({ done, best }), music: () => SND.music, toggleMusic, start: (i) => SCR.leave(() => load(i)) });
-function showScreen(kind) {
-  if (legendOpen) { legendOpen = false; $("legend").classList.remove("open"); }
-  SCR.show(kind);
-}
+function showScreen(kind) { legendOpen = false; HUD.closeMenu(); SCR.show(kind); }
+HUD.init({ PX, SND, canvas: cv, levels: LEVELS, mainCount, label, chapterOf, current: () => idx,
+  isDone: (i) => done.has(LEVELS[i].name), atPar: (i) => best[LEVELS[i].name] <= LEVELS[i].par, best: (i) => best[LEVELS[i].name],
+  music: () => SND.music, sfx: () => SND.sfx,
+  act: (name, arg) => ({ undo, restart, next, move: act, legend: () => toggleLegend(), music: toggleMusic, sound: toggleSfx,
+    title: () => { SND.play("ui"); logEnd("left"); showScreen("title"); }, level: (i) => { logEnd("left"); load(i); } })[name](arg) });
 
 const KEYS = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right", w: "up", s: "down", a: "left", d: "right", W: "up", S: "down", A: "left", D: "right" };
 addEventListener("keydown", (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   if (SCR.open()) { SCR.key(e); return; }
+  if (HUD.key(e)) return; // the pause menu and level select take every key while open
+  if (e.key === "Escape" || e.key === "p" || e.key === "P") { e.preventDefault(); if (legendOpen) toggleLegend(false); else HUD.openMenu("pause"); return; }
   if (KEYS[e.key]) { e.preventDefault(); act(KEYS[e.key]); return; }
   if (e.key === "z" || e.key === "Z" || e.key === "Backspace") { e.preventDefault(); undo(); return; }
   if (e.key === "r" || e.key === "R") { restart(); return; }
-  if (e.key === "N" && e.shiftKey) { if (closeLegend("Legend closed. Press again to skip this level.")) return; logEnd("SKIPPED"); load(idx + 1); return; }
-  if (e.key === "n") { next(); return; }
+  if (e.key === "N" && e.shiftKey) { if (closeLegend("Closed How to play. Press again to skip this level.")) return; logEnd("SKIPPED"); load(idx + 1); return; }
+  if (e.key === "n" || (won && (e.key === "Enter" || e.key === " "))) { e.preventDefault(); next(); return; }
   if (e.key === "l" || e.key === "L") { toggleLegend(); return; }
+  if (e.key === "h" || e.key === "H") { HUD.toggleHint(); return; }
   if (e.key === "m" || e.key === "M") { toggleMusic(); return; }
 });
 
