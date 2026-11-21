@@ -23,7 +23,7 @@ const FILTERS = {
 };
 (async () => {
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: 900, height: 820 } });
+  const page = await browser.newPage({ viewport: { width: 1300, height: 740 } }); // the game canvas shows at 4x (1280 x 720)
   const errors = []; page.on("pageerror", (e) => errors.push(e.message));
   // ?level=1 goes straight to level 1, past the title screen, so a session's first key always plays.
   await page.goto("file://" + path.join(__dirname, "game.html") + "?level=1");
@@ -35,14 +35,15 @@ const FILTERS = {
   }
   const press = async (k) => {
     const m = /^Level:(\d+)$/i.exec(k);
-    if (m) { const b = page.locator("#levels button").nth(Number(m[1]) - 1); if (await b.count()) await b.click({ timeout: 2000 }).catch(() => {}); return; } // hidden under an end screen: does nothing
+    if (m) { const b = page.locator("#levels button").nth(Number(m[1]) - 1); if (await b.count()) await b.dispatchEvent("click").catch(() => {}); return; } // the list is hidden; level select is in the game's menu
     if (k === "ShiftN") return page.keyboard.press("Shift+N");
     await page.keyboard.press(KEY[k]);
   };
   for (const c of S.calls) for (const k of c.keys) await press(k);
   const before = await page.evaluate(() => ({ level: window.__bodyhop.level + 1 }));
   for (const k of newKeys) await press(k);
-  await page.waitForTimeout(320);
+  // A new level shows its intro ribbon for about 1.5 s (any key cuts it short): wait it out before the screenshot.
+  await page.waitForTimeout(/^(N|ShiftN|Level:\d+)$/i.test(newKeys[newKeys.length - 1] || "") ? 1700 : 320);
   const view = await page.evaluate(() => {
     const t = (id) => (document.getElementById(id) || {}).textContent || "";
     return { title: t("title"), hint: t("hint"), body: t("body"), turns: t("turns"), status: t("status").trim(),
@@ -50,7 +51,7 @@ const FILTERS = {
   });
   const n = S.calls.length;
   const shot = path.join(shotDir, `shot-${String(n).padStart(4, "0")}.png`);
-  await page.locator("#app").screenshot({ path: shot });
+  await page.locator("#c").screenshot({ path: shot });
   S.calls.push({ t: new Date().toISOString(), keys: newKeys, note: typeof opt.note === "string" ? opt.note : null,
     levelBefore: before.level, level: view.level, won: view.won, turns: view.nTurns, status: view.status, shot: path.basename(shot) });
   fs.writeFileSync(file, JSON.stringify(S, null, 1));

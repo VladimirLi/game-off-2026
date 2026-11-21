@@ -14,7 +14,7 @@
       teaches: "you are the ghost; walk into a body to become it; another body can pass what stops you",
       aha: "The block that stopped me is no wall to the guard, and walking into the guard makes me the guard.",
       wrong: "I am stuck as the ghost.",
-      hint: "You are the ghost. The block stops you, but not the guard. Walk into the guard to become it.",
+      hint: "You are the spirit. The block stops you, but not the guard. Walk into the guard to become it.",
       map: [
         "#########",
         "#...G#..#",
@@ -83,7 +83,7 @@
       teaches: "a body left on a plate holds the gate; the spirit weighs nothing",
       aha: "The plate ignores me, so I wake the guard, walk it back onto the plate, and hop into the cat beside it; the guard stays behind holding the gate.",
       wrong: "I can hold the plate myself and walk through.",
-      hint: "A plate holds the gate open only while a body stands on it. You, the ghost, weigh nothing.",
+      hint: "A plate holds the gate open only while a body stands on it. You, the spirit, weigh nothing.",
       map: [
         "######",
         "#S_.G#",
