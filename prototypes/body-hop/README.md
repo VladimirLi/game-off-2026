@@ -29,7 +29,7 @@ The side panel names your body in the logo font, shows how it sees a red and a b
 
 - Events (all named `bodyhop_*`): `session_start` (device, touch or not, screen size, language, referrer site), `level_start`, `level_end` (outcome: complete, left, restarted, skipped or closed; turns, par, at par, seconds, undos, and the key sequence), `how_to_play` and `hint_opened` (with the level), `screen` (title, end, final) and `feedback` (the player's note from "Send feedback", at most 1000 characters).
 - The PostHog dashboard "Body Hop: playtests and players" shows per level who started, solved (and at par), median turns and time, quits, restarts, skips and hints; the furthest level each player reached; every level attempt with its key sequence; the feedback notes; who reached the end screens; and sessions per day by mode and device. It leaves out our own test runs.
-- Every event carries `mode`: "playtest" when the address has `?playtest=1` (the link we give testers), "dev" when the page is served from this machine (localhost), otherwise "public". Testers', jam players' and our own test data can be told apart that way.
+- Every event carries `mode`: "playtest" when the address has `?playtest=1` (the link we give testers), "dev" when the page is served from this machine (localhost) or the address has `?dev=1` (our own checks and play-throughs on the live site), otherwise "public". Testers', jam players' and our own data can be told apart that way; the dashboard leaves "dev" out.
 - With stats off, "Send feedback" copies the note instead, to paste to the developer.
 
 ## Art
