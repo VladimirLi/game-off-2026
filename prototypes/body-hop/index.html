@@ -113,11 +113,14 @@ function renderLevels() {
 // What the win line says after the score: the next level, a chapter end, or the end of the main game.
 function winNext() {
   const last = idx === LEVELS.length - 1, endMain = idx === mainCount - 1;
-  if (endMain) return mainCount < LEVELS.length ? " That's the main game! Press N." : " That's the whole game! Press N.";
-  if (last) return " That's every Night shift level! Press N.";
-  if (chapterOf(idx + 1) !== chapterOf(idx)) return ` Chapter complete: ${chapterOf(idx)}. Press N for ${chapterOf(idx + 1)}.`;
-  return " Press N or tap Next level.";
+  const go = touchUI() ? "Tap NEXT" : "Press N";
+  if (endMain) return mainCount < LEVELS.length ? ` That's the main game! ${go}.` : ` That's the whole game! ${go}.`;
+  if (last) return ` That's every Night shift level! ${go}.`;
+  if (chapterOf(idx + 1) !== chapterOf(idx)) return ` Chapter complete: ${chapterOf(idx)}. ${go} for ${chapterOf(idx + 1)}.`;
+  return touchUI() ? " Tap NEXT." : " Press N or Enter.";
 }
+// A touch screen (no mouse to hover) gets the pad and buttons, so its messages name buttons, not keys.
+const touchUI = () => matchMedia("(hover: none) and (pointer: coarse)").matches;
 
 function logEnd(how) {
   if (!log.length && how !== "complete") return;
@@ -140,7 +143,7 @@ function act(dir) {
     const name = BH.NAMES[BH.current(L, s).t];
     const again = history.some((h) => h.ctrl === s.ctrl);
     SND.play(`hop:${BH.current(L, s).t}${again ? ":back" : ""}`); SND.setBody(BH.current(L, s).t);
-    setStatus((again ? `Back in the ${name}.` : `You are the ${name} now.`) + " Z to undo.");
+    setStatus((again ? `Back in the ${name}.` : `You are the ${name} now.`) + (touchUI() ? "" : " Z to undo."));
   } else { setStatus(walkNews(history[history.length - 1], s)); walkSounds(history[history.length - 1], s); }
   if (BH.won(L, s)) {
     won = true; done.add(LEVELS[idx].name);
@@ -194,10 +197,12 @@ function walkNews(prev, now) {
 function undo() {
   if (closeLegend(history.length ? "Closed How to play. Press again to undo." : "Closed How to play.")) return;
   log.push("Z");
-  if (!history.length) return;
+  if (!history.length) { setStatus("Nothing to undo: this is the start."); return; }
   SND.play("undo");
-  s = history.pop(); turns--; won = false; setStatus("");
+  const was = s.ctrl;
+  s = history.pop(); turns--; won = false;
   const after = BH.current(L, s).t;
+  setStatus(s.ctrl !== was ? `Undone: you are the ${BH.NAMES[after]} again.` : `Undone: back to turn ${turns}.`);
   SND.setBody(after);
   hud(); draw();
 }

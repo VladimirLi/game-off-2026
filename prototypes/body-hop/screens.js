@@ -26,9 +26,12 @@
     cv.addEventListener("pointermove", (e) => { const i = pick(e); if (i >= 0 && i !== sel) { sel = i; o.SND.play("ui"); } cv.style.cursor = i >= 0 ? "pointer" : "default"; });
     cv.addEventListener("pointerdown", (e) => { const i = pick(e); if (i >= 0) { e.preventDefault(); sel = i; activate(); } });
   }
+  // Desktops scale by whole numbers; touch screens fill the width (their dense displays hide fractional pixels).
+  const touch = () => matchMedia("(hover: none) and (pointer: coarse)").matches;
   function fit() {
-    const s = Math.max(1, Math.floor(Math.min(innerWidth / W, (innerHeight - 8) / H)));
-    cv.width = W * s; cv.height = H * s;
+    const f = Math.min(innerWidth / W, innerHeight / H), k = touch() || f < 2 ? Math.max(0.5, f * 0.98) : Math.floor(f);
+    const back = Math.max(1, Math.ceil(k * (devicePixelRatio || 1)));
+    cv.width = W * back; cv.height = H * back; cv.style.width = Math.round(W * k) + "px"; cv.style.height = Math.round(H * k) + "px";
   }
   const open = () => kind;
 
@@ -44,8 +47,8 @@
       if (kind === "end" && o.mainCount < o.levels.length) items.push({ label: () => `NIGHT SHIFT: ${o.levels.length - o.mainCount} MORE LEVELS`, act: () => o.start(o.mainCount) });
       items.push({ label: () => "TITLE SCREEN", act: () => show("title") });
     }
-    const y0 = kind === "title" ? 102 + (3 - items.length) * 5 : 106 + (2 - items.length) * 5;
-    items.forEach((it, n) => { it.y = y0 + n * 10; });
+    const y0 = kind === "title" ? 102 + (3 - items.length) * 5 : 105 + (2 - items.length) * 5, pitch = kind === "title" ? 10 : 11;
+    items.forEach((it, n) => { it.y = y0 + n * pitch; });
   }
   function activate() { const it = items[sel]; if (!it) return; if (!it.keep) o.SND.play("ui"); it.act(); }
   function show(k) {
@@ -104,7 +107,7 @@
       if (on) { const b = Math.floor(now / 260) % 2; for (let r = 0; r < 4; r++) { rect(x - 9 + b + r, it.y + r, 1, 7 - 2 * r, "#f8c838"); rect(x + w + 8 - b - r, it.y + r, 1, 7 - 2 * r, "#f8c838"); } }
     });
   }
-  function footer(now, lines) { if (items.length > 2) return; const s = lines[Math.floor(now / 3500) % lines.length]; PX.text(q, s, Math.round((W - PX.textWidth(s)) / 2), 134, "#6c6c8c"); }
+  function footer(now, lines) { if (items.length > 2) return; const s = lines[Math.floor(now / 3500) % lines.length]; PX.text(q, s, Math.round((W - PX.textWidth(s)) / 2), 134, "#9090b4"); }
 
   // ---------- title ----------
   const ROOM = ["############", "##S.G.CR.E##", "############"], roomCv = document.createElement("canvas"); roomCv.width = 192; roomCv.height = 48;
@@ -140,7 +143,7 @@
     shiftingLogo("BODY HOP", 8, 1.5, now, [[-1e9, "S"], [cyc + 1500, "G"], [cyc + 3500, "C"], [cyc + LIGHTS_OUT + 350, "S"], [cyc + P + 1500, "G"]]);
     const sub = "EACH BODY SEES ONE COLOUR"; PX.text(q, sub, Math.round((W - PX.textWidth(sub)) / 2), 31, "#a4a4c8", 1, INK);
     menu(now);
-    footer(now, ["ARROWS + ENTER - M: MUSIC", "GAME OFF 2026 - THEME: SHIFT", "BY VLADIMIR LI"]);
+    footer(now, [touch() ? "TAP START TO PLAY" : "ARROWS + ENTER - M: MUSIC", "GAME OFF 2026 - THEME: SHIFT", "BY VLADIMIR LI"]);
   }
 
   // ---------- end screens: out of the exit at dawn ----------
@@ -154,18 +157,19 @@
   function card(now) {
     const r = report(), age = now - shownAt, rows = [["LEVELS", r.main.solved, r.main.n], ["AT PAR", r.main.par, r.main.n]];
     if (kind === "final") rows.push(["NIGHT", r.night.solved, r.night.n], ["NIGHT PAR", r.night.par, r.night.n]);
-    const x = 103, w = 84, h = 14 + rows.length * 8 + 20, y = 30, shake = age > 1150 && age < 1230 ? 1 : 0;
+    const pitch = 10, x = 99, w = 88, h = 14 + rows.length * pitch + 17, y = rows.length > 2 ? 24 : 30, shake = age > 1150 && age < 1230 ? 1 : 0;
+    if (root.__uiBox) root.__uiBox(x, y + shake, w, h); // lets the layout test check the report's text stays on the card
     rect(x + 2, y + 2 + shake, w, h, "rgba(0,0,0,0.45)"); rect(x - 1, y - 1 + shake, w + 2, h + 2, INK); rect(x, y + shake, w, h, "#f0e6c8");
-    rows.forEach((_, i) => { if (i % 2) rect(x + 3, y + 23 + i * 8 + shake, w - 6, 1, "#ddd0ac"); }); // a rule under each shift's pair of rows
+    rows.forEach((_, i) => { if (i % 2) rect(x + 3, y + 15 + (i + 1) * pitch - 1 + shake, w - 6, 1, "#ddd0ac"); }); // a rule under each shift's pair of rows
     rect(x + w / 2 - 10, y - 3, 20, 5, "#5c5c6c"); rect(x + w / 2 - 8, y - 2, 16, 3, "#a8a8b8"); // the clip
     PX.text(q, "SHIFT REPORT", x + 4, y + 4 + shake, "#3c2a1c"); rect(x + 4, y + 12 + shake, w - 8, 1, "#3c2a1c");
-    rows.forEach(([a, v, n], i) => { const k = prog(age, 350 + i * 180, 420), s = `${Math.round(v * k)}/${n}`; PX.text(q, a, x + 4, y + 15 + i * 8 + shake, "#3c3c4c"); PX.text(q, s, x + w - 4 - PX.textWidth(s), y + 15 + i * 8 + shake, "#3c3c4c"); });
+    rows.forEach(([a, v, n], i) => { const k = prog(age, 350 + i * 180, 420), s = `${Math.round(v * k)}/${n}`; PX.text(q, a, x + 4, y + 15 + i * pitch + shake, "#3c3c4c"); PX.text(q, s, x + w - 4 - PX.textWidth(s), y + 15 + i * pitch + shake, "#3c3c4c"); });
     // the stamp slams down, tilted, with a thunk
     if (age > 1100) {
       if (!stamped) { stamped = true; o.SND.play("plate-down"); }
       const k = prog(age, 1100, 120), sc = 1 + (1 - k) * 0.6;
-      q.save(); q.translate(x + w / 2, y + h - 11 + shake); q.rotate(-0.1); q.scale(sc, sc); q.globalAlpha = 0.25 + 0.75 * k;
-      rect(-35, -6, 70, 12, "#c82818"); rect(-34, -5, 68, 10, "#f0e6c8"); PX.text(q, "CLOCKED OUT", -32, -3, "#c82818");
+      q.save(); q.translate(x + w / 2, y + h - 9 + shake); q.rotate(-0.1); q.scale(sc, sc); q.globalAlpha = 0.25 + 0.75 * k;
+      rect(-35, -6, 70, 12, "#a01408"); rect(-34, -5, 68, 10, "#f0e6c8"); PX.text(q, "CLOCKED OUT", -32, -3, "#a01408");
       q.restore();
     }
   }
@@ -186,11 +190,11 @@
     if (g.out) PX.drawBody(s, { t: "G", x: g.x / 16, y: Y / 16, frame: g.frame, lift: g.lift + wave, awake: true });
     if (c.out) PX.drawBody(s, { t: "C", x: c.x / 16, y: Y / 16, frame: c.frame, lift: c.lift + (1 - wave), awake: true, flip: c.x >= 65 && t > 2000 });
     if (sp.out && rise < 1) {
-      const path = (k) => [sp.x + (60 - sp.x) * k, Y - 2 - 72 * k * (2 - k)];
+      const path = (k) => [sp.x + (60 - sp.x) * k, Y - 2 - 48 * k * (2 - k)]; // rises to just under the title, never through it
       for (let i = 1; i < 10; i++) { const [x, y] = path(Math.max(0, rise - i * 0.025)); if (rise > 0) rect(x + 8, y + 14, i < 4 ? 2 : 1, i < 4 ? 2 : 1, i < 4 ? PAL.y : PAL.Y); }
       const [x, y] = path(rise); PX.drawBody(s, { t: "S", x: x / 16, y: (y - Math.round(Math.sin(t / 300) * 1.5)) / 16, frame: Math.floor(t / 250) % 2 });
     }
-    burst(s, 68, 8, (t - 5600) / 700, 12, 2, 16);
+    burst(s, 68, 32, (t - 5600) / 700, 12, 2, 16);
     q = qq; q.drawImage(sceneCv, 0, 0);
     street(96);
     card(now);

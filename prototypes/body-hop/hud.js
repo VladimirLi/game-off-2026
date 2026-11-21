@@ -11,14 +11,14 @@
 //   menuOpen(); tileAt(pointerEvent) -> [x, y] | null
 (function (root) {
   "use strict";
-  const INK = "#06060c", TEXT = "#ececf8", DIM = "#a0a0c0", FAINT = "#6c6c90", GOLD = "#f8c838", BAD = "#ff8a7a", GOOD = "#8ce07c";
+  const INK = "#06060c", TEXT = "#ececf8", DIM = "#a8a8c8", FAINT = "#9090b4", GOLD = "#f8c838", BAD = "#ff8a7a", GOOD = "#8ce07c";
   const PANEL = "#12122a", EDGE = "#2c2c52", EDGE_HI = "#40406c";
   const ACCENT = { S: "#e0e0f0", G: "#f87858", C: "#5cbcfc" };
   const NAME = { S: "Spirit", G: "Guard", C: "Cat" };
   const NIGHT = ["#090a18", "#0b0c1e", "#0e0e24", "#12112a", "#171430", "#1c1636"];
   const TINT = { S: "#000000", G: "#4a0e08", C: "#08204a" };
   const LAYOUTS = {
-    wide: { W: 320, H: 180, col: { x: 4, y: 18, w: 156, h: 140 }, pan: { x: 164, y: 18, w: 152, h: 140 }, msg: { y: 162, lines: 2 } },
+    wide: { W: 320, H: 180, col: { x: 4, y: 18, w: 156, h: 140 }, pan: { x: 164, y: 18, w: 152, h: 140 }, msg: { y: 160, lines: 2 } },
     tall: { W: 160, H: 290, col: { x: 2, y: 18, w: 156, h: 132 }, msg: { y: 154, lines: 4 }, info: { y: 192 }, pad: { y: 232 } },
   };
 
@@ -65,14 +65,18 @@
   }
 
   // ---------- drawing helpers ----------
+  // Every box text can sit in (panel, button, keycap, tile, ribbon) is reported to window.__uiBox when a layout test
+  // sets it, so the test can check that no text runs past its box.
+  const box = (x, y, w, h) => { if (root.__uiBox) root.__uiBox(x, y, w, h); };
   function panel(x, y, w, h, fill = PANEL) {
+    box(x, y, w, h);
     rect(x + 2, y + 2, w, h, "rgba(0,0,0,0.45)");
     rect(x - 1, y - 1, w + 2, h + 2, INK); rect(x, y, w, h, fill);
     rect(x, y, w, 1, EDGE_HI); rect(x, y, 1, h, EDGE); rect(x + w - 1, y, 1, h, EDGE); rect(x, y + h - 1, w, 1, EDGE);
   }
   function keycap(label, x, y, id, act, gold) {
     const w = tw(label) + 6, on = hover === id;
-    rect(x - 1, y - 1, w + 2, 12, INK);
+    box(x, y, w, 10); rect(x - 1, y - 1, w + 2, 12, INK);
     rect(x, y, w, 10, gold ? (on ? "#fce080" : GOLD) : on ? "#5a5a8c" : "#34345a"); rect(x, y, w, 1, gold ? "#fcf0a8" : on ? "#8a8abc" : "#5a5a88"); rect(x, y + 9, w, 1, gold ? "#a86808" : "#1c1c34");
     text(label, x + 3, y + 1, gold ? INK : on ? "#ffffff" : TEXT);
     if (act) hits.push({ id, x: x - 1, y: y - 1, w: w + 2, h: 12, act });
@@ -92,7 +96,7 @@
   // A big pixel button; returns its rect.
   function button(label, x, y, w, h, id, act, kind) {
     const on = hover === id, gold = kind === "gold", face = gold ? (on ? "#fce080" : GOLD) : on ? "#4a4a7c" : "#2c2c50";
-    rect(x - 1, y - 1, w + 2, h + 2, INK); rect(x, y, w, h, face);
+    box(x, y, w, h); rect(x - 1, y - 1, w + 2, h + 2, INK); rect(x, y, w, h, face);
     rect(x, y, w, 1, gold ? "#fcf0a8" : "#5a5a88"); rect(x, y + h - 2, w, 2, gold ? "#a86808" : "#1a1a30");
     centre(label, x + w / 2, y + Math.round((h - 8) / 2), gold ? INK : TEXT);
     hits.push({ id, x: x - 1, y: y - 1, w: w + 2, h: h + 2, act });
@@ -129,13 +133,14 @@
     const c = cv.getContext("2d"); c.imageSmoothingEnabled = false; c.drawImage(art, 0, 0, cv.width, cv.height);
   }
 
-  // The level's gold number chip and name; on the wide layout the keys sit at the right of the bar.
+  // The level's gold number chip and name; on the wide layout with a keyboard the main keys sit at the right of the
+  // bar (L and H are named in the message line), leaving room for the longest level name.
   function topBar() {
     const x = LAY.col.x, chip = g.label, cw = tw(chip) + 6, y = 4;
     rect(x - 1, y - 1, cw + 2, 12, INK); rect(x, y, cw, 10, GOLD); rect(x, y + 9, cw, 1, "#a86808"); text(chip, x + 3, y + 1, INK);
     text(g.name, x + cw + 5, y + 1, TEXT, INK);
     if (!tall() && !TOUCH) keyRow([["Z", "undo", "k-undo", () => o.act("undo")], ["R", "restart", "k-restart", () => o.act("restart")],
-      ["L", "help", "k-legend", () => o.act("legend")], ["Esc", "menu", "k-menu", () => openMenu("pause")]], W - 4, y, "right");
+      ["Esc", "menu", "k-menu", () => openMenu("pause")]], W - 4, y, "right");
   }
 
   function boardView(now) {
@@ -161,18 +166,19 @@
     [["R", "Red"], ["B", "Blue"]].forEach(([ch, nm], i) => {
       const ix = L + i * 70, iy = y + 32, v = verdict(me, ch);
       rect(ix - 1, iy - 1, 18, 18, INK); tileIcon(ch, me, ix, iy, now);
-      text(nm, ix + 20, iy + 1, ch === "R" ? "#f89878" : "#8cc4f8");
+      text(nm, ix + 20, iy - 1, ch === "R" ? "#f89878" : "#8cc4f8");
       text(v, ix + 20, iy + 9, v === "walk in" ? GOOD : DIM);
     });
     rect(x + 6, y + 52, w - 12, 1, EDGE);
     // turns against par in one row: label, big number, par; one pip per turn below (gold to par, red past it)
     turnsRow(L, y + 56, x + w - 7);
-    rect(x + 6, y + 80, w - 12, 1, EDGE);
+    rect(x + 6, y + 79, w - 12, 1, EDGE);
     if (g.won) winBlock(now, x, y + 82, w);
     else if (TOUCH) panelPad(L, y + 84, x + w - 7);
-    else { // "Hint:" in gold starts the first line; the longest hint takes six lines
-      PX.wrap("Hint: " + g.hint, w - 14).slice(0, 6).forEach((ln, i) => text(ln, L, y + 85 + i * 9, "#c0c0dc"));
-      text("Hint:", L, y + 85, GOLD);
+    else { // "Hint:" in gold starts the first line; the longest hint takes six lines, at a tighter line pitch
+      const lines = PX.wrap("Hint: " + g.hint, w - 14).slice(0, 6), pitch = lines.length > 5 ? 9 : 10;
+      lines.forEach((ln, i) => text(ln, L, y + 83 + i * pitch, "#c0c0dc"));
+      text("Hint:", L, y + 83, GOLD);
     }
   }
   function turnsRow(x, y, right) {
@@ -207,16 +213,17 @@
   }
   const nextLabel = () => g.endMain ? "Finish the shift" : g.last ? "Finish" : g.chapterEnd ? `On to ${g.nextChapter}` : "Next level";
 
-  // The message line: the latest message, or how to move when there is none.
+  // The message line: the latest message, or (none) how to play: with a keyboard it alternates two tips.
+  const IDLE_KEYS = ["Arrows or WASD move. Walk into a body to hop in.", "L: how to play.   H: the hint.   Esc: the menu."];
   function messages(now) {
     const cx = W / 2, st = g.status, { y, lines: max } = LAY.msg;
     let lines, col;
     if (st.text && !(g.won && !tall())) { lines = PX.wrap(st.text, W - 10).slice(0, max); col = st.cls === "bad" ? BAD : st.cls === "good" ? GOLD : TEXT; }
     else if (g.won) { lines = []; }
-    else { lines = PX.wrap(TOUCH ? "Tap the pad or the board to move. Walk into a body to hop into it." : "Arrows or WASD move. Walk into a body to hop in.", W - 10); col = FAINT; }
+    else { lines = PX.wrap(TOUCH ? "Tap the pad or the board to move. Walk into a body to hop into it." : IDLE_KEYS[Math.floor(now / 5000) % 2], W - 10); col = DIM; }
     const shake = st.text && st.cls === "bad" && now - st.at < 120 ? (Math.floor(now / 30) % 2 ? 1 : -1) : 0;
-    const y0 = tall() ? y : lines.length > 1 ? y : y + 5;
-    lines.forEach((ln, i) => centre(ln, cx + shake, y0 + i * 9, col, INK));
+    const y0 = tall() ? y : lines.length > 1 ? y : y + 5, outline = col === DIM ? null : INK; // the plain hint reads best without an outline
+    lines.forEach((ln, i) => centre(ln, cx + shake, y0 + i * 10, col, outline));
   }
 
   // ---------- tall layout: your body and the turns under the messages, then the pad and buttons ----------
@@ -225,11 +232,11 @@
     panel(2, y, W - 4, 36);
     rect(x + 1, y + 4, 22, 22, "#1c1c3c"); body(me, x + 4, y + 7, now, { awake: me !== "S" });
     PX.logo(q, NAME[me], x + 28, y + 4, 1, () => bodyCols(me));
-    const num = String(g.turns), nw = PX.logoWidth(num, 1);
-    PX.logo(q, num, W - 7 - nw, y + 4, 1, () => g.turns > g.par ? bodyCols("G") : bodyCols("gold"));
-    const ps = `par ${g.par}`; text(ps, W - 7 - nw - 5 - tw(ps), y + 6, DIM);
+    // turns against par, labelled, at the right of the name row
+    const tn = String(g.turns), tp = `/${g.par}`, tx = W - 6 - (tw("Turn") + 5 + tw(tn) + 1 + tw(tp));
+    text("Turn", tx, y + 6, DIM); text(tn, tx + tw("Turn") + 5, y + 6, g.turns > g.par ? BAD : GOLD, INK); text(tp, tx + tw("Turn") + 5 + tw(tn) + 1, y + 6, DIM);
     [["R", "Red"], ["B", "Blue"]].forEach(([ch, nm], i) => {
-      const ix = x + 28 + i * 64, iy = y + 19, v = verdict(me, ch);
+      const ix = x + 28 + i * 64, iy = y + 21, v = verdict(me, ch);
       rect(ix, iy, 6, 6, ch === "R" ? "#d84830" : "#3c7ce8"); text(v, ix + 9, iy, v === "walk in" ? GOOD : DIM);
     });
   }
@@ -264,10 +271,10 @@
     button("RESTART", bx, y + 38, bw * 2 + 3, bh, "t-restart", () => o.act("restart"));
   }
   function hintCard() {
-    const B = boardRect, x = LAY.col.x + 4, w = LAY.col.w - 8, lines = PX.wrap(g.hint, w - 12), h = 20 + lines.length * 9;
+    const B = boardRect, x = LAY.col.x + 4, w = LAY.col.w - 8, lines = PX.wrap(g.hint, w - 12), h = 22 + lines.length * 10;
     const y = Math.round(B.y + (B.h - h) / 2);
     panel(x, y, w, h); text("Hint", x + 6, y + 5, GOLD);
-    lines.forEach((ln, i) => text(ln, x + 6, y + 15 + i * 9, TEXT));
+    lines.forEach((ln, i) => text(ln, x + 6, y + 16 + i * 10, TEXT));
     hits.push({ id: "hint", x: 0, y: 0, w: W, h: H, act: () => { hintOpen = false; } });
   }
 
@@ -279,13 +286,13 @@
     const C = LAY.col, slide = t < 120 ? Math.round((1 - prog(t, 0, 120)) * 4) * -C.w / 4 : t > 1450 ? Math.round(prog(t, 1450, 150) * 4) * C.w / 4 : 0;
     const name = introInfo.name.toUpperCase(), lines = [];
     for (const word of name.split(" ")) { const last = lines[lines.length - 1]; if (last && PX.logoWidth(last + " " + word, 1) <= C.w - 10) lines[lines.length - 1] = last + " " + word; else lines.push(word); }
-    const h = 24 + lines.length * 14, y = Math.round(C.y + (C.h - h) / 2);
+    const h = 30 + lines.length * 14, y = Math.round(C.y + (C.h - h) / 2);
     q.save(); q.beginPath(); q.rect(C.x - 2, 0, C.w + 4, H); q.clip(); q.translate(slide, 0);
-    rect(C.x - 2, y - 2, C.w + 4, h + 4, INK); rect(C.x, y, C.w, h, "#101026"); rect(C.x, y, C.w, 1, EDGE_HI); rect(C.x, y + h - 1, C.w, 1, EDGE);
+    box(C.x, y, C.w, h); rect(C.x - 2, y - 2, C.w + 4, h + 4, INK); rect(C.x, y, C.w, h, "#101026"); rect(C.x, y, C.w, 1, EDGE_HI); rect(C.x, y + h - 1, C.w, 1, EDGE);
     const cx = C.x + C.w / 2;
-    centre(introInfo.chapter, cx, y + 4, GOLD, INK);
-    centre(introInfo.label, cx, y + 13, DIM, INK);
-    lines.forEach((ln, i) => PX.logo(q, ln, Math.round(cx - PX.logoWidth(ln, 1) / 2), y + 24 + i * 14, 1, () => bodyCols(g ? g.me : "S")));
+    centre(introInfo.chapter, cx, y + 5, GOLD, INK);
+    centre(introInfo.label, cx, y + 16, DIM, INK);
+    lines.forEach((ln, i) => PX.logo(q, ln, Math.round(cx - PX.logoWidth(ln, 1) / 2), y + 29 + i * 14, 1, () => bodyCols(g ? g.me : "S")));
     q.restore();
   }
 
@@ -303,7 +310,8 @@
       ["Title screen", () => { menu = null; o.act("title"); }],
     ];
   }
-  function dim() { rect(0, 0, W, H, "rgba(4,4,12,0.72)"); }
+  const cover = () => { if (root.__uiBox) root.__uiBox(); }; // an overlay hides every box under it (for the layout test)
+  function dim() { cover(); rect(0, 0, W, H, "rgba(4,4,12,0.96)"); }
   function pauseMenu(now) {
     dim();
     const items = pauseItems(), pw = 150, ph = 30 + items.length * 12 + 16, px = Math.round((W - pw) / 2), py = Math.round((H - ph) / 2);
@@ -328,7 +336,7 @@
   }
   function levelTile(i, tx, ty) {
     const on = i === lvSel, done = o.isDone(i), par = o.atPar(i), cur = i === o.current();
-    rect(tx - 1, ty - 1, 22, 18, on ? GOLD : INK);
+    box(tx, ty, 20, 16); rect(tx - 1, ty - 1, 22, 18, on ? GOLD : INK);
     rect(tx, ty, 20, 16, done ? "#2c4a3c" : "#14142a"); rect(tx, ty, 20, 1, done ? "#4c7c5c" : "#2a2a4c");
     if (!done) { rect(tx, ty, 1, 16, "#2a2a4c"); rect(tx + 19, ty, 1, 16, "#2a2a4c"); rect(tx, ty + 15, 20, 1, "#2a2a4c"); }
     const lb = o.label(i); text(lb, tx + 10 - tw(lb) / 2, ty + 4, on ? GOLD : done ? TEXT : DIM);
@@ -345,12 +353,14 @@
     rows.forEach((r, ri) => {
       const ry = py + 28 + ri * rh, label = r.bonus ? "Night shift (bonus)" : r.name;
       if (T) { text(label, px + 6, ry, DIM); r.levels.forEach((i, k) => levelTile(i, px + 6 + k * 23, ry + 10)); }
-      else { text(r.bonus ? "Night shift" : r.name, px + 8, ry + 4, DIM); if (r.bonus) text("bonus", px + 8, ry + 12, FAINT); r.levels.forEach((i, k) => levelTile(i, px + 88 + k * 23, ry)); }
+      else { text(r.bonus ? "Night shift" : r.name, px + 8, r.bonus ? ry : ry + 4, DIM); if (r.bonus) text("bonus", px + 8, ry + 10, FAINT); r.levels.forEach((i, k) => levelTile(i, px + 88 + k * 23, ry)); }
     });
     const lv = o.levels[lvSel], best = o.best(lvSel), by = py + ph - 42;
     rect(px + 6, by - 3, pw - 12, 1, EDGE);
-    centre(`${o.label(lvSel)} · ${lv.name}`, W / 2, by + 1, TEXT, INK);
-    centre(best ? `Solved · best ${best} · par ${lv.par}` : o.isDone(lvSel) ? `Solved · par ${lv.par}` : `Not solved yet · par ${lv.par}`, W / 2, by + 11, DIM);
+    // the narrow (tall) panel names the level without its number (the tile shows it) and shortens the status
+    centre(T ? lv.name : `${o.label(lvSel)} · ${lv.name}`, W / 2, by + 1, TEXT, INK);
+    const status = best ? (T ? `Best ${best} · par ${lv.par}` : `Solved · best ${best} · par ${lv.par}`) : o.isDone(lvSel) ? `Solved · par ${lv.par}` : `${T ? "Not solved" : "Not solved yet"} · par ${lv.par}`;
+    centre(status, W / 2, by + 11, DIM);
     // the key to the marks, and how to leave
     const ky = py + ph - 14;
     rect(px + 8, ky + 1, 6, 6, "#2c4a3c"); text("solved", px + 17, ky, DIM);
@@ -368,40 +378,40 @@
   }
 
   // ---------- How to play: each body and what it makes of every tile ----------
-  const SAY = { S: { R: "fog: solid", B: "fog: solid", P: "too light" }, G: { R: "solid", B: "walk in", P: "holds gates" }, C: { R: "walk in", B: "solid", P: "holds gates" } };
+  const SAY = { S: { R: "solid (fog)", B: "solid (fog)", P: "can't press" }, G: { R: "solid", B: "walk in", P: "opens gates" }, C: { R: "walk in", B: "solid", P: "opens gates" } };
   const SUB = { S: "colour-blind", G: "sees red", C: "sees blue" };
-  const sayCol = (v) => v === "walk in" ? GOOD : v === "too light" ? BAD : DIM;
+  const sayCol = (v) => v === "walk in" ? GOOD : v === "can't press" ? BAD : DIM;
   function howToPlay(now) {
-    rect(0, 0, W, H, "rgba(4,4,12,0.85)");
+    cover(); rect(0, 0, W, H, "rgba(4,4,12,0.85)");
     const px = 4, py = 3, pw = W - 8, ph = H - 6, T = tall();
     panel(px, py, pw, ph);
     const t = "HOW TO PLAY"; PX.logo(q, t, Math.round(W / 2 - PX.logoWidth(t, 1) / 2), py + 5, 1, () => bodyCols(g ? g.me : "S"));
     ["S", "G", "C"].forEach((b, i) => {
       const on = g && g.me === b;
       if (T) { // one row per body: sprite and name, then its three tiles with a word under each
-        const x = px + 5, y = py + 24 + i * 56;
-        rect(x - 2, y - 2, pw - 6, 54, on ? "#22224a" : "#181834"); if (on) rect(x - 2, y - 2, pw - 6, 1, GOLD);
-        body(b, x, y, now, { awake: b !== "S" }); text(NAME[b], x + 20, y + 1, ACCENT[b], INK); text(SUB[b], x + 20, y + 9, DIM);
+        const x = px + 5, y = py + 24 + i * 62;
+        rect(x - 2, y - 2, pw - 6, 60, on ? "#22224a" : "#181834"); if (on) rect(x - 2, y - 2, pw - 6, 1, GOLD);
+        body(b, x, y, now, { awake: b !== "S" }); text(NAME[b], x + 20, y, ACCENT[b], INK); text(SUB[b], x + 20, y + 10, DIM);
         [["R", "R"], ["B", "B"], ["_", "P"]].forEach(([ch, k], j) => { // a cell per tile: the icon, and the word under it
           const cx = x + j * 49 + 24, iy = y + 19, v = SAY[b][k];
           rect(cx - 9, iy - 1, 18, 18, INK); tileIcon(ch, b, cx - 8, iy, now, ch === "_" ? { press: 0 } : null);
-          PX.wrap(v, 48).forEach((ln, n) => centre(ln, cx, iy + 19 + n * 8, sayCol(v)));
+          PX.wrap(v, 48).forEach((ln, n) => centre(ln, cx, iy + 18 + n * 9, sayCol(v)));
         });
       } else { // three columns
         const x = px + 6 + i * 103, y = py + 23;
-        rect(x - 2, y - 2, 99, 76, on ? "#22224a" : "#181834"); if (on) rect(x - 2, y - 2, 99, 1, GOLD);
-        body(b, x, y, now, { awake: b !== "S" }); text(NAME[b], x + 20, y + 1, ACCENT[b], INK); text(SUB[b], x + 20, y + 9, DIM);
+        rect(x - 2, y - 2, 99, 82, on ? "#22224a" : "#181834"); if (on) rect(x - 2, y - 2, 99, 1, GOLD);
+        body(b, x, y, now, { awake: b !== "S" }); text(NAME[b], x + 20, y, ACCENT[b], INK); text(SUB[b], x + 20, y + 10, DIM);
         [["R", "Red block"], ["B", "Blue block"], ["_", "Plate"]].forEach(([ch, nm], j) => {
-          const iy = y + 20 + j * 18, v = SAY[b][ch === "_" ? "P" : ch];
+          const iy = y + 22 + j * 20, v = SAY[b][ch === "_" ? "P" : ch];
           rect(x - 1, iy - 1, 18, 18, INK); tileIcon(ch, b, x, iy, now, ch === "_" ? { press: 0 } : null);
-          text(nm, x + 20, iy, ch === "R" ? "#f89878" : ch === "B" ? "#8cc4f8" : TEXT);
-          text(v, x + 20, iy + 8, sayCol(v));
+          text(nm, x + 20, iy - 1, ch === "R" ? "#f89878" : ch === "B" ? "#8cc4f8" : TEXT);
+          text(v, x + 20, iy + 9, sayCol(v));
         });
       }
     });
     // the rest of the rules, one line each, with a picture in one column of icons
     const rules = [[T ? "A body on any plate or gate opens them." : "A body on any plate or gate opens gates.", "gate"], ["Walk into a body to hop into it.", "hop"], ["Reach the exit in any body to win.", "exit"]];
-    const y0 = T ? py + 200 : py + 104, rowH = T ? 22 : 18, iconW = T ? 18 : 36, tx = px + 6 + iconW + (T ? 5 : 6), cw = pw - (tx - px) - 6;
+    const y0 = T ? py + 207 : py + 109, rowH = T ? 21 : 18, iconW = T ? 18 : 36, tx = px + 6 + iconW + (T ? 5 : 6), cw = pw - (tx - px) - 6;
     rect(px + 6, y0 - 4, pw - 12, 1, EDGE);
     rules.forEach(([s, pic], j) => {
       const ry = y0 + j * rowH, ix = px + 6;
@@ -410,7 +420,7 @@
       if (pic === "exit") { const ex = T ? ix : ix + 9; rect(ex - 1, ry - 1, 18, 18, INK); tileIcon("E", "S", ex, ry, now); }
       const lines = PX.wrap(s, cw); lines.forEach((ln, n) => text(ln, tx, ry + (lines.length > 1 ? 0 : 5) + n * 9, TEXT));
     });
-    centre(TOUCH ? "Tap anywhere to close." : "Z undoes anything.   L or Esc: close", W / 2, py + ph - 11, FAINT);
+    centre(TOUCH ? "Tap anywhere to close." : tall() ? "L or Esc: close" : "Z undoes anything.   L or Esc: close", W / 2, py + ph - 11, FAINT);
     hits = [{ id: "legend", x: 0, y: 0, w: W, h: H, act: () => o.act("legend") }];
   }
 
