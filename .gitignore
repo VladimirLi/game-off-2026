@@ -1,8 +1,5 @@
-# Godot
-.godot/
+# Scratch
 *.tmp
-export/
-*.pck
 # OS
 .DS_Store
 # Agent scratch (the shared setup in .claude/ is committed)

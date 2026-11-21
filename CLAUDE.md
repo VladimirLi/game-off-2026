@@ -4,7 +4,7 @@ Solo entry for GitHub Game Off 2026, theme **SHIFT**. The owner is new to game d
 
 ## Focus
 - The game is **Body Hop** (`prototypes/body-hop/`): plain HTML and JavaScript, no build step, runs from `index.html`.
-- All other prototypes are out of scope. Don't read, change or check them unless the owner asks. The root README still shows Godot and Drag the margin as frontrunner; that is stale.
+- Body Hop is the only game in the repo. The other prototypes were removed on 21 Nov 2026 and remain in git history.
 - `prototypes/body-hop/README.md` is the source of truth for rules, controls and tools. `levels.js` is the source of truth for levels; keep the README levels table in sync when levels change.
 - Start Claude Code at the repo root: the hooks in `.claude/` load only from there.
 
@@ -21,15 +21,15 @@ Solo entry for GitHub Game Off 2026, theme **SHIFT**. The owner is new to game d
 - Bots press keys only. A test that calls game functions directly proves nothing about play.
 
 ## Playtests
-- Human playtests are the only evidence of fun and difficulty. As of 13 Nov no human has played Body Hop.
-- `playtests/2026-11-13*/` are AI personas (Haiku, Sonnet, Opus). They solve at exactly par far more than people do. Always label them "AI persona", never "playtest" alone.
+- Human playtests are the only evidence of fun and difficulty. As of 21 Nov no human has played Body Hop.
+- Every run in `playtests/` so far is AI personas (Haiku, Sonnet, Opus). They solve at exactly par far more than people do. Always label them "AI persona", never "playtest" alone.
 - The owner reports in one line ("too easy", "2 and 3 confusing"). Work from that, the level and the solver; don't ask for more.
 - The game logs one line per level to the browser console only, so there is no saved log of the owner's play. If the owner pastes console lines, save them under `prototypes/body-hop/playtests/human/<date>.md`.
 
 ## Milestones
 - Feature freeze 24 Nov. Then juice, audio, menus, the itch page and a README GIF.
 - Last two days: bugs only, and test the uploaded build in Chrome and Firefox. Submit 30 Nov.
-- Not started as of 13 Nov: a human playtest, the itch.io upload, audio. Check `git log` for later progress.
+- Not started as of 21 Nov: art (still the grey box), audio, a title screen and an end screen, a human playtest, the itch.io upload. GitHub Pages serves a build from loop round 6 (`gh-pages` branch), one round behind `main`. Check `git log` for later progress.
 - A SessionStart hook prints today's date and the days left. After the freeze, flag any new mechanic or level to the owner before starting it.
 
 ## Running the team (main session only; subagents ignore this section)

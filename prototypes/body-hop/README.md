@@ -2,7 +2,7 @@
 
 You are a spirit that hops between the bodies in a building. Each body sees one colour, and only what it sees is real. Bodies you leave behind stay where they are, asleep, and get in the way. Theme fit: one verb, the hop, shifts who you are and what the world contains.
 
-This is a browser prototype in plain HTML and JavaScript, not Godot like the other prototypes. It needs no build step and runs from a file. The rules live in one file, `engine.js`. The game and the solver both load it, so the solver checks exactly the rules the game plays.
+This is a browser game in plain HTML and JavaScript. It needs no build step and runs from a file. The rules live in one file, `engine.js`. The game and the solver both load it, so the solver checks exactly the rules the game plays.
 
 ## Run
 

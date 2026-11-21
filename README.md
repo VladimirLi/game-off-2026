@@ -1,39 +1,30 @@
 # Game Off 2026 — theme: SHIFT
 
-Solo entry for [GitHub Game Off 2026](https://itch.io/jam/game-off-2026) (theme **SHIFT**, due 1 Dec 2026), built in Godot 4.7.2 with GDScript, browser-first.
+Solo entry for [GitHub Game Off 2026](https://itch.io/jam/game-off-2026) (theme **SHIFT**, due 1 Dec 2026): **Body Hop**, a turn-based browser puzzle game in plain HTML and JavaScript.
 
-This repo holds the whole process, not just the game: the research that shaped it, the idea funnel, the grey-box prototypes that were tried and rejected, and the game itself.
+You are a spirit that hops between the bodies in a building. Each body sees one colour, and only what it sees is real. Bodies you leave behind stay where they are and get in the way, so the puzzle is where to leave each one. One verb, the hop, shifts who you are and what the world contains.
+
+**Play:** [vladimirli.github.io/game-off-2026](https://vladimirli.github.io/game-off-2026/), or open `prototypes/body-hop/index.html` locally.
 
 ## Status
 
-Week 1, prototyping. Frontrunner: **Drag the margin**, a platformer on a paragraph of text where dragging the right margin reflows the words under you.
+- 18 levels: 12 main levels and the optional Night shift chapter (X1 to X6), each checked by the solver.
+- Tested by AI personas over seven rounds; no human playtest yet.
+- Still grey box: no art, no audio, no title or end screen yet. Feature freeze 24 Nov, submit 30 Nov.
 
 ## Layout
 
 | Path | What |
 |---|---|
-| `research/` | Primary-sourced notes: how to place in Game Off, idea-to-shipped-game process, theme-to-idea methods, and the filtered shortlist from 187 generated ideas |
-| `prototypes/` | Grey-box prototypes (rectangles only, no art, no sound). Each has a README with the question it tests and the verdict. Run one with `godot --path prototypes/<name>`, except body-hop, which is plain HTML: open its `index.html` |
-| `game/` | The entry itself (to come) |
-
-## Prototype verdicts
-
-| Prototype | Verdict |
-|---|---|
-| drag-the-margin | Frontrunner. Readable at once; difficulty is a level-design dial. In iteration |
-| body-hop | Contender. Possess bodies that each see one colour; parked bodies make placement the puzzle. Browser grey box, 11 solver-checked levels, not yet played by people |
-| insert-a-row | Confusing in play. Benched |
-| pull-the-rug | Confusing in play. Benched |
-| rulebender | Too complicated (18 rule bits). Out |
-| selection-pressure | Out on prior art (several evolving-enemy tower defences exist) |
-| tell | Out: theme in fiction only, random play beats the predictor |
-| slide-the-row | Out on prior art (six close jam games) |
+| `prototypes/body-hop/` | The game. Its [README](prototypes/body-hop/README.md) holds the rules, controls, levels and tools |
+| `prototypes/body-hop/playtests/` | AI persona runs: session logs, interviews and analysis |
+| `research/` | Primary-sourced notes: placing in Game Off, idea-to-shipped-game process, compelling puzzle design, Body Hop prior art. Notes from 7 Nov assume Godot or Bevy; the game is plain HTML and JavaScript |
+| `.claude/` | Claude Code agents, hooks and checks used to build and test the game |
 
 ## Tooling
 
-- Godot 4.7.2 (`brew install --cask godot`)
-- Prototypes verify with `godot --headless --path <dir> --quit-after 180` (expect only the engine banner)
+- Node.js for the checks, run from `prototypes/body-hop/`: `node tools/solve.js` (every level solvable at par) and `node tools/bot.js` (replays each solution as key presses in Chromium; needs `npm install` once).
 
 ## AI disclosure
 
-Research, ideation and prototype code were produced with Claude (Anthropic) under my direction; design decisions and playtesting are mine. Declared per the Game Off rules.
+Research, ideation and game code were produced with Claude (Anthropic) under my direction; design decisions and playtesting are mine. Declared per the Game Off rules.
