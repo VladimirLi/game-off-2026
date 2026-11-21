@@ -150,7 +150,7 @@ function logEnd(how) {
   const par = LEVELS[idx].par;
   console.log(`Level ${idx + 1} ${how} | turns ${turns} (par ${par}) | time ${secs} s | undos ${log.filter((x) => x === "Z").length} | keys ${compress(log)}`);
   AN.track("level_end", { level: label(idx), index: idx + 1, name: LEVELS[idx].name, outcome: how.toLowerCase(), turns, par, at_par: how === "complete" && turns <= par,
-    secs: +secs, undos: log.filter((x) => x === "Z").length, restarts: log.filter((x) => x === "R").length, keys: compress(log).slice(0, 600) });
+    secs: +secs, undos: log.filter((x) => x === "Z").length, keys: compress(log).slice(0, 600) }); // a restart ends the attempt with outcome "restarted"
 }
 function compress(a) { const out = []; for (const k of a) { const last = out[out.length - 1]; if (last && last[0] === k) last[1]++; else out.push([k, 1]); } return out.map(([k, n]) => n > 1 ? `${k}x${n}` : k).join(" "); }
 
@@ -330,7 +330,7 @@ requestAnimationFrame(loop);
 
 // ---------- How to play: hud.js draws it over the game while legendOpen ----------
 let legendOpen = false;
-function toggleLegend(open = !legendOpen) { if (open !== legendOpen) { SND.play("ui"); if (open) AN.track("how_to_play", { level: label(idx) }); } legendOpen = open; }
+function toggleLegend(open = !legendOpen) { if (open !== legendOpen) { SND.play("ui"); if (open) AN.track("how_to_play", { level: label(idx), index: idx + 1 }); } legendOpen = open; }
 
 // While How to play is open, every game input (move, undo, restart, next, skip, level button) only
 // closes it, so nothing happens on a board you cannot see. The status line then says so (`msg`), so a
@@ -380,7 +380,7 @@ function showScreen(kind) { legendOpen = false; HUD.closeMenu(); SCR.show(kind);
 HUD.init({ PX, SND, canvas: cv, levels: LEVELS, mainCount, label, chapterOf, current: () => idx,
   isDone: (i) => done.has(LEVELS[i].name), atPar: (i) => best[LEVELS[i].name] <= LEVELS[i].par, best: (i) => best[LEVELS[i].name],
   music: () => SND.music, sfx: () => SND.sfx, stats: () => AN.available() ? AN.enabled() : null,
-  track: (event, props) => AN.track(event, { level: label(idx), ...props }),
+  track: (event, props) => AN.track(event, { level: label(idx), index: idx + 1, ...props }),
   act: (name, arg) => ({ undo, restart, next, move: act, legend: () => toggleLegend(), music: toggleMusic, sound: toggleSfx,
     stats: () => { AN.setEnabled(!AN.enabled()); SND.play("ui"); }, feedback: openFeedback,
     title: () => { SND.play("ui"); logEnd("left"); showScreen("title"); }, level: (i) => { logEnd("left"); load(i); } })[name](arg) });
