@@ -32,6 +32,31 @@ const CHEV = { right: CHEV_R, left: CHEV_R.map((r) => [...r].reverse().join(""))
 CHEV.down = [...Array(5)].map((_, i) => CHEV_R.map((r) => r[i]).join(""));
 CHEV.up = [...CHEV.down].reverse();
 const EXIT_FONT = { E: ["111", "100", "110", "100", "111"], X: ["101", "101", "010", "101", "101"], I: ["1", "1", "1", "1", "1"], T: ["111", "010", "010", "010", "010"] };
+// 5 x 7 pixel font for the title and end screens: each glyph is 7 rows of 5 bits.
+const FONT = Object.fromEntries(Object.entries({
+  A: "01110 10001 10001 11111 10001 10001 10001", B: "11110 10001 10001 11110 10001 10001 11110", C: "01110 10001 10000 10000 10000 10001 01110",
+  D: "11110 10001 10001 10001 10001 10001 11110", E: "11111 10000 10000 11110 10000 10000 11111", F: "11111 10000 10000 11110 10000 10000 10000",
+  G: "01110 10001 10000 10111 10001 10001 01111", H: "10001 10001 10001 11111 10001 10001 10001", I: "01110 00100 00100 00100 00100 00100 01110",
+  J: "00111 00010 00010 00010 00010 10010 01100", K: "10001 10010 10100 11000 10100 10010 10001", L: "10000 10000 10000 10000 10000 10000 11111",
+  M: "10001 11011 10101 10101 10001 10001 10001", N: "10001 10001 11001 10101 10011 10001 10001", O: "01110 10001 10001 10001 10001 10001 01110",
+  P: "11110 10001 10001 11110 10000 10000 10000", Q: "01110 10001 10001 10001 10101 10010 01101", R: "11110 10001 10001 11110 10100 10010 10001",
+  S: "01111 10000 10000 01110 00001 00001 11110", T: "11111 00100 00100 00100 00100 00100 00100", U: "10001 10001 10001 10001 10001 10001 01110",
+  V: "10001 10001 10001 10001 10001 01010 00100", W: "10001 10001 10001 10101 10101 10101 01010", X: "10001 10001 01010 00100 01010 10001 10001",
+  Y: "10001 10001 01010 00100 00100 00100 00100", Z: "11111 00001 00010 00100 01000 10000 11111",
+  0: "01110 10001 10011 10101 11001 10001 01110", 1: "00100 01100 00100 00100 00100 00100 01110", 2: "01110 10001 00001 00010 00100 01000 11111",
+  3: "11111 00010 00100 00010 00001 10001 01110", 4: "00010 00110 01010 10010 11111 00010 00010", 5: "11111 10000 11110 00001 00001 10001 01110",
+  6: "00110 01000 10000 11110 10001 10001 01110", 7: "11111 00001 00010 00100 01000 01000 01000", 8: "01110 10001 10001 01110 10001 10001 01110",
+  9: "01110 10001 10001 01111 00001 00010 01100", "!": "00100 00100 00100 00100 00100 00000 00100", ".": "00000 00000 00000 00000 00000 01100 01100",
+  "'": "00100 00100 01000 00000 00000 00000 00000", "-": "00000 00000 00000 11111 00000 00000 00000", ":": "00000 01100 01100 00000 01100 01100 00000",
+  " ": "00000 00000 00000 00000 00000 00000 00000", "/": "00001 00010 00010 00100 01000 01000 10000", "+": "00000 00100 00100 11111 00100 00100 00000",
+}).map(([ch, rows]) => [ch, rows.split(" ")]));
+const textWidth = (str, scale = 1) => str.length * 6 * scale - scale;
+// Draws str at (x, y) in art pixels; outline draws a 1-art-pixel ring of that colour round every letter first.
+function text(q, str, x, y, col, scale = 1, outline) {
+  const glyphs = (ox, oy, c) => { q.fillStyle = c; [...str.toUpperCase()].forEach((ch, n) => (FONT[ch] || FONT[" "]).forEach((row, j) => [...row].forEach((b, i) => { if (b === "1") q.fillRect(x + ox + (n * 6 + i) * scale, y + oy + j * scale, scale, scale); }))); };
+  if (outline) for (const [ox, oy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [1, 1]]) glyphs(ox, oy, outline);
+  glyphs(0, 0, col);
+}
 // Blocks: [front face, top face, highlight]. Red blocks carry stripes, blue blocks rivet dots, in every view.
 const COLS = { R: ["#7c1408", "#d84830", "#f89878"], B: ["#0c3c9c", "#3c7ce8", "#9cc4f8"] };
 const FOGC = { R: ["#a87870", "#9c6e68"], B: ["#7088aa", "#68809e"] }; // mist keeps most of the block's hue
@@ -149,7 +174,7 @@ function spriteCanvas(rows, map, key) {
 const OUTLINE = Object.fromEntries([...Object.keys(PAL), "e", "k", "v", "q"].map((ch) => [ch, PAL.Y]));
 // b: { t, x, y (tiles), active, frame, squash, flip, lift, dx, dy, sink }
 function drawBody(q, b) {
-  const rows = (b.t === "G" ? GUARD : b.t === "C" ? CAT : SPIRIT)[b.frame || 0], awake = b.active || b.t === "S";
+  const rows = (b.t === "G" ? GUARD : b.t === "C" ? CAT : SPIRIT)[b.frame || 0], awake = b.active || b.awake || b.t === "S";
   // b.mark colours the guard's badge or the cat's collar, so two bodies of one kind can be told apart.
   const marks = { v: b.mark || PAL.Y, q: b.mark || PAL.B };
   const img = spriteCanvas(rows, { ...PAL, ...marks, ...(awake ? { e: PAL.W, k: PAL.K } : { e: PAL.K, k: PAL.K }) }, b.t + (b.frame || 0) + awake + (b.mark || ""));
@@ -196,7 +221,7 @@ function render(cv, sc) {
       drawTile(q, "|", x * K, y * K, sc.viewer, L, { x, y, t: sc.t, nb: (dx, dy) => tile(x + dx, y + dy), ...(sc.state ? sc.state(x, y) || {} : {}) });
       q.restore();
     }
-    if (b.zz) { const k = Math.floor(sc.t / 500) % 2, ZX = Math.round(b.x * K) + 10, ZY = Math.round(b.y * K); spr(q, ZZ_SHADOW, ZX + 1, ZY + 1 + k); spr(q, ZZ, ZX, ZY + k); }
+    if (b.zz) { const k = Math.floor(sc.t / 500) % 2, ZX = Math.round(b.x * K) + 10, ZY = Math.round(b.y * K) - 3; spr(q, ZZ_SHADOW, ZX + 1, ZY + 1 + k); spr(q, ZZ, ZX, ZY + k); } // above the head, not on it
   }
   // Hop markers: a chevron straddling the edge you would press across, nudging toward the body.
   for (const [x, y, dir] of sc.hops || []) {
@@ -211,5 +236,5 @@ const dot = (q, x, y, col, s = 1) => { q.fillStyle = col; q.fillRect(Math.round(
 // One step from a to b starting at t0: position, leg frame and a 1px lift mid-step.
 function walk(t, t0, a, b, dur = 160) { const k = prog(t, t0, dur); return { pos: a + (b - a) * k, moving: k > 0 && k < 1, lift: k > 0 && k < 1 ? Math.round(Math.sin(Math.PI * k)) : 0 }; }
 
-root.PixelArt = { K, PAL, render, walk, dot };
+root.PixelArt = { K, PAL, LENS, render, drawBody, walk, dot, text, textWidth, lens, FONT };
 })(typeof self !== "undefined" ? self : this);
