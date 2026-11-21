@@ -63,8 +63,14 @@
   #legend canvas { width: 32px; height: 32px; border-radius: 2px; background: none; flex: none; outline: 1px solid #3a3e46; }
   #legend canvas.mark { width: 40px; height: 40px; }
   #legend p { margin: 6px 0 0; color: var(--dim); }
-  #legendBtn, #sfxBtn, #musicBtn { background: none; border: 1px solid #3a3e46; color: var(--dim); border-radius: 4px; padding: 2px 8px; font: inherit; font-size: 13px; cursor: pointer; }
+  #legendBtn, #sfxBtn, #musicBtn, #titleBtn { background: none; border: 1px solid #3a3e46; color: var(--dim); border-radius: 4px; padding: 2px 8px; font: inherit; font-size: 13px; cursor: pointer; }
   #levels button.done::after { content: " ✓"; color: var(--accent); }
+  /* Title and end screens (screens.js): one pixel-art canvas over the game, scaled by whole numbers. */
+  #screen { display: none; position: fixed; inset: 0; z-index: 20; background: #06060c; align-items: center; justify-content: center; animation: screen-in 0.3s ease-out; }
+  #screen.open { display: flex; }
+  #screen.leaving { opacity: 0; transition: opacity 0.25s ease-in; }
+  #screen canvas { display: block; background: none; border-radius: 0; max-width: 100%; touch-action: manipulation; }
+  @keyframes screen-in { from { opacity: 0; } to { opacity: 1; } }
 </style>
 </head>
 <body>
@@ -94,13 +100,15 @@
     <kbd>←↑→↓</kbd>/<kbd>WASD</kbd> move, or walk into a body to hop into it ·
     <kbd>Z</kbd>/<kbd>Backspace</kbd> undo · <kbd>R</kbd> restart · <kbd>N</kbd> next level (after a win) · <kbd>Shift+N</kbd> skip ·
     <button id="legendBtn"><kbd>L</kbd> legend</button> · <button id="touchToggle">Touch controls</button> ·
-    <button id="sfxBtn">Sound on</button> · <button id="musicBtn"><kbd>M</kbd> Music on</button>
+    <button id="sfxBtn">Sound on</button> · <button id="musicBtn"><kbd>M</kbd> Music on</button> · <button id="titleBtn">Title screen</button>
   </footer>
 </div>
+<div id="screen" role="dialog" aria-label="Body Hop"><canvas id="screenArt"></canvas></div>
 <script src="engine.js"></script>
 <script src="levels.js"></script>
 <script src="audio.js"></script>
 <script src="pixel-art.js"></script>
+<script src="screens.js"></script>
 <script>
 "use strict";
 const BH = window.BodyHop, LEVELS = window.BODY_HOP_LEVELS, SND = window.BodyHopAudio;
@@ -167,10 +175,8 @@ function renderLevels() {
 // What the win line says after the score: the next level, a chapter end, or the end of the main game.
 function winNext() {
   const last = idx === LEVELS.length - 1, endMain = idx === mainCount - 1;
-  if (endMain) return mainCount < LEVELS.length
-    ? " That's the main game. Want more? Press N for Night shift."
-    : " That's the whole game. Thanks for playing!";
-  if (last) return " That's every Night shift level. Thanks for playing!";
+  if (endMain) return mainCount < LEVELS.length ? " That's the main game! Press N." : " That's the whole game! Press N.";
+  if (last) return " That's every Night shift level! Press N.";
   if (chapterOf(idx + 1) !== chapterOf(idx)) return ` Chapter complete: ${chapterOf(idx)}. Press N for ${chapterOf(idx + 1)}.`;
   return " Press N or tap Next level.";
 }
@@ -201,6 +207,7 @@ function act(dir) {
   if (BH.won(L, s)) {
     won = true; done.add(LEVELS[idx].name);
     try { localStorage.setItem("bodyhop-done", JSON.stringify([...done])); } catch (e) { /* ignore */ }
+    if (!(best[LEVELS[idx].name] <= turns)) { best[LEVELS[idx].name] = turns; try { localStorage.setItem("bodyhop-best", JSON.stringify(best)); } catch (e) { /* ignore */ } }
     const par = LEVELS[idx].par;
     setStatus(`Out in ${turns} turns${par ? (turns <= par ? " (par!)" : ` (par ${par})`) : ""}.${winNext()}`, "good");
     logEnd("complete"); renderLevels(); SND.play("win");
@@ -347,7 +354,7 @@ function draw(now = performance.now()) {
   };
   PX.render(cv, { map: anim.map, viewer: hop ? (k < 0.5 ? hop.from : hop.to) : me.t, from: hop ? hop.from : me.t, to: hop ? hop.to : me.t, lensT: k, t: now, bodies, hops, state, fx });
 }
-const loop = (now) => { draw(now); requestAnimationFrame(loop); };
+const loop = (now) => { if (SCR.open()) SCR.draw(now); else draw(now); requestAnimationFrame(loop); };
 requestAnimationFrame(loop);
 
 // ---------- legend ----------
@@ -452,7 +459,13 @@ function closeLegend(msg) {
 
 // At turn 0 a restart changes nothing on the board, so the close message promises nothing.
 function restart() { if (closeLegend(history.length ? "Legend closed. Press again to restart." : "Legend closed.")) return; logEnd("restarted"); log.push("R"); load(idx, "restart"); }
-function next() { if (closeLegend(won && idx < LEVELS.length - 1 ? "Legend closed. Press again for the next level." : "Legend closed.")) return; if (won && idx < LEVELS.length - 1) load(idx + 1); }
+// After the last main level, N opens the end screen; after the last level, the final screen.
+function next() {
+  if (closeLegend(won ? "Legend closed. Press again to go on." : "Legend closed.")) return;
+  if (!won) return;
+  if (idx === mainCount - 1 || idx === LEVELS.length - 1) showScreen(idx === mainCount - 1 && mainCount < LEVELS.length ? "end" : "final");
+  else load(idx + 1);
+}
 
 // On-screen controls. pointerdown (not click) so taps feel instant and double-tap never zooms.
 for (const b of document.querySelectorAll("#pad button")) {
@@ -484,10 +497,27 @@ function toggleMusic() { SND.setMusic(!SND.music); SND.play("ui"); soundButtons(
 $("sfxBtn").addEventListener("click", () => { SND.setSfx(!SND.sfx); SND.play("ui"); soundButtons(); });
 $("musicBtn").addEventListener("click", toggleMusic);
 soundButtons();
+$("titleBtn").addEventListener("click", () => { SND.play("ui"); logEnd("left"); showScreen("title"); });
+
+// ---------- title and end screens (screens.js) ----------
+// The title shows on a plain visit (a ?level=N link, as the test tools use, goes straight to that level). The
+// end screen shows when you press N (or Next level) after the last main level, the final screen after the last
+// Night shift level.
+const best = {}; // fewest turns per level name, saved on this machine
+try { Object.assign(best, JSON.parse(localStorage.getItem("bodyhop-best") || "{}")); } catch (e) { /* storage unavailable */ }
+const firstUnsolved = () => { const i = LEVELS.findIndex((lv) => !done.has(lv.name)); return i < 0 ? 0 : i; };
+const SCR = window.BodyHopScreens;
+SCR.init({ PX, SND, el: $("screen"), canvas: $("screenArt"), levels: LEVELS, mainCount, label, firstUnsolved,
+  progress: () => ({ done, best }), music: () => SND.music, toggleMusic, start: (i) => SCR.leave(() => load(i)) });
+function showScreen(kind) {
+  if (legendOpen) { legendOpen = false; $("legend").classList.remove("open"); }
+  SCR.show(kind);
+}
 
 const KEYS = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right", w: "up", s: "down", a: "left", d: "right", W: "up", S: "down", A: "left", D: "right" };
 addEventListener("keydown", (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (SCR.open()) { SCR.key(e); return; }
   if (KEYS[e.key]) { e.preventDefault(); act(KEYS[e.key]); return; }
   if (e.key === "z" || e.key === "Z" || e.key === "Backspace") { e.preventDefault(); undo(); return; }
   if (e.key === "r" || e.key === "R") { restart(); return; }
@@ -499,6 +529,7 @@ addEventListener("keydown", (e) => {
 
 const q = Number(new URLSearchParams(location.search).get("level"));
 load(q > 0 ? q - 1 : 0);
+if (!(q > 0)) showScreen("title");
 window.__bodyhop = { get state() { return s; }, get level() { return idx; }, get won() { return won; }, get turns() { return turns; } };
 </script>
 </body>

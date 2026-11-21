@@ -25,7 +25,8 @@ const FILTERS = {
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 900, height: 820 } });
   const errors = []; page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto("file://" + path.join(__dirname, "game.html"));
+  // ?level=1 goes straight to level 1, past the title screen, so a session's first key always plays.
+  await page.goto("file://" + path.join(__dirname, "game.html") + "?level=1");
   if (S.filter && FILTERS[S.filter]) {
     await page.evaluate((m) => {
       document.body.insertAdjacentHTML("beforeend", `<svg width="0" height="0" style="position:absolute"><filter id="cvd"><feColorMatrix type="matrix" values="${m}"/></filter></svg>`);
@@ -34,7 +35,7 @@ const FILTERS = {
   }
   const press = async (k) => {
     const m = /^Level:(\d+)$/i.exec(k);
-    if (m) { const b = page.locator("#levels button").nth(Number(m[1]) - 1); if (await b.count()) await b.click(); return; }
+    if (m) { const b = page.locator("#levels button").nth(Number(m[1]) - 1); if (await b.count()) await b.click({ timeout: 2000 }).catch(() => {}); return; } // hidden under an end screen: does nothing
     if (k === "ShiftN") return page.keyboard.press("Shift+N");
     await page.keyboard.press(KEY[k]);
   };

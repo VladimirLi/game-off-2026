@@ -8,7 +8,8 @@ const inline = (f) => `<script>\n${fs.readFileSync(path.join(dir, f), "utf8")}\n
 html = html.replace('<script src="engine.js"></script>', () => inline("engine.js"))
            .replace('<script src="levels.js"></script>', () => inline("levels.js"))
            .replace('<script src="audio.js"></script>', () => inline("audio.js"))
-           .replace('<script src="pixel-art.js"></script>', () => inline("pixel-art.js"));
+           .replace('<script src="pixel-art.js"></script>', () => inline("pixel-art.js"))
+           .replace('<script src="screens.js"></script>', () => inline("screens.js"));
 // The host wraps the page in its own document skeleton: keep only the title, style and body content.
 const title = '<title>Body Hop</title>\n<meta name="claude:viewport-fit-sides" content="cover">';
 const style = html.match(/<style>[\s\S]*?<\/style>/)[0]
