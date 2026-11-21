@@ -1,7 +1,7 @@
 // Body Hop rules engine. Shared by the browser game (index.html) and the solver (tools/solve.js),
 // so the solver checks exactly the rules the game plays.
 //
-// Rules v2 (parked bodies):
+// Rules v3 (parked bodies, colour-only tiles):
 // - One arrow press is one turn. Pressing toward a free tile walks there.
 //   Pressing toward a body hops into it. Your old body stays where it is, asleep ("parked").
 // - The spirit exists only at the start. Its first hop uses it up; there is no "leave body" action.
@@ -9,10 +9,8 @@
 // - You can hop into any orthogonally adjacent body, including one you left earlier.
 // - A hop is not a walk: only adjacency matters, so a guard can hop into a cat standing inside a red block.
 // - Colour vision: a body's own colour is real to it, the other colour is not.
-//   Real block = wall, real bridge = floor. Unreal block = floor, unreal bridge = pit.
-//   The spirit sees no colour: coloured things are fog it cannot pass (blocks are walls, bridges are pits).
-// - Guard (sees red): carries the key, so locked doors are guard-only tiles.
-// - Cat (sees blue): the only one small enough for vents, so vents are cat-only tiles.
+//   A real block is a wall, an unreal block is floor. The guard sees red, the cat sees blue.
+//   The spirit sees no colour: coloured blocks are fog it cannot pass.
 // - Plates: a body on a plate (parked or not) holds it down. The spirit weighs nothing.
 //   Gates share one channel: every gate is open while any plate is held, or while a body stands in any gate
 //   (a body is a doorstop for all of them).
@@ -24,9 +22,7 @@
   const NAMES = { S: "spirit", G: "guard", C: "cat" };
   const LEGEND = {
     "#": "wall", ".": "floor", " ": "void",
-    "R": "red block", "B": "blue block",
-    "r": "red bridge", "b": "blue bridge", "~": "pit",
-    "D": "locked door", "V": "vent", "E": "exit",
+    "R": "red block", "B": "blue block", "E": "exit",
     "_": "plate", "|": "gate",
     "S": "spirit start", "G": "guard", "C": "cat",
   };
@@ -81,13 +77,9 @@
       case ".": case "E": case "_": return true;
       case "R": return t === "C";   // red block: wall to the guard, not there for the cat
       case "B": return t === "G";
-      case "r": return t === "G";   // red bridge: floor to the guard, a pit for the cat
-      case "b": return t === "C";
-      case "D": return t === "G";
-      case "V": return t === "C";
       case "|": return gateOpen(L, s);
     }
-    return false; // wall, void, pit
+    return false; // wall, void
   }
 
   function current(L, s) {
@@ -114,17 +106,11 @@
     const who = `the ${NAMES[t]}`;
     if (x < 0 || y < 0 || x >= L.w || y >= L.h) return `Blocked: ${who} can't walk through a wall.`;
     const ch = L.tiles[y][x];
-    const col = ch === "R" || ch === "r" ? "red" : "blue";
+    const col = ch === "R" ? "red" : "blue";
     switch (ch) {
       case "R": case "B": return t === "S"
         ? `Blocked: the spirit can't pass a ${col} block.`
         : `Blocked: ${who} sees ${col}, so the ${col} block is a wall to it.`;
-      case "r": case "b": return t === "S"
-        ? `Blocked: the spirit can't see bridges, so the ${col} bridge is a pit to it.`
-        : `Blocked: ${who} can't see ${col}, so the ${col} bridge is a pit to it.`;
-      case "~": return `Blocked: ${who} can't cross a pit.`;
-      case "V": return `Blocked: only a cat fits through the vent.`;
-      case "D": return `Blocked: only a guard can open the locked door.`;
       case "|": return `Blocked: the gate is shut. A body on a plate, or standing in a gate, opens it.`;
     }
     return `Blocked: ${who} can't walk through a wall.`;

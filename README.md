@@ -9,8 +9,9 @@ You are a spirit that hops between the bodies in a building. Each body sees one 
 ## Status
 
 - 18 levels: 12 main levels and the optional Night shift chapter (X1 to X6), each checked by the solver.
-- Tested by AI personas over seven rounds; no human playtest yet.
-- Sound is in: effects generated in code and a calm generative music track that shifts with the body you are in. Still grey box: no art, no title or end screen yet. Feature freeze 24 Nov, submit 30 Nov.
+- Tested by AI personas over seven level rounds and five art rounds; no human playtest yet.
+- Sound is in: effects generated in code and a calm generative music track that shifts with the body you are in.
+- Art is in: 8-bit pixel art and animation drawn in code; each body repaints the room in its colour. No title or end screen yet. Feature freeze 24 Nov, submit 30 Nov.
 
 ## Layout
 

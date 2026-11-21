@@ -13,7 +13,7 @@
   #turns { color: var(--dim); font-variant-numeric: tabular-nums; }
   #hint { min-height: 1.4em; margin: 8px 0; color: var(--dim); }
   #stage { position: relative; display: flex; justify-content: center; margin: 12px 0; }
-  canvas { background: #000; border-radius: 6px; max-width: 100%; }
+  canvas { background: #000; border-radius: 6px; max-width: 100%; image-rendering: pixelated; }
   #status { min-height: 1.4em; text-align: center; font-weight: 600; }
   #status.bad { color: #ff9a8a; } #status.good { color: var(--accent); }
   /* While the touch pad is shown it sits right under the status line, so the line always keeps two
@@ -60,8 +60,8 @@
   #legend .row .lbl { color: var(--dim); min-width: 44px; }
   #legend .row.list { flex-direction: column; align-items: flex-start; }
   #legend .item { display: inline-flex; align-items: center; gap: 3px; }
-  #legend canvas { width: 20px; height: 20px; border-radius: 2px; background: none; flex: none; outline: 1px solid #3a3e46; }
-  #legend canvas.mark { width: 36px; height: 36px; }
+  #legend canvas { width: 32px; height: 32px; border-radius: 2px; background: none; flex: none; outline: 1px solid #3a3e46; }
+  #legend canvas.mark { width: 40px; height: 40px; }
   #legend p { margin: 6px 0 0; color: var(--dim); }
   #legendBtn, #sfxBtn, #musicBtn { background: none; border: 1px solid #3a3e46; color: var(--dim); border-radius: 4px; padding: 2px 8px; font: inherit; font-size: 13px; cursor: pointer; }
   #levels button.done::after { content: " ✓"; color: var(--accent); }
@@ -100,19 +100,15 @@
 <script src="engine.js"></script>
 <script src="levels.js"></script>
 <script src="audio.js"></script>
+<script src="pixel-art.js"></script>
 <script>
 "use strict";
 const BH = window.BodyHop, LEVELS = window.BODY_HOP_LEVELS, SND = window.BodyHopAudio;
-const T = 56; // tile size in px
+const PX = window.PixelArt, SCALE = 4, TILE = PX.K * SCALE; // 16 px art scaled 4x
 const cv = document.getElementById("c");
-let g = cv.getContext("2d"); // swapped briefly to draw legend icons
 const $ = (id) => document.getElementById(id);
 
-// Each form tints the whole world; hopping cross-fades between tints ("shifting").
-const TINT = { S: [150, 150, 165], G: [235, 110, 95], C: [95, 150, 235] };
-const RED = "#d94a3a", BLUE = "#3a78d9";
-
-let idx = 0, L, s, history, turns, startTime, log, won, flash = null, shiftT = 1, shiftFrom = "S";
+let idx = 0, L, s, history, turns, startTime, log, won, flash = null;
 const done = new Set();
 try { for (const n of JSON.parse(localStorage.getItem("bodyhop-done") || "[]")) done.add(n); } catch (e) { /* storage unavailable */ }
 
@@ -121,8 +117,7 @@ function load(i, cue = "start") {
   idx = (i + LEVELS.length) % LEVELS.length;
   L = BH.parse(LEVELS[idx]);
   s = L.start; history = []; turns = 0; won = false; log = []; startTime = performance.now();
-  shiftFrom = "S"; shiftT = 1;
-  cv.width = L.w * T; cv.height = L.h * T;
+  cv.width = L.w * TILE; cv.height = L.h * TILE;
   $("title").textContent = `${label(idx)}. ${LEVELS[idx].name}`;
   $("hint").textContent = LEVELS[idx].hint || "";
   setStatus("");
@@ -191,7 +186,6 @@ function compress(a) { const out = []; for (const k of a) { const last = out[out
 function act(dir) {
   if (closeLegend(!won ? "Legend closed. Press again to move." : idx < LEVELS.length - 1 ? "Legend closed. Press N for the next level." : "Legend closed.")) return;
   if (won) return;
-  const before = BH.current(L, s).t;
   const r = BH.step(L, s, dir);
   log.push(dir[0].toUpperCase());
   if (!r.state) { setStatus(r.why, "bad"); flash = { t: performance.now(), dir }; draw(); SND.play("blocked"); return; }
@@ -199,16 +193,11 @@ function act(dir) {
   // A hop says which body you are in now, and whether you have been in it before, so an
   // accidental hop back into a parked body is never silent.
   if (r.kind === "hop") {
-    // A hop out of a body (not the spirit's first hop) also names the body you left and points at its
-    // footprints, so the mark is explained the moment it appears.
     const name = BH.NAMES[BH.current(L, s).t];
     const again = history.some((h) => h.ctrl === s.ctrl);
     SND.play(`hop:${BH.current(L, s).t}${again ? ":back" : ""}`); SND.setBody(BH.current(L, s).t);
-    const from = history[history.length - 1].ctrl;
-    const left = from >= 0 ? ` Footprints mark the ${BH.NAMES[L.types[from]]} you left.` : "";
-    setStatus((again ? `Back in the ${name}.` : `You are the ${name} now.`) + left + " Z to undo.");
+    setStatus((again ? `Back in the ${name}.` : `You are the ${name} now.`) + " Z to undo.");
   } else { setStatus(walkNews(history[history.length - 1], s)); walkSounds(history[history.length - 1], s); }
-  if (r.kind === "hop") { shiftFrom = before; shiftT = 0; animate(); }
   if (BH.won(L, s)) {
     won = true; done.add(LEVELS[idx].name);
     try { localStorage.setItem("bodyhop-done", JSON.stringify([...done])); } catch (e) { /* ignore */ }
@@ -220,7 +209,7 @@ function act(dir) {
 }
 
 // The sounds of a walk: the step of the body that walked, plus at most one extra, the most specific
-// thing it changed (gate change > plate > locked door, vent or unseen block), never a pile-up.
+// thing it changed (gate change > plate > unseen block), never a pile-up.
 function walkSounds(prev, now) {
   const me = BH.current(L, now), from = BH.current(L, prev), tile = L.tiles[me.y][me.x];
   SND.play("step:" + me.t);
@@ -230,8 +219,6 @@ function walkSounds(prev, now) {
   if (gates && was && !is) return SND.play("gate-shut");
   if (tile === "_") return SND.play(me.t === "S" ? "plate-ghost" : "plate-down");
   if (L.tiles[from.y][from.x] === "_" && me.t !== "S") return SND.play("plate-up");
-  if (tile === "D") return SND.play("door");
-  if (tile === "V") return SND.play("vent");
   if (tile === { C: "R", G: "B" }[me.t]) SND.play("shimmer");
 }
 
@@ -264,373 +251,146 @@ function undo() {
   log.push("Z");
   if (!history.length) return;
   SND.play("undo");
-  const before = BH.current(L, s).t;
   s = history.pop(); turns--; won = false; setStatus("");
   const after = BH.current(L, s).t;
-  if (after !== before) { shiftFrom = before; shiftT = 0; animate(); }
   SND.setBody(after);
   hud(); draw();
 }
 
-function animate() {
-  const t0 = performance.now();
-  const tick = (now) => { shiftT = Math.min(1, (now - t0) / 260); draw(); if (shiftT < 1) requestAnimationFrame(tick); };
-  requestAnimationFrame(tick);
+// ---------- drawing: 8-bit art from pixel-art.js ----------
+// The drawing never changes the game. Each frame it compares the game state with the one it last saw and
+// animates the difference: a walk slides one tile with stepping legs, a hop sends a spark to the new body and
+// repaints the world in four steps, plates sink, gate bars slide, a refused press nudges the body and blinks
+// the tile it hit, a win sinks the body down the exit stairs.
+const WALK_MS = 160, HOP_MS = 350;
+const anim = { L: null, seen: null, won: false, wonAt: 0, walks: new Map(), facing: new Map(), hop: null, gate: 0, plates: new Map(), last: 0 };
+
+const entPos = (st, i) => i < 0 ? [st.sx, st.sy] : st.pos[i];
+function noteChange(now) {
+  if (anim.L !== L) { // a new level or a restart: show it as it is, no tweens
+    Object.assign(anim, { L, seen: s, won, hop: null, gate: BH.gateOpen(L, s) ? 1 : 0, map: L.tiles.map((r) => r.join("")) });
+    anim.walks.clear(); anim.facing.clear(); anim.plates.clear();
+    return;
+  }
+  if (anim.seen === s) return;
+  const prev = anim.seen; anim.seen = s;
+  // Draw the settled picture too, in case the browser is not running animation frames (a hidden tab).
+  for (const ms of [WALK_MS + 40, 700, 1300]) setTimeout(() => draw(), ms);
+  const ents = s.pos.map((_, i) => i); if (s.ctrl < 0 && prev.ctrl < 0) ents.push(-1);
+  for (const i of ents) {
+    const [ax, ay] = entPos(prev, i), [bx, by] = entPos(s, i);
+    if (ax !== bx || ay !== by) { anim.walks.set(i, { ax, ay, bx, by, t0: now }); if (ax !== bx) anim.facing.set(i, bx < ax); }
+  }
+  if (prev.ctrl !== s.ctrl) { const a = BH.current(L, prev), b = BH.current(L, s); anim.hop = { ax: a.x, ay: a.y, bx: b.x, by: b.y, from: a.t, to: b.t, t0: now }; }
+  if (won && !anim.won) anim.wonAt = now;
+  anim.won = won;
 }
 
-// ---------- drawing ----------
-function mix(a, b, t) { return a.map((v, i) => Math.round(v + (b[i] - v) * t)); }
-function rgb(c, a = 1) { return `rgba(${c[0]},${c[1]},${c[2]},${a})`; }
-
-// The body you most recently hopped out of, or -1 (none yet, or the last hop was the spirit's, which leaves
-// no body). Read from the undo history, so undo, restart and a level change keep it right.
-function lastLeft() {
-  for (let i = history.length - 1; i >= 0; i--) {
-    const next = i === history.length - 1 ? s : history[i + 1];
-    if (history[i].ctrl !== next.ctrl) return history[i].ctrl;
-  }
-  return -1;
-}
-
-function draw() {
-  const me = BH.current(L, s);
-  const tint = mix(TINT[shiftFrom], TINT[me.t], shiftT);
-  const gateOpen = BH.gateOpen(L, s), held = BH.platesHeld(L, s);
-  g.clearRect(0, 0, cv.width, cv.height);
-  for (let y = 0; y < L.h; y++) for (let x = 0; x < L.w; x++) drawTile(x, y, L.tiles[y][x], me.t, tint, gateOpen, held);
-  // Bodies. The body you most recently hopped out of carries a footprint, so walking back into it is never a surprise.
-  const left = lastLeft();
-  s.pos.forEach(([x, y], i) => drawBody(x, y, L.types[i], i === s.ctrl, i === left, L.tiles[y][x]));
-  if (s.ctrl < 0) drawSpirit(s.sx, s.sy);
-  // Hop targets: every body next to you, which your next press that way hops into. Yellow corner
-  // brackets on its tile and an arrow on the shared edge (shape, not colour, tells them from the
-  // white "you" outline, the green plate and gate frames and the red blocked flash).
-  if (!won) for (const [dx, dy] of Object.values(BH.DIRS)) {
-    if (BH.bodyAt(s, me.x + dx, me.y + dy) >= 0) { hopCorners(me.x + dx, me.y + dy); hopArrow(me.x, me.y, dx, dy); }
-  }
-  if (flash && performance.now() - flash.t < 250) {
-    const [dx, dy] = BH.DIRS[flash.dir];
-    g.strokeStyle = "rgba(255,120,100,0.9)"; g.lineWidth = 3;
-    g.strokeRect((me.x + dx) * T + 4, (me.y + dy) * T + 4, T - 8, T - 8);
-    setTimeout(draw, 260);
-  }
-}
-
-// LIT marks "this is working": a held plate and an open gate share it, so the link between them is visible.
-const LIT = "#7fd27f";
-function drawTile(x, y, ch, who, tint, gateOpen, held) {
-  const px = x * T, py = y * T;
-  const floor = () => { g.fillStyle = rgb(mix([70, 72, 78], tint, 0.25)); g.fillRect(px, py, T, T); g.strokeStyle = "rgba(0,0,0,0.25)"; g.lineWidth = 1; g.strokeRect(px + 0.5, py + 0.5, T - 1, T - 1); };
-  // A pit is a flat black hole: where the tile above is not a hole, its far inner side shows as a dark
-  // band along the top edge, so it reads as a drop, never as a raised wall.
-  const pit = () => {
-    g.fillStyle = "#0b0c0f"; g.fillRect(px, py, T, T);
-    if (!"~rb".includes(tileAt(x, y - 1))) { g.fillStyle = "#1e2026"; g.fillRect(px, py, T, 6); g.fillStyle = "#000"; g.fillRect(px, py + 6, T, 2); }
+function draw(now = performance.now()) {
+  if (!L) return;
+  noteChange(now);
+  // Event handlers draw with performance.now(), animation frames with a frame time that can be a little
+  // earlier, so the clock only moves forward.
+  const dt = Math.max(0, now - (anim.last || now)); anim.last = Math.max(anim.last, now);
+  const me = BH.current(L, s), K = PX.K, PAL = PX.PAL;
+  const hop = anim.hop && now - anim.hop.t0 < HOP_MS ? anim.hop : null, k = hop ? (now - hop.t0) / HOP_MS : 1;
+  const landed = anim.hop && !hop ? now - anim.hop.t0 - HOP_MS : Infinity;
+  const fl = flash && now - flash.t < 300 ? flash : null, fdt = fl ? now - fl.t : 0;
+  const [ndx, ndy] = fl ? BH.DIRS[fl.dir] : [0, 0], nudge = fl && fdt < 120 ? Math.round(Math.sin(Math.PI * fdt / 120) * 2) : 0;
+  const sinkT = won ? now - anim.wonAt - WALK_MS : -1, sink = sinkT > 0 ? Math.min(16, Math.floor(sinkT / 30)) : 0;
+  const idle = Math.floor(now / 450) % 2, bodies = [];
+  const place = (i, t, x, y, o) => {
+    const w = anim.walks.get(i); let px = x, py = y, frame = 0, lift = o.active && !won ? idle : 0;
+    if (w) { const p = PX.walk(now, w.t0, 0, 1, WALK_MS); px = w.ax + (w.bx - w.ax) * p.pos; py = w.ay + (w.by - w.ay) * p.pos; frame = p.moving ? 1 : 0; lift = p.lift; if (p.pos >= 1) anim.walks.delete(i); }
+    if (t === "S") frame = Math.floor(now / 250) % 2;
+    bodies.push({ t, x: px, y: py, frame, lift, flip: anim.facing.get(i), ...o });
   };
-  switch (ch) {
-    case " ": g.fillStyle = "#000"; g.fillRect(px, py, T, T); return;
-    case "#": wall(x, y, tint); return;
-    case ".": floor(); return;
-    case "~": pit(); return;
-    case "E":
-      floor(); g.fillStyle = "#f0d060"; g.fillRect(px + 10, py + 10, T - 20, T - 20);
-      g.fillStyle = "#1d1f24"; g.font = "bold 18px system-ui"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("EXIT", px + T / 2, py + T / 2, T - 22); return;
-    case "R": case "B": {
-      const col = ch === "R" ? RED : BLUE;
-      const real = who === "S" || (ch === "R" ? who === "G" : who === "C");
-      floor();
-      if (real && who === "S") { // the spirit can't pass colour: the block in its full colour under grey fog
-        g.fillStyle = col; g.fillRect(px + 2, py + 2, T - 4, T - 4);
-        fog(px + 2, py + 2, T - 4, T - 4);
-      } else if (real) { g.fillStyle = col; g.fillRect(px + 2, py + 2, T - 4, T - 4); g.fillStyle = "rgba(0,0,0,0.18)"; g.fillRect(px + 2, py + T - 10, T - 4, 8); }
-      else { ghost(px, py, col); }
-      return;
+  s.pos.forEach(([x, y], i) => {
+    const mine = i === s.ctrl, active = mine && !hop;
+    // The second, third... body of one kind gets its own collar (cat) or badge (guard) colour.
+    const nth = L.types.slice(0, i).filter((u) => u === L.types[i]).length, mark = nth ? (L.types[i] === "C" ? ["#f8a4c0", "#fcfcfc", "#58d854"] : ["#fcfcfc", "#f8a4c0", "#58d854"])[(nth - 1) % 3] : undefined;
+    place(i, L.types[i], x, y, { active, zz: !mine, mark,
+      dx: mine ? ndx * nudge : 0, dy: mine ? ndy * nudge : 0, sink: mine ? sink : 0,
+      squash: mine && landed < 160 ? (landed < 60 ? 0.7 : landed < 110 ? 1.1 : 1) : 1 });
+  });
+  if (s.ctrl < 0) place(-1, "S", s.sx, s.sy, { active: true, dx: ndx * nudge, dy: ndy * nudge, sink });
+  // Hop markers on every edge between you and a body next to you.
+  const hops = won || hop ? [] : Object.entries(BH.DIRS).filter(([, [dx, dy]]) => BH.bodyAt(s, me.x + dx, me.y + dy) >= 0).map(([dir]) => [me.x, me.y, dir]);
+  // Plates sink when a body has arrived on them; the gates follow once every walk has landed.
+  const onTile = (x, y) => bodies.some((b) => b.t !== "S" && Math.abs(b.x - x) < 0.3 && Math.abs(b.y - y) < 0.3);
+  const gateTo = BH.gateOpen(L, s) ? 1 : 0;
+  // Finished walks are dropped here, not only when drawn: the spirit's last walk is never drawn again once it hops.
+  for (const [i, w] of anim.walks) if (now - w.t0 >= WALK_MS) anim.walks.delete(i);
+  if (!anim.walks.size) anim.gate = gateTo ? Math.min(1, anim.gate + dt / 300) : Math.max(0, anim.gate - dt / 120);
+  const state = (x, y) => {
+    const c = L.tiles[y][x];
+    if (c === "|") return { open: Math.floor(anim.gate * 6) / 6, lit: anim.gate > 0.5 };
+    if (c !== "_") return null;
+    const key = x + "," + y, v = anim.plates.get(key) || 0, to = onTile(x, y) ? 1 : 0;
+    const nv = to ? Math.min(1, v + dt / 80) : Math.max(0, v - dt / 80); anim.plates.set(key, nv);
+    return { press: nv };
+  };
+  const fx = (q) => {
+    if (hop) { // the spark: arcs from the body you left to the one you enter, trailing gold
+      const at = (kk) => [hop.ax * K + 8 + (hop.bx - hop.ax) * K * kk, hop.ay * K + 8 + (hop.by - hop.ay) * K * kk - Math.sin(Math.PI * kk) * 12];
+      for (let i = 3; i > 0; i--) { const [x, y] = at(Math.max(0, k - i * 0.09)); PX.dot(q, x, y, i === 1 ? PAL.y : PAL.Y); }
+      const [x, y] = at(k); PX.dot(q, x - 1, y - 1, PAL.W, 2); for (const [dx, dy] of [[-2, 0], [2, 0], [0, -2], [0, 2]]) PX.dot(q, x + dx, y + dy, PAL.Y);
+    } else if (landed < 200) { const r = 4 + landed / 25; for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [-0.7, -0.7], [0.7, -0.7]]) PX.dot(q, me.x * K + 8 + dx * r, me.y * K + 8 + dy * r, landed < 100 ? PAL.W : PAL.Y); }
+    if (fl) { // a refused press: the tile you pushed against blinks red, a puff of dust at your feet
+      if (Math.floor(fdt / 75) % 2 === 0) { q.strokeStyle = PAL.R; q.lineWidth = 1; q.strokeRect((me.x + ndx) * K + 0.5, (me.y + ndy) * K + 0.5, K - 1, K - 1); }
+      if (fdt >= 40 && fdt < 220) { const sp = 2 + fdt / 50; PX.dot(q, me.x * K + 8 - sp, me.y * K + 15 - fdt / 80, PAL.L); PX.dot(q, me.x * K + 8 + sp, me.y * K + 15 - fdt / 80, PAL.L); }
     }
-    case "r": case "b": {
-      const col = ch === "r" ? RED : BLUE;
-      const real = ch === "r" ? who === "G" : who === "C";
-      pit();
-      if (real) { g.fillStyle = col; for (let i = 0; i < 4; i++) g.fillRect(px + 6, py + 5 + i * 12, T - 12, 8); }
-      else ghost(px, py, col);
-      return;
-    }
-    case "D": {
-      // A locked door: a dark frame (two jambs and a lintel) round a plank door that fills the tile to
-      // the floor, two iron bands across it and a padlock hung on the upper band. It is built into the
-      // tile, so it reads as a shut door in the wall line, not as a key lying on the floor to pick up.
-      floor();
-      const cx = px + T / 2;
-      g.fillStyle = "#3b2a1b"; g.fillRect(px + 1, py + 1, T - 2, T - 1);           // frame
-      g.fillStyle = "#8a5a2b"; g.fillRect(px + 7, py + 7, T - 14, T - 7);          // door leaf
-      g.fillStyle = "#5c3a1a"; for (const sx of [17, 27, 38]) g.fillRect(px + sx, py + 7, 2, T - 7); // plank seams
-      g.fillStyle = "#4b5059"; g.fillRect(px + 7, py + 15, T - 14, 4); g.fillRect(px + 7, py + T - 12, T - 14, 4); // iron bands
-      // Padlock: a steel shackle through the upper band, a steel body with a dark keyhole.
-      g.strokeStyle = "#d4d8e0"; g.lineWidth = 3; g.beginPath(); g.arc(cx, py + 22, 6, 0, 7); g.stroke();
-      g.fillStyle = "#1d1f24"; g.fillRect(cx - 10, py + 21, 20, 17);
-      g.fillStyle = "#aeb4be"; g.fillRect(cx - 9, py + 22, 18, 15);
-      g.fillStyle = "#1d1f24"; g.beginPath(); g.arc(cx, py + 28, 2.5, 0, 7); g.fill(); g.fillRect(cx - 1, py + 29, 2, 5);
-      return;
-    }
-    case "V": {
-      // A vent is round: a grey rim around a dark hole with horizontal slats. A gate is square with
-      // vertical bars, so the two never look alike, whatever the colours.
-      floor();
-      const cx = px + T / 2, cy = py + T / 2, r = T / 2 - 8;
-      g.fillStyle = "#8a909a"; g.beginPath(); g.arc(cx, cy, r + 4, 0, 7); g.fill();
-      g.fillStyle = "#16181c"; g.beginPath(); g.arc(cx, cy, r, 0, 7); g.fill();
-      g.save(); g.beginPath(); g.arc(cx, cy, r, 0, 7); g.clip();
-      g.fillStyle = "#5d636d"; for (let i = -2; i <= 2; i++) g.fillRect(cx - r, cy + i * 8 - 2, 2 * r, 4);
-      g.restore(); return;
-    }
-    case "_": {
-      floor();
-      // A plate is a square slab set into the floor in a dark groove: the same on all four sides, so a body
-      // standing on it is ringed all round (an open gate is two posts and a top beam, open at the bottom).
-      // Up (empty): raised grey, light top-left edge, dark bottom-right edge, grey button.
-      // Held: sunk in (edges swapped), the slab lit in the same colour as an open gate, and a dark
-      // diagonal in each corner (the bevel of a pressed-in tray), which shows beside a body on it.
-      // White stays reserved for "this is you".
-      g.fillStyle = "#121317"; g.fillRect(px + 1, py + 1, T - 2, T - 2); // the groove
-      g.fillStyle = held ? LIT : "#c9ced8"; g.fillRect(px + 3, py + 3, T - 6, T - 6);
-      g.fillStyle = held ? "rgba(0,0,0,0.45)" : "rgba(255,255,255,0.7)"; g.fillRect(px + 3, py + 3, T - 6, 3); g.fillRect(px + 3, py + 3, 3, T - 6);
-      g.fillStyle = held ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.45)"; g.fillRect(px + 3, py + T - 6, T - 6, 3); g.fillRect(px + T - 6, py + 3, 3, T - 6);
-      if (held) {
-        g.strokeStyle = "rgba(0,0,0,0.55)"; g.lineWidth = 2; g.beginPath();
-        for (const [ax, ay, bx, by] of [[3, 3, 13, 13], [T - 3, 3, T - 13, 13], [3, T - 3, 13, T - 13], [T - 3, T - 3, T - 13, T - 13]]) {
-          g.moveTo(px + ax, py + ay); g.lineTo(px + bx, py + by);
-        }
-        g.stroke();
-      }
-      g.fillStyle = held ? "#1f3a1f" : "#2e3138"; g.fillRect(px + 13, py + 13, T - 26, T - 26);
-      g.beginPath(); g.arc(px + T / 2, py + T / 2, held ? 5 : 8, 0, 7); g.fillStyle = held ? LIT : "#9aa1ad"; g.fill(); return;
-    }
-    case "|": {
-      // A gate is a frame (two posts and a top beam, open at the bottom) with spiked bars: a portcullis.
-      // Shut: grey, bars down to the floor. Open: the frame is lit (as a held plate is) and the bars are
-      // pulled up under the beam with their spikes showing, so the floor shows through. The posts sit at the
-      // tile edges, and a body standing in an open gate gets the raised bars drawn again over its head
-      // (gateTop, from drawBody), so it reads as "under a raised gate", never as "on a held plate".
-      floor();
-      const col = gateOpen ? LIT : "#c9ced8";
-      if (!gateOpen) { g.fillStyle = "rgba(0,0,0,0.35)"; g.fillRect(px + 6, py + 9, T - 12, T - 11); }
-      g.fillStyle = "rgba(0,0,0,0.5)"; g.fillRect(px + 6, py + 1, 2, T - 1); g.fillRect(px + T - 8, py + 1, 2, T - 1); // post shadows
-      g.fillStyle = col; g.fillRect(px + 1, py + 1, 5, T - 1); g.fillRect(px + T - 6, py + 1, 5, T - 1);
-      if (gateOpen) { gateTop(px, py); return; }
-      g.fillRect(px + 1, py + 1, T - 2, 8);
-      g.strokeStyle = col; g.lineWidth = 4;
-      for (let i = 0; i < 4; i++) {
-        const gx = px + 12 + i * 10.7;
-        g.beginPath(); g.moveTo(gx, py + 8); g.lineTo(gx, py + T - 10); g.stroke();
-        // Shut, each bar ends in a spike near the floor, unlike the round, slatted vent.
-        g.fillStyle = col; g.beginPath(); g.moveTo(gx - 4, py + T - 11); g.lineTo(gx + 4, py + T - 11); g.lineTo(gx, py + T - 3); g.fill();
-      }
-      return;
-    }
-  }
-}
-
-// The tile at (x, y) on the board, "#" outside it. A legend icon is drawn alone, so to it every
-// neighbour is floor (a lone wall icon shows its front face, a lone pit its far side).
-let drawingIcon = false;
-function tileAt(x, y) {
-  if (drawingIcon) return ".";
-  return x < 0 || y < 0 || x >= L.w || y >= L.h ? "#" : L.tiles[y][x];
-}
-
-// A wall is a raised block of light bricks with dark mortar, and where the tile below is not a wall, a
-// dark front face along its bottom edge (the block's height). A pit is a flat black hole. So the two differ by brightness and by shape
-// (bricks and a front face, or a hole), not by hue: an inner wall never reads as a pit. Bricks are laid
-// on the board grid (rows of 14 px, bricks 28 px wide, every other row offset by half a brick), so a run
-// of wall tiles shows one continuous brick wall.
-const BRICK_H = 14, BRICK_W = 28, FRONT = 11;
-function wall(x, y, tint) {
-  const px = x * T, py = y * T;
-  const solid = (dx, dy) => "# ".includes(tileAt(x + dx, y + dy));
-  g.fillStyle = rgb(mix([50, 50, 54], tint, 0.12)); g.fillRect(px, py, T, T); // mortar
-  g.fillStyle = rgb(mix([120, 117, 112], tint, 0.12));
-  for (let r = 0; r < T / BRICK_H; r++) {
-    const off = (y * (T / BRICK_H) + r) % 2 ? BRICK_W / 2 : 0;
-    for (let bx = -off; bx < T; bx += BRICK_W) {
-      const x0 = Math.max(bx + 1, 0), x1 = Math.min(bx + BRICK_W - 1, T); // 2 px joints, split across bricks
-      if (x1 > x0) g.fillRect(px + x0, py + r * BRICK_H + 1, x1 - x0, BRICK_H - 2);
-    }
-  }
-  // Edges next to open ground: a light top lip where the block's top meets the open tile above, a dark line
-  // on an open side, and a dark front face (the block's height) above open ground below.
-  if (!solid(0, -1)) { g.fillStyle = "rgba(255,255,255,0.35)"; g.fillRect(px, py, T, 2); }
-  g.fillStyle = "rgba(0,0,0,0.6)";
-  if (!solid(-1, 0)) g.fillRect(px, py, 2, T);
-  if (!solid(1, 0)) g.fillRect(px + T - 2, py, 2, T);
-  if (!solid(0, 1)) {
-    g.fillStyle = rgb(mix([40, 39, 42], tint, 0.1)); g.fillRect(px, py + T - FRONT, T, FRONT);
-    g.fillStyle = "rgba(0,0,0,0.55)"; g.fillRect(px, py + T - FRONT, T, 2); g.fillRect(px, py + T - 2, T, 2);
-  }
-}
-
-// The top of an open gate: the lit beam and the four bars pulled up under it, each ending in a spike
-// (the same spikes a shut gate shows at the floor). Drawn on the gate tile, and again over a body standing
-// in the gate, so that body shows the raised bars over its head (a body on a held plate shows a closed ring).
-function gateTop(px, py) {
-  g.fillStyle = "rgba(0,0,0,0.6)"; g.fillRect(px + 1, py + 9, T - 2, 2); // shadow under the beam
-  g.fillStyle = LIT; g.fillRect(px + 1, py + 1, T - 2, 8);
-  for (let i = 0; i < 4; i++) {
-    const gx = px + 12 + i * 10.7;
-    g.fillStyle = "rgba(0,0,0,0.6)"; g.beginPath(); g.moveTo(gx - 5.5, py + 12); g.lineTo(gx + 5.5, py + 12); g.lineTo(gx, py + 21.5); g.closePath(); g.fill();
-    g.fillStyle = LIT; g.fillRect(gx - 2, py + 8, 4, 6);
-    g.beginPath(); g.moveTo(gx - 4, py + 13); g.lineTo(gx + 4, py + 13); g.lineTo(gx, py + 20); g.closePath(); g.fill();
-  }
-}
-
-// The front lip of a held plate, drawn over the feet of the body standing on it: a flat lit strip across
-// the bottom of the tile with a dark top edge, so the body stands sunk in a tray (no posts, no spikes).
-function plateLip(px, py) {
-  g.fillStyle = "rgba(0,0,0,0.6)"; g.fillRect(px + 3, py + T - 13, T - 6, 2);
-  g.fillStyle = LIT; g.fillRect(px + 3, py + T - 11, T - 6, 8);
-  g.fillStyle = "rgba(255,255,255,0.35)"; g.fillRect(px + 3, py + T - 6, T - 6, 3);
-}
-
-// Grey fog over a coloured block, as the spirit sees it: diagonal grey bands, so the block keeps its
-// full colour (it reads as "red block" or "blue block") but is marked as something the spirit can't pass.
-function fog(x, y, w, h) {
-  g.save(); g.beginPath(); g.rect(x, y, w, h); g.clip();
-  g.strokeStyle = "rgba(205,207,215,0.6)"; g.lineWidth = 5;
-  for (let d = -h; d < w; d += 12) { g.beginPath(); g.moveTo(x + d, y + h); g.lineTo(x + d + h, y); g.stroke(); }
-  g.restore();
-}
-
-// A thing this body cannot see: a faint dashed outline, so the player still knows it is there for others.
-function ghost(px, py, col) {
-  g.save(); g.setLineDash([5, 5]); g.strokeStyle = col; g.globalAlpha = 0.55; g.lineWidth = 2;
-  g.strokeRect(px + 5, py + 5, T - 10, T - 10); g.restore();
-}
-
-// under: the tile the body stands on. In a gate (always open with a body in it) the gate's raised bars are
-// drawn over the body's head; on a plate (always held with a body on it) the plate's front lip is drawn
-// over its feet. So the two read apart by shape: spikes over the head, or a flat tray round the feet.
-function drawBody(x, y, t, active, last, under) {
-  const px = x * T, py = y * T, cx = px + T / 2, cy = py + T / 2;
-  const col = t === "G" ? RED : BLUE;
-  const size = t === "G" ? T - 14 : T - 24; // the cat is small (it fits in vents)
-  g.globalAlpha = active ? 1 : 0.55;
-  g.fillStyle = col; g.fillRect(cx - size / 2, cy - size / 2, size, size);
-  g.fillStyle = "#fff"; g.font = `bold ${t === "G" ? 20 : 15}px system-ui`; g.textAlign = "center"; g.textBaseline = "middle";
-  g.fillText(t, cx, cy + 1);
-  g.globalAlpha = 1;
-  if (under === "|") gateTop(px, py);
-  if (under === "_") plateLip(px, py);
-  if (active) { g.strokeStyle = "#fff"; g.lineWidth = 3; g.strokeRect(cx - size / 2 - 4, cy - size / 2 - 4, size + 8, size + 8); }
-  else { g.fillStyle = "rgba(255,255,255,0.8)"; g.font = "bold 12px system-ui"; g.fillText("z", px + T - 9, py + 10); }
-  if (last) footprint(px, py);
-}
-
-// The body you just hopped out of: a pair of white footprints with a dark edge in the top-left of its tile.
-// Two feet side by side read as "footprints" (the old single foot on a white disc read as "a white dot"),
-// and still read as two prints on a phone (the board can scale to about 0.65). They sit on the tile
-// diagonal, where nothing else is drawn: the yellow hop arrows sit at the middle of an edge and narrow
-// toward the tile centre, the hop corner brackets hug the tile corners, the "z" is top right and the body
-// letter is in the middle. Each foot is six circles (ball, arch, heel, three toes), drawn dark 1.5 px larger
-// first, then white. Placed by a search: with its dark edge the pair is at least 1.3 px clear of every hop
-// arrow and corner bracket (with their dark edges and line caps) and of the "z", the two feet are 2 px
-// apart, and they reach about 1 px into the top-left corner of the letter's box (where a G or C is empty).
-const FOOT = [[0.5, -2.2, 2.9], [-0.4, 1.0, 2.1], [-0.6, 4.0, 2.2], [1.6, -7.3, 1.2], [-0.6, -7.2, 0.95], [-2.4, -6.2, 0.8]]; // a left foot, toes up: ball, arch, heel, three toes
-const FOOT_K = 0.85, FOOT_TURN = -0.4, FEET = [[13.5, 16.5, 1], [21.5, 15, -1]]; // size, turn (rad), [x, y, mirror] of the left and right foot
-function footprint(px, py) {
-  const c = Math.cos(FOOT_TURN), sn = Math.sin(FOOT_TURN);
-  const circles = [];
-  for (const [fx, fy, mirror] of FEET)
-    for (const [x, y, r] of FOOT) { const X = x * mirror * FOOT_K, Y = y * FOOT_K; circles.push([px + fx + X * c - Y * sn, py + fy + X * sn + Y * c, r * FOOT_K]); }
-  for (const [fill, grow] of [["rgba(0,0,0,0.8)", 1.5], ["#fff", 0]]) {
-    g.fillStyle = fill;
-    for (const [x, y, r] of circles) { g.beginPath(); g.arc(x, y, r + grow, 0, 7); g.fill(); }
-  }
-}
-
-function drawSpirit(x, y) {
-  const cx = x * T + T / 2, cy = y * T + T / 2;
-  g.fillStyle = "rgba(255,255,255,0.9)"; g.beginPath(); g.arc(cx, cy, T / 4, 0, 7); g.fill();
-  g.strokeStyle = "rgba(255,255,255,0.4)"; g.lineWidth = 2; g.beginPath(); g.arc(cx, cy, T / 4 + 6, 0, 7); g.stroke();
-}
-
-// Hop target marks, in HOP yellow with a dark edge so they read on any tile (a light plate, a red block).
-const HOP = "#f0d060";
-function hopCorners(x, y) {
-  const a = 3, b = T - 3, n = 11, px = x * T, py = y * T;
-  const path = () => {
-    g.beginPath();
-    for (const [cx, cy, sx, sy] of [[a, a, 1, 1], [b, a, -1, 1], [a, b, 1, -1], [b, b, -1, -1]]) {
-      g.moveTo(px + cx + sx * n, py + cy); g.lineTo(px + cx, py + cy); g.lineTo(px + cx, py + cy + sy * n);
+    if (sinkT > 480 && sinkT < 980) { // the win: a flash on the exit and a ring of light
+      const d = sinkT - 480; if (d < 80) { q.fillStyle = PAL.W; q.fillRect(me.x * K, me.y * K, K, K); }
+      const r = 6 + d / 18; for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; PX.dot(q, me.x * K + 8 + Math.cos(a) * r, me.y * K + 8 + Math.sin(a) * r, i % 2 ? PAL.Y : PAL.W); }
     }
   };
-  g.save(); g.lineCap = "square";
-  path(); g.strokeStyle = "rgba(0,0,0,0.75)"; g.lineWidth = 6; g.stroke();
-  path(); g.strokeStyle = HOP; g.lineWidth = 3; g.stroke();
-  g.restore();
+  PX.render(cv, { map: anim.map, viewer: hop ? (k < 0.5 ? hop.from : hop.to) : me.t, from: hop ? hop.from : me.t, to: hop ? hop.to : me.t, lensT: k, t: now, bodies, hops, state, fx });
 }
-// An arrow on the edge between you (x, y) and the body in direction (dx, dy), pointing into it.
-function hopArrow(x, y, dx, dy) {
-  const cx = x * T + T / 2 + dx * (T / 2 + 3), cy = y * T + T / 2 + dy * (T / 2 + 3);
-  const a = Math.atan2(dy, dx), r = 9;
-  g.save(); g.beginPath();
-  g.moveTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
-  g.lineTo(cx + Math.cos(a + 2.3) * r, cy + Math.sin(a + 2.3) * r);
-  g.lineTo(cx + Math.cos(a - 2.3) * r, cy + Math.sin(a - 2.3) * r);
-  g.closePath();
-  g.lineJoin = "round"; g.strokeStyle = "rgba(0,0,0,0.75)"; g.lineWidth = 3; g.stroke();
-  g.fillStyle = HOP; g.fill(); g.restore();
-}
+const loop = (now) => { draw(now); requestAnimationFrame(loop); };
+requestAnimationFrame(loop);
 
 // ---------- legend ----------
 // An HTML overlay on the board. Each body's rows draw the tiles exactly as that body sees them.
 const LEGEND_BODIES = [
-  { t: "S", title: "Spirit (white circle): sees no colour, so every red or blue block is fog (grey bands), and fog is a wall to the spirit; weighs nothing on plates",
+  { t: "S", title: "Spirit (white ghost): sees no colour, so every red or blue block is grey fog, a wall to the spirit; weighs nothing on plates",
     can: [[".", "floor"], ["_", "plate"], ["E", "exit"], ["|o", "open gate"]],
-    cannot: [["R", "red block (fog: a wall to the spirit)"], ["B", "blue block (fog: a wall to the spirit)"], ["r", "red bridge"], ["b", "blue bridge"], ["D", "locked door"], ["V", "vent"], ["#", "wall"], ["~", "pit"], ["|", "shut gate"]] },
-  { t: "G", title: "Guard (big red G): sees red, not blue; carries the key",
-    can: [["B", "blue block"], ["r", "red bridge"], ["D", "locked door"]], also: "floor, plates, open gates, exit",
-    cannot: [["R", "red block"], ["b", "blue bridge"], ["V", "vent"], ["#", "wall"], ["~", "pit"], ["|", "shut gate"]] },
-  { t: "C", title: "Cat (small blue C): sees blue, not red; fits through vents",
-    can: [["R", "red block"], ["b", "blue bridge"], ["V", "vent"]], also: "floor, plates, open gates, exit",
-    cannot: [["B", "blue block"], ["r", "red bridge"], ["D", "locked door"], ["#", "wall"], ["~", "pit"], ["|", "shut gate"]] },
+    cannot: [["R", "red block (fog)"], ["B", "blue block (fog)"], ["#", "wall"], ["|", "shut gate"]] },
+  { t: "G", title: "Guard (red uniform): sees red, not blue",
+    can: [["B", "blue block: not there for the guard"]], also: "floor, plates, open gates, exit",
+    cannot: [["R", "red block"], ["#", "wall"], ["|", "shut gate"]] },
+  { t: "C", title: "Cat (blue): sees blue, not red",
+    can: [["R", "red block: not there for the cat"]], also: "floor, plates, open gates, exit",
+    cannot: [["B", "blue block"], ["#", "wall"], ["|", "shut gate"]] },
 ];
-const LEGEND_TILES = [["#", "wall (raised bricks): no body passes"],
-  ["~", "pit (flat black hole): no body crosses, except on a bridge of the colour it sees"],
-  ["V", "vent (round grey grille, flat slats): cat only"],
-  ["D", "locked door (plank door with a padlock): guard only. Nothing to pick up: the guard already carries the key"],
-  ["_", "plate, up (raised grey square): no body on it. The spirit weighs nothing"],
-  ["_h", "plate, held (sunk in, lit green square): a body stands on it, so every gate is open"],
-  ["_hG", "body on a held plate: a closed green square all round it"],
-  ["|", "gate, shut (two posts and a beam, grey spiked bars down to the floor): no body on a plate or in a gate"],
-  ["|o", "gate, open (lit green posts and beam, bars pulled up): while any plate is held, or a body stands in any gate"],
-  ["|oG", "body in an open gate: posts at its sides, the raised spiked bars over its head, open at the bottom"]];
+// [tile, text, the body whose view the icon shows (default: the spirit's)]
+const LEGEND_TILES = [["#", "wall (bricks): no body passes"],
+  ["R", "red block (stripes): solid to the guard, not there for the cat", "G"],
+  ["B", "blue block (dots): solid to the cat, not there for the guard", "C"],
+  ["_", "plate (grey, with a ring): step a body on it. The spirit weighs nothing"],
+  ["_h", "plate, held (lit green, glowing round the body on it): every gate is open"],
+  ["|", "gate, shut (bars down, red lamps): no body on a plate or in a gate"],
+  ["|o", "gate, open (bars up, green lamps): while any plate is held, or a body stands in any gate"],
+  ["E", "exit (green EXIT sign over a lit door): reach it to win"]];
 // Board markers. "@x" items draw a marker icon instead of a tile.
-const LEGEND_MARKS = [["@you", "white outline: the body you are in"],
+const LEGEND_MARKS = [["@you", "yellow outline and ring: the body you are in"],
   ["@sleep", "z: an asleep body. It blocks the way"],
-  ["@last", "two white footprints (top left): the body you just hopped out of. Walking into it hops you back"],
-  ["@hop", "yellow corners and arrow: your next step that way hops into this body"]];
+  ["@hop", "yellow arrow on your edge: step that way to hop into the body there"]];
 let legendOpen = false;
 
+// "|o" draws an open gate and "|" a shut one; "_h" a held plate and "_" an empty one.
 function tileIcon(ch, who) {
-  const c = document.createElement("canvas"); c.width = c.height = T;
-  const keep = g; g = c.getContext("2d"); drawingIcon = true;
-  // "|o" draws an open gate and "|" a shut one; "_h" a held plate and "_" an empty one.
-  // A third letter puts an asleep body of that type on the tile ("_hG", "|oG").
+  const c = document.createElement("canvas"); c.width = c.height = PX.K * 2;
   const open = ch.startsWith("|o"), held = ch.startsWith("_h");
-  try {
-    drawTile(0, 0, ch[0], who, TINT[who], open, held);
-    if (ch[2]) drawBody(0, 0, ch[2], false, false, ch[0]);
-  } finally { g = keep; drawingIcon = false; }
+  PX.render(c, { map: [ch[0]], viewer: who, t: 0, state: () => ch[0] === "|" ? { open: open ? 1 : 0, lit: open } : ch[0] === "_" ? { press: held ? 1 : 0 } : null });
   return c;
 }
 
 // A marker icon for the legend: a guard on floor, drawn as the board draws it.
 function markerIcon(kind) {
-  const c = document.createElement("canvas"); c.width = c.height = T; c.className = "mark";
-  const keep = g; g = c.getContext("2d"); drawingIcon = true;
-  try {
-    drawTile(0, 0, ".", "S", TINT.S, false, false);
-    drawBody(0, 0, "G", kind === "you", kind === "last");
-    if (kind === "hop") { hopCorners(0, 0); hopArrow(-1, 0, 1, 0); }
-  } finally { g = keep; drawingIcon = false; }
+  const c = document.createElement("canvas"), wide = kind === "hop"; c.width = PX.K * (wide ? 4 : 2); c.height = PX.K * 2; c.className = "mark";
+  if (wide) c.style.width = "80px";
+  PX.render(c, { map: [wide ? ".." : "."], viewer: "S", t: 0, bodies: [{ t: "G", x: wide ? 1 : 0, y: 0, active: kind === "you", zz: kind !== "you" }], hops: wide ? [[0, 0, "right"]] : [] });
   return c;
 }
 
@@ -638,9 +398,9 @@ function legendRow(label, items, who, also) {
   const row = document.createElement("div"); row.className = "row";
   if (label) { const head = document.createElement("span"); head.className = "lbl"; head.textContent = label; row.appendChild(head); }
   else row.classList.add("list");
-  for (const [ch, name] of items) {
+  for (const [ch, name, view] of items) {
     const it = document.createElement("span"); it.className = "item";
-    it.appendChild(ch[0] === "@" ? markerIcon(ch.slice(1)) : tileIcon(ch, who)); it.appendChild(document.createTextNode(name)); row.appendChild(it);
+    it.appendChild(ch[0] === "@" ? markerIcon(ch.slice(1)) : tileIcon(ch, view || who)); it.appendChild(document.createTextNode(name)); row.appendChild(it);
   }
   if (also) { const a = document.createElement("span"); a.textContent = "and " + also; row.appendChild(a); }
   return row;
@@ -663,7 +423,7 @@ function buildLegend() {
   const mk = document.createElement("div"); mk.className = "who"; mk.textContent = "Bodies on the board";
   box.append(mk, legendRow("", LEGEND_MARKS, "S"));
   const p = document.createElement("p");
-  p.textContent = "Each tile is drawn as that body sees it: a dashed outline is not there for that body. " +
+  p.textContent = "Each tile is drawn as that body sees it: a dotted outline is not there for that body. " +
     "Walk into a body to hop into it; Z undoes a hop.";
   box.appendChild(p);
 }

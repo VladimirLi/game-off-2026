@@ -12,7 +12,7 @@ const rnd = () => { // mulberry32
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 };
 const pick = (a) => a[Math.floor(rnd() * a.length)];
-const WEIGHTS = [[".", 50], ["#", 22], ["R", 6], ["B", 6], ["~", 5], ["r", 2], ["b", 2], ["D", 2], ["V", 2], ["|", 2], ["_", 1]];
+const WEIGHTS = [[".", 50], ["#", 27], ["R", 10], ["B", 10], ["|", 2], ["_", 1]];
 const TOTAL = WEIGHTS.reduce((a, [, w]) => a + w, 0);
 function tile() { let r = rnd() * TOTAL; for (const [c, w] of WEIGHTS) if ((r -= w) < 0) return c; return "."; }
 

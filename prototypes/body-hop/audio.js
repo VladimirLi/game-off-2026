@@ -38,8 +38,6 @@
     plateUp:   [.45,0,180,.004,.04,.14,1,1,.6,0,0,0,0,0,0,0,0,1,0,0,-450],       // plate springs back up
     plateGhost:[.25,0,880,0,0,.04,0,1,0,0,0,0,0,0,0,0,.05,1,0,0,0],              // spirit on a plate: hollow tick
     shimmer:   [.4,0,1760,.03,.1,.3,0,1,0,0,0,0,.035,0,0,0,0,1,0,.6,0],          // walking into an unseen block
-    door:      [.7,0,900,0,0,.03,1,1,0,0,-300,.012,0,0,0,0,.07,1,0,0,-1300],     // key turns: click-clack
-    vent:      [.6,0,1200,0,.02,.06,1,1,0,0,0,0,0,0,37,0,.09,1,0,0,0],           // tinny echo in the vent
     bell:      [.6,0,293.7,.005,.05,.9,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0],           // D4 bell, pitched for win and start
     undo:      [.3,0,660,0,.02,.07,0,1,-4,0,0,0,0,0,0,0,0,1,0,0,0],              // quick descending blip
     restart:   [.35,0,900,.04,.12,.22,1,1,-3,0,0,0,0,0,0,0,0,1,0,0,-800],        // soft rewind sweep
@@ -54,7 +52,7 @@
     "blocked": [["blocked"]],
     "gate-open": [["gateOpen"]], "gate-shut": [["gateShut"]],
     "plate-down": [["plateDown"]], "plate-up": [["plateUp"]], "plate-ghost": [["plateGhost"]],
-    "shimmer": [["shimmer"]], "door": [["door"]], "vent": [["vent"]],
+    "shimmer": [["shimmer"]],
     "win": [["bell", 0, -12], ["bell", .16, -8], ["bell", .32, -5], ["bell", .48, 0, .8]], // D3 F#3 A3 D4, with a music swell
     "start": [["bell", 0, -5, .3], ["bell", .18, 0, .25]],                                // soft A3 then D4
     "undo": [["undo"]], "restart": [["restart"]], "ui": [["ui"]],

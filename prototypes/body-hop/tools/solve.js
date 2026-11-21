@@ -8,7 +8,6 @@
 //   "needs:G" / "needs:C"  unsolvable if you may never hop into that body type
 //   "reenter"              unsolvable if each body may be entered only once (you must go back to a parked body)
 //   "plate"                unsolvable if plates are taken out (gates become walls)
-//   "door"                 unsolvable if locked doors are walls
 //   "doorstop"             unsolvable if a body in a gate does not hold it open
 const BH = require("../engine.js");
 const LEVELS = require("../levels.js");
@@ -84,10 +83,10 @@ function solve(level, opt = {}) {
   return res;
 }
 
-const CHECKS = ["needs:G", "needs:C", "reenter", "plate", "door", "doorstop"];
+const CHECKS = ["needs:G", "needs:C", "reenter", "plate", "doorstop"];
 function restriction(c) {
   if (c.startsWith("needs:")) return { forbid: [c.slice(6)] };
-  return { reenter: { once: true }, plate: { swap: { "_": ".", "|": "#" } }, door: { swap: { "D": "#" } }, doorstop: { noDoorstop: true } }[c];
+  return { reenter: { once: true }, plate: { swap: { "_": ".", "|": "#" } }, doorstop: { noDoorstop: true } }[c];
 }
 
 // Brute-force proxy: how often a player pressing random arrows (no-ops skipped) reaches the exit

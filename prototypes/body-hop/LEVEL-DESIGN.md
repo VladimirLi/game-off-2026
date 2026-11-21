@@ -27,10 +27,10 @@ Three chapters of four levels on the main path, plus an optional expert set. Eac
 
 | Slot | Chapter | Teaches (one idea) | The wrong assumption it breaks |
 |---|---|---|---|
-| 1 | Eyes | Walk into a body to become it; the guard has the key | "I am stuck as the white circle" |
+| 1 | Eyes | Walk into a body to become it; another body can pass what stops you | "I am stuck as the ghost" |
 | 2 | Eyes | Red isn't there for the cat (a dashed outline = not there for you) | "Dashed means wall" |
-| 3 | Eyes | A blue bridge exists only for the cat | "That pit is impassable" |
-| 4 | Eyes (closer) | Hop body to body, from wherever you stand, even inside a red block | "Hopping only works from open floor / only the spirit hops" |
+| 3 | Eyes | Hop body to body: one body carries you to the next, which can pass what the first can't | "One body has to make the whole trip" |
+| 4 | Eyes (closer) | Hop body to body, from wherever you stand, even inside a block | "Hopping only works from open floor / only the spirit hops" |
 | 5 | Leftovers | A body left on a plate holds the gate; the spirit weighs nothing | "I can hold the plate myself and walk through" |
 | 6 | Leftovers | Parked bodies block; park where you can still hop back | "Bodies get out of my way" |
 | 7 | Leftovers | The first hop is the one move you can't undo (pick the right first body) | "Any body will do to start" |
@@ -40,6 +40,8 @@ Three chapters of four levels on the main path, plus an optional expert set. Eac
 | 11 | Gates | Each body type has its own waiting places (blue blocks for guards, red for cats) | "There is nowhere to park" |
 | 12 | Gates (closer) | Combine: a plate hand-over through a relay | |
 | X1–X6 | Night shift (optional, open from the start) | Expert levels where the obvious plan fails | Each names its own trap |
+
+Since 21 Nov 2026 the tile set is colour only (README, "Rules (v3)"): locked doors, vents, bridges and pits were cut because each played exactly like a colour block or a wall, so the maps changed tile for tile with every route and par kept.
 
 Slots 9 to 12 and the Night shift set may use ideas from v2 levels (Light sleeper, Doorstop, No trace, Lay-by, Two breaks, Changing of the guard) when the redesign measures better; the slot's idea matters, not the old map.
 
