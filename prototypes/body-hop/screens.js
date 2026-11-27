@@ -122,7 +122,7 @@
     sky(NIGHT, 0, 92, now, tint === "#000000" ? null : [tint, 0.35], 92, 42); moon(178, 12);
     // the room's three bodies, walking and hopping to the exit
     const walkAt = (start, steps) => { let x = start, moving = false, lift = 0; for (const [t0, a, b] of steps) if (t >= t0) { const w = PX.walk(t, t0, a, b, 200); x = w.pos; moving = w.moving; lift = w.lift; } return { x, frame: moving ? 1 : 0, lift }; };
-    const idle = Math.floor(now / 450) % 2, squash = (t0) => { const d = landed(t0); return d >= 0 && d < 160 ? (d < 60 ? 0.7 : d < 110 ? 1.1 : 1) : 1; };
+    const idle = Math.floor(now / 450) % 2, squash = (t0) => { const d = PX.calm() ? -1 : landed(t0); return d >= 0 && d < 160 ? (d < 60 ? 0.7 : d < 110 ? 1.1 : 1) : 1; };
     const bodies = [];
     if (t < 1500) { const s = walkAt(2, [[900, 2, 3]]); bodies.push({ t: "S", x: s.x, y: 1, active: true, frame: Math.floor(now / 250) % 2, lift: s.lift || idle }); }
     { const g = walkAt(4, [[2700, 4, 5]]), on = cur === "G" && !hop; bodies.push({ t: "G", x: g.x, y: 1, active: on, zz: !on, frame: g.frame, lift: g.lift || (on ? idle : 0), squash: squash(1500) }); }
@@ -131,13 +131,13 @@
     const fx = (qq) => {
       if (t < 350) burst(qq, 2 * 16 + 8, 24, t / 350, 8, 10, 2);
       if (hop) spark(qq, hop.ax * 16 + 8, 22, hop.bx * 16 + 8, 22, hop.k);
-      for (const [t0, , , , bx] of HOPS) { const d = landed(t0); if (d >= 0 && d < 90) { qq.fillStyle = "rgba(255,255,255,0.6)"; qq.fillRect(bx * 16, 16, 16, 16); burst(qq, bx * 16 + 8, 24, d / 90, 8, 4, 12); } } // the body being entered flashes
+      for (const [t0, , , , bx] of HOPS) { const d = landed(t0); if (d >= 0 && d < 90 && !PX.calm()) { qq.fillStyle = "rgba(255,255,255,0.6)"; qq.fillRect(bx * 16, 16, 16, 16); burst(qq, bx * 16 + 8, 24, d / 90, 8, 4, 12); } } // the body being entered flashes (not with reduce motion)
       burst(qq, 9 * 16 + 8, 24, (t - 6500) / 600, 10, 2, 14);
     };
     PX.render(roomCv, { map: ROOM, viewer: hop ? (hop.k < 0.5 ? hop.a : hop.b) : cur, from, to, lensT: hop ? hop.k : 1, t: now, bodies, hops, fx });
-    const shake = HOPS.some(([t0]) => landed(t0) >= 0 && landed(t0) < 90) ? (Math.floor(t / 30) % 2 ? 1 : -1) : 0;
+    const calm = PX.calm(), shake = !calm && HOPS.some(([t0]) => landed(t0) >= 0 && landed(t0) < 90) ? (Math.floor(t / 30) % 2 ? 1 : -1) : 0;
     q.drawImage(roomCv, shake, RY);
-    if (HOPS.some(([t0]) => landed(t0) >= 0 && landed(t0) < 60)) rect(0, RY, W, 48, "rgba(255,255,255,0.22)"); // the hop's flash
+    if (!calm && HOPS.some(([t0]) => landed(t0) >= 0 && landed(t0) < 60)) rect(0, RY, W, 48, "rgba(255,255,255,0.22)"); // the hop's flash
     if (t >= LIGHTS_OUT) { const d = t - LIGHTS_OUT, k = d < 300 ? Math.ceil(d / 100) / 3 : d < 400 ? 1 : Math.max(0, 1 - Math.ceil((d - 400) / 100) / 3); rect(0, RY, W, 48, `rgba(4,4,14,${0.85 * k})`); } // a quick stepped blackout resets the room
     street(92);
     shiftingLogo("BODY HOP", 8, 1.5, now, [[-1e9, "S"], [cyc + 1500, "G"], [cyc + 3500, "C"], [cyc + LIGHTS_OUT + 350, "S"], [cyc + P + 1500, "G"]]);
@@ -157,7 +157,7 @@
   function card(now) {
     const r = report(), age = now - shownAt, rows = [["LEVELS", r.main.solved, r.main.n], ["AT PAR", r.main.par, r.main.n]];
     if (kind === "final") rows.push(["NIGHT", r.night.solved, r.night.n], ["NIGHT PAR", r.night.par, r.night.n]);
-    const pitch = 10, x = 99, w = 88, h = 14 + rows.length * pitch + 17, y = rows.length > 2 ? 24 : 30, shake = age > 1150 && age < 1230 ? 1 : 0;
+    const pitch = 10, x = 99, w = 88, h = 14 + rows.length * pitch + 17, y = rows.length > 2 ? 24 : 30, shake = age > 1150 && age < 1230 && !PX.calm() ? 1 : 0;
     if (root.__uiBox) root.__uiBox(x, y + shake, w, h); // lets the layout test check the report's text stays on the card
     rect(x + 2, y + 2 + shake, w, h, "rgba(0,0,0,0.45)"); rect(x - 1, y - 1 + shake, w + 2, h + 2, INK); rect(x, y + shake, w, h, "#f0e6c8");
     rows.forEach((_, i) => { if (i % 2) rect(x + 3, y + 15 + (i + 1) * pitch - 1 + shake, w - 6, 1, "#ddd0ac"); }); // a rule under each shift's pair of rows
