@@ -7,3 +7,10 @@
 .claude/worktrees/
 # Node
 node_modules/
+
+# Gas City / beads runtime (never published)
+.beads/
+.gc/
+.omp/
+.claude/skills/
+worktrees/

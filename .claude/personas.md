@@ -2,7 +2,7 @@
 
 Run as `persona-tester` subagents, all in parallel, one per persona, with the model below. Results are AI-persona evidence: label them that way, and never report them as a human playtest.
 
-| Session name | Persona brief (as in `prototypes/body-hop/playtests/2026-11-13/README.md`) | Model |
+| Session name | Persona brief | Model |
 |---|---|---|
 | maya | Casual phone gamer, impatient, skims text | haiku |
 | theo | 12, impulsive, mashes keys | haiku |

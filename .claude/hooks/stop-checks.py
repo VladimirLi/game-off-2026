@@ -2,8 +2,7 @@
 """Stop hook: don't let the agent stop while changed Body Hop files fail their checks.
 
 Changed files = everything changed since the last commit that passed, plus uncommitted
-and untracked files, under each folder in .claude/checks.json (docs and playtests
-ignored). Every check runs, even after one fails.
+and untracked files, under each folder in .claude/checks.json (docs ignored). Every check runs, even after one fails.
 
 - First stop with a failure: block (exit 2) and give the agent the failing lines.
 - Repeat stop (stop_hook_active): run the checks again. Still failing: don't block
@@ -56,7 +55,7 @@ def main():
         return any(fnmatch.fnmatch(rel, p) or fnmatch.fnmatch(os.path.basename(f), p) for p in cfg["ignore"])
 
     failures, skipped, all_pass = [], [], True
-    for proto, cmds in cfg["prototypes"].items():
+    for proto, cmds in cfg["folders"].items():
         files = sorted(f for f in changed if f.startswith(proto + "/") and not ignored(f, proto))
         if not files:
             continue

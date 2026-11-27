@@ -10,9 +10,6 @@ jobs:
   checks:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    defaults:
-      run:
-        working-directory: prototypes/body-hop
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
