@@ -118,6 +118,7 @@ node tools/solve.js map.txt      # analyse a plain-text map: route, and which el
 node tools/gen.js 300000 1 9 7 GC  # random search for raw material (tries, seed, width, height, bodies)
 node tools/bot.js [shot-dir]     # browser check: replay each solution as key presses in Chromium
 node tools/record-gif.js [out.gif]  # record level 2 solved by key presses as the README GIF (media/body-hop.gif; needs ffmpeg)
+node tools/capture-screenshots.js [out-dir]  # save the itch.io page screenshots by key presses (media/screenshots/, see ITCH-PAGE.md)
 node tools/analyze-playtest.js <run>/sessions [notes] [--old-legend]  # score AI persona sessions against levels.js
 ```
 
@@ -126,6 +127,8 @@ The checks a level can declare: `needs:G` and `needs:C` (unsolvable without hopp
 `tools/analyze-playtest.js` replays each session's keys through the engine, with the legend modelled as the page does it (while open, any key but L only closes it). Sessions played before 14 Nov 2026 (every run in `playtests/` up to `2026-11-14-r1`) were on a build where keys still acted under the legend: add `--old-legend` for those.
 
 `tools/bot.js` uses Playwright. It replays the solver's route for each level as real key presses, checks the game reports a win in exactly par turns, and checks that `window.BodyHopAudio.log` holds a `win` cue and, when the route hops, a `hop:` cue (it reads which cues were requested; it can't hear them). Then it undoes every turn and checks it is back at the start. It also fails on any page error.
+
+`tools/capture-screenshots.js` uses Playwright too, and plays the game the same way: key presses along the solver's routes on the local build. It saves one PNG per entry under "Screenshots to take" in `ITCH-PAGE.md` (1280 x 720, and the 630 x 500 cover), after checking the game's state against `engine.js` (the guard after the first hop on level 1, the cat inside a red block on level 2, and so on), so a shot that no longer shows what the list describes fails the run (exit 1). The end screen is reached by winning levels 1 to 12 at par first, so its Shift report reads in full. It steps the game's own clock with Playwright's `page.clock`, so a re-run writes the same bytes unless the game looks different. Run it, and `tools/record-gif.js`, again after any visual change to refresh the media.
 
 ## Sound
 
