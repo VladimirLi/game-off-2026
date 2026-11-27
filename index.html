@@ -7,11 +7,11 @@
 <style>
   /* The game is one pixel-art canvas (hud.js), centred in the window and scaled by whole numbers; the title and end
      screens (screens.js) are another, over it. The text the canvas shows is also kept in a visually hidden block
-     (#sr) for screen readers and the test tools. */
+     (#sr) for screen readers and the test tools, pinned to the top-left so it cannot make the page scroll. */
   html, body { margin: 0; height: 100%; background: #06060c; color: #ececf8; font: 15px/1.4 system-ui, sans-serif; }
   #app { min-height: 100%; display: flex; align-items: center; justify-content: center; }
   #c { display: block; image-rendering: pixelated; touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
-  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .sr { position: absolute; top: 0; left: 0; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   /* Title and end screens (screens.js): one pixel-art canvas over the game, scaled by whole numbers. */
   #screen { display: none; position: fixed; inset: 0; z-index: 20; background: #06060c; align-items: center; justify-content: center; animation: screen-in 0.3s ease-out; }
   #screen.open { display: flex; }
@@ -234,8 +234,9 @@ function undo() {
 // ---------- drawing: 8-bit art from pixel-art.js ----------
 // The drawing never changes the game. Each frame it compares the game state with the one it last saw and
 // animates the difference: a walk slides one tile with stepping legs, a hop sends a spark to the new body and
-// repaints the world in four steps, plates sink, gate bars slide, a refused press nudges the body and blinks
-// the tile it hit, a win sinks the body down the exit stairs.
+// repaints the world in four steps, plates sink, gate bars slide, a refused press nudges the body, bumps the board
+// and blinks the tile it hit, a win sinks the body down the exit stairs and throws confetti. With the system's
+// "reduce motion" setting (PixelArt.calm) nothing shakes, squashes, nudges, flashes or blinks; the rest still shows.
 const WALK_MS = 160, HOP_MS = 350;
 const anim = { L: null, seen: null, won: false, wonAt: 0, walks: new Map(), facing: new Map(), hop: null, gate: 0, plates: new Map(), last: 0 };
 
@@ -255,7 +256,7 @@ function noteChange(now) {
     const [ax, ay] = entPos(prev, i), [bx, by] = entPos(s, i);
     if (ax !== bx || ay !== by) { anim.walks.set(i, { ax, ay, bx, by, t0: now }); if (ax !== bx) anim.facing.set(i, bx < ax); }
   }
-  if (prev.ctrl !== s.ctrl) { const a = BH.current(L, prev), b = BH.current(L, s); anim.hop = { ax: a.x, ay: a.y, bx: b.x, by: b.y, from: a.t, to: b.t, t0: now }; }
+  if (prev.ctrl !== s.ctrl) { const a = BH.current(L, prev), b = BH.current(L, s); anim.hop = { ax: a.x, ay: a.y, bx: b.x, by: b.y, from: a.t, to: b.t, fromI: prev.ctrl, t0: now }; }
   if (won && !anim.won) anim.wonAt = now;
   anim.won = won;
 }
@@ -266,11 +267,11 @@ function draw(now = performance.now()) {
   // Event handlers draw with performance.now(), animation frames with a frame time that can be a little
   // earlier, so the clock only moves forward.
   const dt = Math.max(0, now - (anim.last || now)); anim.last = Math.max(anim.last, now);
-  const me = BH.current(L, s), K = PX.K, PAL = PX.PAL;
+  const me = BH.current(L, s), K = PX.K, PAL = PX.PAL, still = PX.calm();
   const hop = anim.hop && now - anim.hop.t0 < HOP_MS ? anim.hop : null, k = hop ? (now - hop.t0) / HOP_MS : 1;
   const landed = anim.hop && !hop ? now - anim.hop.t0 - HOP_MS : Infinity;
   const fl = flash && now - flash.t < 300 ? flash : null, fdt = fl ? now - fl.t : 0;
-  const [ndx, ndy] = fl ? BH.DIRS[fl.dir] : [0, 0], nudge = fl && fdt < 120 ? Math.round(Math.sin(Math.PI * fdt / 120) * 2) : 0;
+  const [ndx, ndy] = fl ? BH.DIRS[fl.dir] : [0, 0], nudge = fl && fdt < 120 && !still ? Math.round(Math.sin(Math.PI * fdt / 120) * 2) : 0;
   const sinkT = won ? now - anim.wonAt - WALK_MS : -1, sink = sinkT > 0 ? Math.min(16, Math.floor(sinkT / 30)) : 0;
   const idle = Math.floor(now / 450) % 2, bodies = [];
   const place = (i, t, x, y, o) => {
@@ -279,13 +280,16 @@ function draw(now = performance.now()) {
     if (t === "S") frame = Math.floor(now / 250) % 2;
     bodies.push({ t, x: px, y: py, frame, lift, flip: anim.facing.get(i), ...o });
   };
+  // A hop crouches the body you leave as the spark leaves it, and squashes the one you land in.
+  const leaving = hop && !still && hop.fromI >= 0 ? now - hop.t0 : Infinity;
   s.pos.forEach(([x, y], i) => {
     const mine = i === s.ctrl, active = mine && !hop;
     // The second, third... body of one kind gets its own collar (cat) or badge (guard) colour.
     const nth = L.types.slice(0, i).filter((u) => u === L.types[i]).length, mark = nth ? (L.types[i] === "C" ? ["#f8a4c0", "#fcfcfc", "#58d854"] : ["#fcfcfc", "#f8a4c0", "#58d854"])[(nth - 1) % 3] : undefined;
+    const crouch = i === (hop && hop.fromI) && leaving < 130 ? (leaving < 70 ? 0.75 : 1.12) : 1;
     place(i, L.types[i], x, y, { active, zz: !mine, mark,
       dx: mine ? ndx * nudge : 0, dy: mine ? ndy * nudge : 0, sink: mine ? sink : 0,
-      squash: mine && landed < 160 ? (landed < 60 ? 0.7 : landed < 110 ? 1.1 : 1) : 1 });
+      squash: mine && landed < 160 && !still ? (landed < 60 ? 0.7 : landed < 110 ? 1.1 : 1) : crouch });
   });
   if (s.ctrl < 0) place(-1, "S", s.sx, s.sy, { active: true, dx: ndx * nudge, dy: ndy * nudge, sink });
   // Hop markers on every edge between you and a body next to you.
@@ -310,19 +314,19 @@ function draw(now = performance.now()) {
       for (let i = 3; i > 0; i--) { const [x, y] = at(Math.max(0, k - i * 0.09)); PX.dot(q, x, y, i === 1 ? PAL.y : PAL.Y); }
       const [x, y] = at(k); PX.dot(q, x - 1, y - 1, PAL.W, 2); for (const [dx, dy] of [[-2, 0], [2, 0], [0, -2], [0, 2]]) PX.dot(q, x + dx, y + dy, PAL.Y);
     } else if (landed < 200) { const r = 4 + landed / 25; for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [-0.7, -0.7], [0.7, -0.7]]) PX.dot(q, me.x * K + 8 + dx * r, me.y * K + 8 + dy * r, landed < 100 ? PAL.W : PAL.Y); }
-    if (fl) { // a refused press: the tile you pushed against blinks red, a puff of dust at your feet
-      if (Math.floor(fdt / 75) % 2 === 0) { q.strokeStyle = PAL.R; q.lineWidth = 1; q.strokeRect((me.x + ndx) * K + 0.5, (me.y + ndy) * K + 0.5, K - 1, K - 1); }
+    if (fl) { // a refused press: the tile you pushed against blinks red (holds still with reduce motion), a puff of dust at your feet
+      if (still || Math.floor(fdt / 75) % 2 === 0) { q.strokeStyle = PAL.R; q.lineWidth = 1; q.strokeRect((me.x + ndx) * K + 0.5, (me.y + ndy) * K + 0.5, K - 1, K - 1); }
       if (fdt >= 40 && fdt < 220) { const sp = 2 + fdt / 50; PX.dot(q, me.x * K + 8 - sp, me.y * K + 15 - fdt / 80, PAL.L); PX.dot(q, me.x * K + 8 + sp, me.y * K + 15 - fdt / 80, PAL.L); }
     }
     if (sinkT > 480 && sinkT < 980) { // the win: a flash on the exit and a ring of light
-      const d = sinkT - 480; if (d < 80) { q.fillStyle = PAL.W; q.fillRect(me.x * K, me.y * K, K, K); }
+      const d = sinkT - 480; if (d < 80 && !still) { q.fillStyle = PAL.W; q.fillRect(me.x * K, me.y * K, K, K); }
       const r = 6 + d / 18; for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; PX.dot(q, me.x * K + 8 + Math.cos(a) * r, me.y * K + 8 + Math.sin(a) * r, i % 2 ? PAL.Y : PAL.W); }
     }
   };
   const viewer = hop ? (k < 0.5 ? hop.from : hop.to) : me.t, lv = LEVELS[idx], last = idx === LEVELS.length - 1;
   PX.render(boardCv, { map: anim.map, viewer, from: hop ? hop.from : me.t, to: hop ? hop.to : me.t, lensT: k, t: now, bodies, hops, state, fx });
   HUD.frame(now, { board: boardCv, me: viewer, label: label(idx), name: lv.name, hint: lv.hint || "", turns, par: lv.par, best: best[lv.name],
-    won, wonAt: anim.wonAt, status, hopLanded: landed, legendOpen, endMain: idx === mainCount - 1, last,
+    won, wonAt: anim.wonAt, winFlashAt: anim.wonAt + WALK_MS + 480, exit: [me.x, me.y], status, hopLanded: landed, bump: fl ? [ndx, ndy, fdt] : null, legendOpen, endMain: idx === mainCount - 1, last,
     chapter: chapterOf(idx).replace(/ \(optional\)/, ""), chapterEnd: !last && chapterOf(idx + 1) !== chapterOf(idx), nextChapter: last ? "" : chapterOf(idx + 1).replace(/ \(optional\)/, "") });
 }
 const loop = (now) => { if (SCR.open()) SCR.draw(now); else draw(now); requestAnimationFrame(loop); };
