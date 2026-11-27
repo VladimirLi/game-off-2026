@@ -7,11 +7,11 @@
 <style>
   /* The game is one pixel-art canvas (hud.js), centred in the window and scaled by whole numbers; the title and end
      screens (screens.js) are another, over it. The text the canvas shows is also kept in a visually hidden block
-     (#sr) for screen readers and the test tools. */
+     (#sr) for screen readers and the test tools, pinned to the top-left so it cannot make the page scroll. */
   html, body { margin: 0; height: 100%; background: #06060c; color: #ececf8; font: 15px/1.4 system-ui, sans-serif; }
   #app { min-height: 100%; display: flex; align-items: center; justify-content: center; }
   #c { display: block; image-rendering: pixelated; touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
-  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .sr { position: absolute; top: 0; left: 0; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   /* Title and end screens (screens.js): one pixel-art canvas over the game, scaled by whole numbers. */
   #screen { display: none; position: fixed; inset: 0; z-index: 20; background: #06060c; align-items: center; justify-content: center; animation: screen-in 0.3s ease-out; }
   #screen.open { display: flex; }
