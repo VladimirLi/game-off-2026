@@ -341,8 +341,12 @@ function render(cv, sc) {
 }
 const dot = (q, x, y, col, s = 1) => { q.fillStyle = col; q.fillRect(Math.round(x), Math.round(y), s, s); };
 
-// One step from a to b starting at t0: position, leg frame and a 1px lift mid-step.
-function walk(t, t0, a, b, dur = 160) { const k = prog(t, t0, dur); return { pos: a + (b - a) * k, moving: k > 0 && k < 1, lift: k > 0 && k < 1 ? Math.round(Math.sin(Math.PI * k)) : 0 }; }
+// One step from a to b starting at t0: position (eased out: a quick start that settles into the tile), leg frame and
+// a 1px lift mid-step.
+function walk(t, t0, a, b, dur = 160) { const k = prog(t, t0, dur), e = 1 - (1 - k) ** 3; return { pos: a + (b - a) * e, moving: k > 0 && k < 1, lift: k > 0 && k < 1 ? Math.round(Math.sin(Math.PI * k)) : 0 }; }
+// The system's "reduce motion" setting: the game and HUD then skip shakes, squashes, nudges, flashes and confetti.
+const RM = root.matchMedia ? root.matchMedia("(prefers-reduced-motion: reduce)") : null;
+const calm = () => !!(RM && RM.matches);
 
-root.PixelArt = { K, PAL, LENS, render, drawBody, walk, dot, text, textWidth, wrap, lens, FONT, logo, logoWidth, shiftingLogo, BODY_COLS, mix: mixHex };
+root.PixelArt = { K, PAL, LENS, render, drawBody, walk, calm, dot, text, textWidth, wrap, lens, FONT, logo, logoWidth, shiftingLogo, BODY_COLS, mix: mixHex };
 })(typeof self !== "undefined" ? self : this);

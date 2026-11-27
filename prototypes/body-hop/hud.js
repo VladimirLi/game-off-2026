@@ -125,12 +125,28 @@
     boardView(now);
     if (tall()) { tallInfo(now); tallPad(now); } else sidePanel(now);
     messages(now);
+    confetti(now);
     introRibbon(now);
     if (hintOpen) hintCard(now);
     if (g.legendOpen) howToPlay(now);
     if (menu === "pause") pauseMenu(now);
     if (menu === "levels") levelSelect(now);
     const c = cv.getContext("2d"); c.imageSmoothingEnabled = false; c.drawImage(art, 0, 0, cv.width, cv.height);
+  }
+
+  // A win throws confetti from the exit over the whole screen as the ring of light rises (not with "reduce motion"):
+  // each piece flutters between a square and a sliver, falls back and winks out on its own.
+  const CONFETTI = ["#f8b800", "#fcfcfc", "#fce0a8", "#58d854", "#f8a4c0", "#3cbcfc", "#f83800"];
+  function confetti(now) {
+    const d = (now - g.winFlashAt) / 1000;
+    if (!g.won || !boardRect || d < 0 || d > 1.6 || PX.calm()) return;
+    const ex = boardRect.x + g.exit[0] * PX.K + 8, ey = boardRect.y + g.exit[1] * PX.K + 6;
+    for (let i = 0; i < 40; i++) {
+      const h = Math.imul(i + 1, 2654435761) >>> 0, life = 0.8 + (h >>> 4) % 80 / 100;
+      if (d > life) continue;
+      const a = -Math.PI / 2 + ((h % 1000) / 1000 - 0.5) * 2.4, v = 70 + (h >>> 10) % 90, s = i % 3 ? 2 : 3;
+      rect(ex + Math.cos(a) * v * d, ey + Math.sin(a) * v * d + 140 * d * d, s, Math.floor(now / 90 + i) % 2 ? 1 : s, CONFETTI[i % CONFETTI.length]);
+    }
   }
 
   // The level's gold number chip and name; on the wide layout with a keyboard the main keys sit at the right of the
@@ -147,11 +163,16 @@
     const b = g.board, bw = b.width, bh = b.height, C = LAY.col;
     const bx = Math.round(C.x + (C.w - bw) / 2), by = Math.round(C.y + (C.h - bh) / 2);
     boardRect = { x: bx, y: by, w: bw, h: bh };
-    // a hop lands with a one-pixel shake and a flash, as on the title screen
-    const land = g.hopLanded, shake = land >= 0 && land < 90 ? (Math.floor(now / 30) % 2 ? 1 : -1) : 0;
+    // a hop lands with a one-pixel shake and a flash, as on the title screen; a refused press bumps the board a
+    // pixel toward the push and back. A win flashes the frame white and rings it gold as the light rises from the
+    // exit. With "reduce motion" none of these happen: the frame just turns gold.
+    const still = PX.calm(), land = still ? Infinity : g.hopLanded, wt = g.won && !still ? now - g.winFlashAt : -1;
+    let sx = land >= 0 && land < 90 ? (Math.floor(now / 30) % 2 ? 1 : -1) : 0, sy = 0;
+    if (g.bump && !still && g.bump[2] < 100) { const j = Math.floor(g.bump[2] / 25) % 2 ? -1 : 1; sx += g.bump[0] * j; sy += g.bump[1] * j; }
     rect(bx + 3, by + 3, bw, bh, "rgba(0,0,0,0.5)");
-    rect(bx - 2, by - 2, bw + 4, bh + 4, INK); rect(bx - 1, by - 1, bw + 2, bh + 2, g.won ? GOLD : EDGE_HI);
-    q.drawImage(b, bx + shake, by);
+    if (wt >= 0 && wt < 400) rect(bx - 3, by - 3, bw + 6, bh + 6, Math.floor(wt / 100) % 2 ? "#fcf0a8" : GOLD);
+    rect(bx - 2, by - 2, bw + 4, bh + 4, INK); rect(bx - 1, by - 1, bw + 2, bh + 2, g.won ? (wt >= 0 && wt < 80 ? "#ffffff" : GOLD) : EDGE_HI);
+    q.drawImage(b, bx + sx, by + sy);
     if (land >= 0 && land < 60) rect(bx, by, bw, bh, "rgba(255,255,255,0.2)");
   }
 
@@ -221,7 +242,7 @@
     if (st.text && !(g.won && !tall())) { lines = PX.wrap(st.text, W - 10).slice(0, max); col = st.cls === "bad" ? BAD : st.cls === "good" ? GOLD : TEXT; }
     else if (g.won) { lines = []; }
     else { lines = PX.wrap(TOUCH ? "Tap the pad or the board to move. Walk into a body to hop into it." : IDLE_KEYS[Math.floor(now / 5000) % 2], W - 10); col = DIM; }
-    const shake = st.text && st.cls === "bad" && now - st.at < 120 ? (Math.floor(now / 30) % 2 ? 1 : -1) : 0;
+    const shake = st.text && st.cls === "bad" && now - st.at < 120 && !PX.calm() ? (Math.floor(now / 30) % 2 ? 1 : -1) : 0;
     const y0 = tall() ? y : lines.length > 1 ? y : y + 5, outline = col === DIM ? null : INK; // the plain hint reads best without an outline
     lines.forEach((ln, i) => centre(ln, cx + shake, y0 + i * 10, col, outline));
   }
