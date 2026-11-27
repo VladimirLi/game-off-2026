@@ -1,6 +1,6 @@
 # Body Hop level design spec (v3)
 
-The level set is redesigned from scratch against two sources: the research in `docs/research/compelling-games/` and the silent AI persona playtest of 13 Nov (its logs were deleted from the repo; they are in git history before this commit (4815b55)). The rules (docs/GAME.md, "Rules (v2)") stay as they are: every playtester understood them, and the research says to dig deeper into a small ruleset rather than add mechanics.
+The level set is redesigned from scratch against two sources: the research in `docs/research/compelling-games/` and the silent AI persona playtest of 13 Nov (its logs were deleted from the repo; they are in git history, last present at commit 4815b55). The rules (docs/GAME.md, "Rules (v2)") stay as they are: every playtester understood them, and the research says to dig deeper into a small ruleset rather than add mechanics.
 
 ## What the playtest showed (baseline, v2 levels)
 

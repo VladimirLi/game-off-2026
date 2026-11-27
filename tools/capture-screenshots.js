@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Saves the screenshots listed in ITCH-PAGE.md ("Screenshots to take") from the local build, as PNGs in media/screenshots/.
+// Saves the screenshots listed in docs/ITCH-PAGE.md ("Screenshots to take") from the local build, as PNGs in media/screenshots/.
 // Like tools/bot.js and tools/record-gif.js it plays the real game in Chromium with key presses along the solver's
 // routes, and it checks the game's state after the presses against the engine, so a shot that does not show what the
 // list describes fails the run. Playwright's page.clock steps the game's own clock (performance.now and
@@ -71,8 +71,8 @@ function pressesToFirstHop(no) {
   return n;
 }
 
-// Refuses a picture that does not show what ITCH-PAGE.md says it shows.
-const expect = (ok, what) => { if (!ok) throw new Error("not what ITCH-PAGE.md describes: " + what); };
+// Refuses a picture that does not show what docs/ITCH-PAGE.md says it shows.
+const expect = (ok, what) => { if (!ok) throw new Error("not what docs/ITCH-PAGE.md describes: " + what); };
 
 // The title and end screens fade in with a CSS animation (0.3 s) that runs on the real clock, not the stepped one;
 // "disabled" jumps finite CSS animations to their end, so no shot is taken half faded. The game has no other CSS animation.
@@ -82,7 +82,7 @@ async function save(page, out, file) {
   console.log(`${path.relative(process.cwd(), path.join(out, file))}: ${buf.readUInt32BE(16)} x ${buf.readUInt32BE(20)}, ${(buf.length / 1000).toFixed(1)} KB`);
 }
 
-// One entry per numbered item under "Screenshots to take" in ITCH-PAGE.md.
+// One entry per numbered item under "Screenshots to take" in docs/ITCH-PAGE.md.
 const SHOTS = {
   // 1. The title while the logo's colour runs across the letters. The cover is the same moment in a 630 x 500 window.
   "1 title and cover": async (browser, errors, out) => {

@@ -5,7 +5,7 @@ Solo entry for GitHub Game Off 2026, theme **SHIFT**. The owner is new to game d
 ## Focus
 - The game is **Body Hop** (`game/`): plain HTML and JavaScript, no build step, runs from `index.html`.
 - Body Hop is the only game in the repo. The other prototypes were removed on 21 Nov 2026 and remain in git history.
-- `docs/GAME.md` is the source of truth for rules, controls and tools. `levels.js` is the source of truth for levels; keep the README levels table in sync when levels change.
+- `docs/GAME.md` is the source of truth for rules, controls and tools. `levels.js` is the source of truth for levels; keep the levels table in `docs/GAME.md` in sync when levels change.
 - Start Claude Code at the repo root: the hooks in `.claude/` load only from there.
 
 ## Jam facts
@@ -22,7 +22,7 @@ Solo entry for GitHub Game Off 2026, theme **SHIFT**. The owner is new to game d
 
 ## Playtests
 - Human playtests are the only evidence of fun and difficulty. As of 21 Nov no human has played Body Hop.
-- Every run so far (Haiku, Sonnet, Opus) is an AI persona run, not people. The logs of the 14 early runs were deleted from the repo on 27 Nov; they are in git history before this commit (4815b55). AI personas solve at exactly par far more than people do. Always label them "AI persona", never "playtest" alone.
+- Every run so far (Haiku, Sonnet, Opus) is an AI persona run, not people. The logs of the 14 early runs were deleted from the repo on 27 Nov; they are in git history, last present at commit 4815b55. AI personas solve at exactly par far more than people do. Always label them "AI persona", never "playtest" alone.
 - The owner reports in one line ("too easy", "2 and 3 confusing"). Work from that, the level and the solver; don't ask for more.
 - Play stats: `game/analytics.js` sends anonymous events (`bodyhop_*`) to the PostHog EU project "Body Hop" (ID 361888) from the live site, for testers (link with `?playtest=1`, property `mode` = "playtest") and jam players (`mode` = "public"). Players can switch them off in the pause menu; "Send feedback" notes arrive as `bodyhop_feedback`. Read them in PostHog (Activity, or insights on `bodyhop_level_end` by `name` and `outcome`). The browser console still gets one line per level; if the owner pastes console lines, save them under `docs/playtests/human/<date>.md`. The tester message is `docs/TESTER-GUIDE.md`.
 

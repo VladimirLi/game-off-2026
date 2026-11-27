@@ -34,7 +34,7 @@ The side panel names your body in the logo font, shows how it sees a red and a b
 
 ## Art
 
-8-bit pixel art, drawn in code by `pixel-art.js` (no image files): every tile is 16 x 16 art pixels in an NES-like palette, scaled up 4x with no smoothing. The style was chosen from mockups and tuned over five rounds of blind AI persona tests (logs deleted from the repo, in git history before this commit (4815b55); research in `docs/research/body-hop-art.md`).
+8-bit pixel art, drawn in code by `pixel-art.js` (no image files): every tile is 16 x 16 art pixels in an NES-like palette, scaled up 4x with no smoothing. The style was chosen from mockups and tuned over five rounds of blind AI persona tests (logs deleted from the repo, in git history, last present at commit 4815b55; research in `docs/research/body-hop-art.md`).
 
 - **The lens:** each body repaints the floor and walls: grey for the spirit, brown for the guard, blue for the cat. Floors stay light and walls dark in every lens. A hop recolours the room in four quick steps.
 - **You:** a yellow outline round the sprite and a pulsing yellow ring at its feet. Every other body sleeps (closed eyes and a "z") with a shadow under it. A second or third body of one kind gets its own collar (cat) or badge (guard) colour.
@@ -124,7 +124,7 @@ node tools/analyze-playtest.js <run>/sessions [notes] [--old-legend]  # score AI
 
 The checks a level can declare: `needs:G` and `needs:C` (unsolvable without hopping into that body type), `reenter` (unsolvable if each body may be entered only once), `plate` and `doorstop` (unsolvable without that element). `solve.js` also reports the share of reachable states from which the exit is no longer reachable ("dead").
 
-`tools/analyze-playtest.js` replays each session's keys through the engine, with the legend modelled as the page does it (while open, any key but L only closes it). Sessions played before 14 Nov 2026 (every AI persona run up to `2026-11-14-r1`, deleted from the repo, in git history before this commit (4815b55)) were on a build where keys still acted under the legend: add `--old-legend` for those.
+`tools/analyze-playtest.js` replays each session's keys through the engine, with the legend modelled as the page does it (while open, any key but L only closes it). Sessions played before 14 Nov 2026 (every AI persona run up to `2026-11-14-r1`, deleted from the repo, in git history, last present at commit 4815b55) were on a build where keys still acted under the legend: add `--old-legend` for those.
 
 `tools/bot.js` uses Playwright. It replays the solver's route for each level as real key presses, checks the game reports a win in exactly par turns, and checks that `window.BodyHopAudio.log` holds a `win` cue and, when the route hops, a `hop:` cue (it reads which cues were requested; it can't hear them). Then it undoes every turn and checks it is back at the start. It also fails on any page error.
 

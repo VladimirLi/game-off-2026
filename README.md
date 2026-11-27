@@ -16,7 +16,7 @@ Complete and playable; the jam deadline is Tue 1 Dec 2026, 21:37 UTC.
 - Title and end screens, a pixel-art in-game UI (keyboard, touch pad and tall phone layouts) and juice polish: eased walks, hop take-off, board bump on a refused press, win confetti, `prefers-reduced-motion` respected.
 - Sound is in: effects generated in code and a calm generative music track that shifts with the body you are in.
 - Art is in: 8-bit pixel art and animation drawn in code; each body repaints the room in its colour.
-- Tested by AI personas only; no human playtest yet. Their logs and two early research notes were deleted from the repo; they are in git history before this commit (4815b55).
+- Tested by AI personas only; no human playtest yet. Their logs and two early research notes were deleted from the repo; they are in git history, last present at commit 4815b55.
 
 ## Layout
 

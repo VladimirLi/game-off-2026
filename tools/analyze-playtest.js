@@ -5,7 +5,7 @@
 // The legend is modelled as the page does it: L toggles it, and while it is open every other key
 // (arrow, Z, R, N, ShiftN, Level:n) only closes it. Sessions played on a build from before 14 Nov 2026
 // (commit cb9ad98 and earlier, where the legend was drawn on the canvas and keys still acted under it)
-// need --old-legend, which ignores L. That covers every session in the playtests/ folder up to 2026-11-14-r1 (deleted from the repo; see git history before 4815b55).
+// need --old-legend, which ignores L. That covers every session in the playtests/ folder up to 2026-11-14-r1 (deleted from the repo; see git history, last present at commit 4815b55).
 // The end screens are modelled too: N after winning the last main level opens the end screen (where N
 // starts the Night shift and every other key does nothing), and N after the last level opens the final one.
 const fs = require("fs"), path = require("path");
