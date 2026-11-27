@@ -117,6 +117,7 @@ node tools/solve.js plan [n]     # optimal moves and a readable route per level
 node tools/solve.js map.txt      # analyse a plain-text map: route, and which elements it really needs
 node tools/gen.js 300000 1 9 7 GC  # random search for raw material (tries, seed, width, height, bodies)
 node tools/bot.js [shot-dir]     # browser check: replay each solution as key presses in Chromium
+node tools/record-gif.js [out.gif]  # record level 2 solved by key presses as the README GIF (media/body-hop.gif; needs ffmpeg)
 node tools/analyze-playtest.js <run>/sessions [notes] [--old-legend]  # score AI persona sessions against levels.js
 ```
 
