@@ -2,6 +2,8 @@
 
 Solo entry for [GitHub Game Off 2026](https://itch.io/jam/game-off-2026) (theme **SHIFT**, due 1 Dec 2026): **Body Hop**, a turn-based browser puzzle game in plain HTML and JavaScript.
 
+![Body Hop, level 2: the spirit hops into the guard, which walks through the blue block, then into the cat, which walks through the red blocks to the exit in 13 turns, at par.](prototypes/body-hop/media/body-hop.gif)
+
 You are a spirit that hops between the bodies in a building. Each body sees one colour, and only what it sees is real. Bodies you leave behind stay where they are and get in the way, so the puzzle is where to leave each one. One verb, the hop, shifts who you are and what the world contains.
 
 **Play:** [vladimirli.github.io/game-off-2026](https://vladimirli.github.io/game-off-2026/), or open `prototypes/body-hop/index.html` locally.
