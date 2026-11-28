@@ -13,7 +13,14 @@
   const hash = (x, y) => ((x * 73856093) ^ (y * 19349663)) >>> 0;
   const rect = (x, y, w, h, col) => { q.fillStyle = col; q.fillRect(Math.round(x), Math.round(y), w, h); };
   const prog = (t, a, d) => Math.min(1, Math.max(0, (t - a) / d));
-  const mix = (a, b, k) => { const p = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16)), A = p(a), B = p(b); return "#" + A.map((v, i) => Math.round(v + (B[i] - v) * k).toString(16).padStart(2, "0")).join(""); };
+  const mix = (a, b, k) => PX.mix(a, b, k);
+  // Draws once into a kept canvas of the given size what draw() would draw into q, then copies it at (x, y).
+  const kept = new Map();
+  function keep(key, w, h, x, y, draw) {
+    let c = kept.get(key);
+    if (!c) { c = document.createElement("canvas"); c.width = w; c.height = h; const was = q; q = c.getContext("2d"); draw(); q = was; kept.set(key, c); }
+    q.drawImage(c, x, y);
+  }
 
   // The logo font lives in pixel-art.js; here it is centred on the screen.
   const shiftingLogo = (str, y, size, now, changes) => PX.shiftingLogo(q, str, Math.round((W - PX.logoWidth(str, size)) / 2), y, size, now, changes);
@@ -27,11 +34,15 @@
     cv.addEventListener("pointerdown", (e) => { const i = pick(e); if (i >= 0) { e.preventDefault(); sel = i; activate(); } });
   }
   // Desktops scale by whole numbers; touch screens fill the width (their dense displays hide fractional pixels).
+  // At a whole-number scale in device pixels the art goes straight onto the page canvas and CSS scales it up
+  // (image-rendering: pixelated); otherwise it is drawn into `art` and copied up at the device's resolution.
   const touch = () => matchMedia("(hover: none) and (pointer: coarse)").matches;
   function fit() {
     const f = Math.min(innerWidth / W, innerHeight / H), k = touch() || f < 2 ? Math.max(0.5, f * 0.98) : Math.floor(f);
-    const back = Math.max(1, Math.ceil(k * (devicePixelRatio || 1)));
-    cv.width = W * back; cv.height = H * back; cv.style.width = Math.round(W * k) + "px"; cv.style.height = Math.round(H * k) + "px";
+    const dpr = devicePixelRatio || 1, back = Math.max(1, Math.ceil(k * dpr));
+    if (back === k * dpr) { cv.width = W; cv.height = H; q = cv.getContext("2d"); }
+    else { cv.width = W * back; cv.height = H * back; q = art.getContext("2d"); }
+    cv.style.width = Math.round(W * k) + "px"; cv.style.height = Math.round(H * k) + "px";
   }
   const open = () => kind;
 
@@ -80,14 +91,19 @@
   // Stars stay out of the band where the logo and its subtitle sit (from the top down to `clear`).
   const STARS = Array.from({ length: 46 }, (_, n) => { const h = hash(n, 7); return [h % W, (h >> 9) % 92, (h >> 3) % 7]; });
   function sky(bands, top, bottom, now, tint, starsTo, clear) {
-    const hb = (bottom - top) / bands.length;
-    bands.forEach((c, i) => rect(0, top + i * hb, W, Math.ceil(hb), tint ? mix(c, tint[0], tint[1]) : c));
-    for (let i = 1; i < bands.length; i++) for (let x = i % 2; x < W; x += 2) rect(x, top + i * hb - 1, 1, 1, tint ? mix(bands[i], tint[0], tint[1]) : bands[i]);
+    keep(`sky|${bands}|${top}|${bottom}|${tint}`, W, bottom, 0, 0, () => {
+      const hb = (bottom - top) / bands.length;
+      bands.forEach((c, i) => rect(0, top + i * hb, W, Math.ceil(hb), tint ? mix(c, tint[0], tint[1]) : c));
+      for (let i = 1; i < bands.length; i++) for (let x = i % 2; x < W; x += 2) rect(x, top + i * hb - 1, 1, 1, tint ? mix(bands[i], tint[0], tint[1]) : bands[i]);
+    });
     for (const [x, y, p] of STARS) if (y < starsTo && !(y < clear && x > 8 && x < W - 8)) { const tw = Math.floor(now / 450 + p) % 7; rect(x, y, 1, 1, tw === 0 ? "#fcfcfc" : tw < 3 ? "#9c9cc8" : "#4c4c78"); if (p === 0 && tw === 0) { rect(x - 1, y, 3, 1, "#a8a8d8"); rect(x, y - 1, 1, 3, "#a8a8d8"); } }
   }
   function disc(x, y, r, body, rim, glow) {
-    for (let j = -r - 4; j <= r + 4; j++) for (let i = -r - 4; i <= r + 4; i++) { const d = Math.hypot(i, j);
-      if (d < r) rect(x + i, y + j, 1, 1, d > r - 1.3 ? rim : body); else if (glow && d < r + 4 && (i + j) % 2 === 0) rect(x + i, y + j, 1, 1, glow); }
+    const R = r + 4;
+    keep(`disc|${r}|${body}|${rim}|${glow}`, 2 * R + 1, 2 * R + 1, x - R, y - R, () => {
+      for (let j = -R; j <= R; j++) for (let i = -R; i <= R; i++) { const d = Math.hypot(i, j);
+        if (d < r) rect(R + i, R + j, 1, 1, d > r - 1.3 ? rim : body); else if (glow && d < R && (i + j) % 2 === 0) rect(R + i, R + j, 1, 1, glow); }
+    });
   }
   function moon(x, y) { disc(x, y, 6, "#f8f0cc", "#d8cc9c", "rgba(252,236,180,0.16)"); rect(x - 2, y - 2, 2, 2, "#e4d8a8"); rect(x + 2, y + 1, 2, 2, "#e4d8a8"); rect(x - 1, y + 3, 1, 1, "#e4d8a8"); }
   function street(y) { rect(0, y, W, 3, "#3c3c4c"); rect(0, y, W, 1, "#6c6c7c"); for (let x = 6; x < W; x += 12) rect(x, y + 1, 1, 2, "#2c2c38"); rect(0, y + 3, W, H - y - 3, "#0e0e18"); rect(0, y + 3, W, 1, "#08080e"); }
@@ -208,7 +224,7 @@
     if (!kind) return;
     q.clearRect(0, 0, W, H);
     if (kind === "title") title(now); else ending(now);
-    const g = cv.getContext("2d"); g.imageSmoothingEnabled = false; g.drawImage(art, 0, 0, cv.width, cv.height);
+    if (q.canvas !== cv) { const g = cv.getContext("2d"); g.imageSmoothingEnabled = false; g.drawImage(art, 0, 0, cv.width, cv.height); }
   }
 
   root.BodyHopScreens = { init, show, leave, draw, key, open };

@@ -22,10 +22,13 @@
     tall: { W: 160, H: 290, col: { x: 2, y: 18, w: 156, h: 132 }, msg: { y: 154, lines: 4 }, info: { y: 192 }, pad: { y: 232 } },
   };
 
-  let o, PX, cv, art, q, icon, LAY = LAYOUTS.wide, W = 320, H = 180, TOUCH = false;
+  let o, PX, cv, art, buf, q, icon, LAY = LAYOUTS.wide, W = 320, H = 180, TOUCH = false;
   let hover = null, hits = [], menu = null, sel = 0, lvSel = 0, introAt = -1e9, introInfo = null, hintOpen = false, g = null, stampedFor = -1, boardRect = null;
-  const rect = (x, y, w, h, c) => { q.fillStyle = c; q.fillRect(Math.round(x), Math.round(y), w, h); };
-  const text = (s, x, y, c, outline) => PX.text(q, s, Math.round(x), Math.round(y), c, 1, outline);
+  // While only some rects of the screen are redrawn (clipR), plain drawing that misses them all is skipped.
+  let clipR = null;
+  const seen = (x, y, w, h) => !clipR || clipR.some((r) => x < r[0] + r[2] && r[0] < x + w && y < r[1] + r[3] && r[1] < y + h);
+  const rect = (x, y, w, h, c) => { x = Math.round(x); y = Math.round(y); if (!seen(x, y, w, h)) return; q.fillStyle = c; q.fillRect(x, y, w, h); };
+  const text = (s, x, y, c, outline) => { x = Math.round(x); y = Math.round(y); if (seen(x - 1, y - 1, PX.textWidth(s) + 2, 11)) PX.text(q, s, x, y, c, 1, outline); };
   const tw = (s) => PX.textWidth(s);
   const centre = (s, cx, y, c, outline) => text(s, cx - tw(s) / 2, y, c, outline);
   const prog = (t, a, d) => Math.min(1, Math.max(0, (t - a) / d));
@@ -36,7 +39,7 @@
 
   function init(opts) {
     o = opts; PX = o.PX; cv = o.canvas;
-    art = document.createElement("canvas"); q = art.getContext("2d");
+    buf = document.createElement("canvas");
     icon = document.createElement("canvas"); icon.width = icon.height = PX.K;
     addEventListener("resize", fit); fit();
     const hit = (e) => { const [x, y] = toArt(e); for (let i = hits.length - 1; i >= 0; i--) { const h = hits[i]; if (x >= h.x && x < h.x + h.w && y >= h.y && y < h.y + h.h) return h; } return null; };
@@ -52,16 +55,19 @@
 
   // A window taller than wide gets the tall layout. A touch screen (no mouse to hover) gets on-screen buttons in
   // either layout; with a keyboard and mouse the keys are shown instead (and are clickable).
+  // The art is drawn at 1x; at a whole-number scale in device pixels it goes straight onto the page canvas and CSS
+  // scales it up (image-rendering: pixelated), otherwise into `buf`, copied up at the device's resolution each frame.
   function fit() {
     TOUCH = matchMedia("(hover: none) and (pointer: coarse)").matches;
     LAY = innerHeight > innerWidth * 1.15 ? LAYOUTS.tall : LAYOUTS.wide; W = LAY.W; H = LAY.H;
-    if (art.width !== W || art.height !== H) { art.width = W; art.height = H; }
     // Desktops scale by whole numbers (crisp pixels). Phones fill the screen: their dense displays hide the uneven
     // pixels of a fractional scale, and the backing canvas is drawn at the device's own resolution.
     const s = Math.min(innerWidth / W, innerHeight / H), k = TOUCH || s < 2 ? Math.max(0.5, s * 0.98) : Math.floor(s);
-    const back = Math.max(1, Math.ceil(k * (devicePixelRatio || 1)));
-    cv.width = W * back; cv.height = H * back;
-    cv.style.width = Math.round(W * k) + "px"; cv.style.height = Math.round(H * k) + "px";
+    const dpr = devicePixelRatio || 1, back = Math.max(1, Math.ceil(k * dpr));
+    art = back === k * dpr ? cv : buf;
+    if (art !== cv) { cv.width = W * back; cv.height = H * back; }
+    art.width = W; art.height = H; q = art.getContext("2d");
+    cv.style.width = Math.round(W * k) + "px"; cv.style.height = Math.round(H * k) + "px"; cv.style.visibility = "visible";
   }
 
   // ---------- drawing helpers ----------
@@ -102,23 +108,38 @@
     hits.push({ id, x: x - 1, y: y - 1, w: w + 2, h: h + 2, act });
   }
   function tileIcon(ch, viewer, x, y, now, state) {
-    PX.render(icon, { map: [ch], viewer, t: now, state: state ? () => state : undefined });
+    PX.clock.at(Math.round(x), Math.round(y), () => PX.render(icon, { map: [ch], viewer, t: now, state: state ? () => state : undefined }));
     q.drawImage(icon, Math.round(x), Math.round(y));
   }
-  function body(t, x, y, now, extra = {}) { PX.drawBody(q, { t, x: x / PX.K, y: y / PX.K, frame: Math.floor(now / 250) % 2, lift: Math.floor(now / 450) % 2, awake: true, ...extra }); }
+  function body(t, x, y, now, extra = {}) {
+    const r = [Math.round(x) - 2, Math.round(y) - 3, 20, 21]; // the sprite, its 1 px lift and outline
+    PX.drawBody(q, { t, x: x / PX.K, y: y / PX.K, frame: PX.clock.step(now, 250, r) % 2, lift: PX.clock.step(now, 450, r) % 2, awake: true, ...extra });
+  }
+  // The night sky behind everything, per body tint and layout, is drawn once and kept; the stars twinkle on top.
+  const skies = new Map();
   function sky(me, now) {
-    const tint = TINT[me], hb = H / NIGHT.length, col = (c) => tint === "#000000" ? c : PX.mix(c, tint, 0.35);
-    NIGHT.forEach((c, i) => rect(0, i * hb, W, Math.ceil(hb) + 1, col(c)));
-    for (let i = 1; i < NIGHT.length; i++) for (let x = i % 2; x < W; x += 2) rect(x, Math.round(i * hb) - 1, 1, 1, col(NIGHT[i]));
+    const key = `${me}|${W}x${H}`;
+    let c = skies.get(key);
+    if (!c) {
+      c = document.createElement("canvas"); c.width = W; c.height = H;
+      const was = q, wasClip = clipR; q = c.getContext("2d"); clipR = null;
+      const tint = TINT[me], hb = H / NIGHT.length, col = (cl) => tint === "#000000" ? cl : PX.mix(cl, tint, 0.35);
+      NIGHT.forEach((cl, i) => rect(0, i * hb, W, Math.ceil(hb) + 1, col(cl)));
+      for (let i = 1; i < NIGHT.length; i++) for (let x = i % 2; x < W; x += 2) rect(x, Math.round(i * hb) - 1, 1, 1, col(NIGHT[i]));
+      q = was; clipR = wasClip; skies.set(key, c);
+    }
+    q.drawImage(c, 0, 0);
     // stars only where no text sits: beside the board, never in the top bar or under the message line
-    for (const [x, y, p] of STARS) if (x < W && y > 16 && y < LAY.msg.y - 3) { const t = Math.floor(now / 450 + p) % 7; rect(x, y, 1, 1, t === 0 ? "#fcfcfc" : t < 3 ? "#7c7ca8" : "#3c3c64"); }
+    for (const [x, y, p] of STARS) if (x < W && y > 16 && y < LAY.msg.y - 3) { const t = (PX.clock.step(now, 450, [x, y, 1, 1]) + p) % 7; rect(x, y, 1, 1, t === 0 ? "#fcfcfc" : t < 3 ? "#7c7ca8" : "#3c3c64"); }
   }
   // What a body makes of a block of a colour: solid, or not there for it (walk in). The spirit sees both as fog.
   const verdict = (me, col) => me === "S" ? "fog" : (me === "G") === (col === "R") ? "solid" : "walk in";
 
   // ---------- the game view ----------
-  function frame(now, state) {
+  // clip: redraw only these rects (from PX.clock.dirty), or all when it is missing.
+  function frame(now, state, clip) {
     g = state; hits = [];
+    PX.clipTo(q, clip); clipR = clip || null;
     q.clearRect(0, 0, W, H);
     sky(g.me, now);
     topBar(now);
@@ -131,15 +152,20 @@
     if (g.legendOpen) howToPlay(now);
     if (menu === "pause") pauseMenu(now);
     if (menu === "levels") levelSelect(now);
-    const c = cv.getContext("2d"); c.imageSmoothingEnabled = false; c.drawImage(art, 0, 0, cv.width, cv.height);
+    q.restore(); clipR = null;
+    if (art !== cv) { const c = cv.getContext("2d"); c.imageSmoothingEnabled = false; c.drawImage(art, 0, 0, cv.width, cv.height); }
   }
+  // Where a board of this size sits on the screen.
+  const boardAt = (bw, bh) => { const C = LAY.col; return [Math.round(C.x + (C.w - bw) / 2), Math.round(C.y + (C.h - bh) / 2)]; };
 
   // A win throws confetti from the exit over the whole screen as the ring of light rises (not with "reduce motion"):
   // each piece flutters between a square and a sliver, falls back and winks out on its own.
   const CONFETTI = ["#f8b800", "#fcfcfc", "#fce0a8", "#58d854", "#f8a4c0", "#3cbcfc", "#f83800"];
   function confetti(now) {
     const d = (now - g.winFlashAt) / 1000;
-    if (!g.won || !boardRect || d < 0 || d > 1.6 || PX.calm()) return;
+    if (!g.won || !boardRect || d > 1.6 || PX.calm()) return;
+    PX.clock.live(); // waiting to be thrown, then flying
+    if (d < 0) return;
     const ex = boardRect.x + g.exit[0] * PX.K + 8, ey = boardRect.y + g.exit[1] * PX.K + 6;
     for (let i = 0; i < 40; i++) {
       const h = Math.imul(i + 1, 2654435761) >>> 0, life = 0.8 + (h >>> 4) % 80 / 100;
@@ -160,8 +186,7 @@
   }
 
   function boardView(now) {
-    const b = g.board, bw = b.width, bh = b.height, C = LAY.col;
-    const bx = Math.round(C.x + (C.w - bw) / 2), by = Math.round(C.y + (C.h - bh) / 2);
+    const b = g.board, bw = b.width, bh = b.height, [bx, by] = boardAt(bw, bh);
     boardRect = { x: bx, y: by, w: bw, h: bh };
     // a hop lands with a one-pixel shake and a flash, as on the title screen; a refused press bumps the board a
     // pixel toward the push and back. A win flashes the frame white and rings it gold as the light rises from the
@@ -169,10 +194,11 @@
     const still = PX.calm(), land = still ? Infinity : g.hopLanded, wt = g.won && !still ? now - g.winFlashAt : -1;
     let sx = land >= 0 && land < 90 ? (Math.floor(now / 30) % 2 ? 1 : -1) : 0, sy = 0;
     if (g.bump && !still && g.bump[2] < 100) { const j = Math.floor(g.bump[2] / 25) % 2 ? -1 : 1; sx += g.bump[0] * j; sy += g.bump[1] * j; }
+    if ((land >= 0 && land < 90) || (wt >= 0 && wt < 400) || sx || sy) PX.clock.live();
     rect(bx + 3, by + 3, bw, bh, "rgba(0,0,0,0.5)");
     if (wt >= 0 && wt < 400) rect(bx - 3, by - 3, bw + 6, bh + 6, Math.floor(wt / 100) % 2 ? "#fcf0a8" : GOLD);
     rect(bx - 2, by - 2, bw + 4, bh + 4, INK); rect(bx - 1, by - 1, bw + 2, bh + 2, g.won ? (wt >= 0 && wt < 80 ? "#ffffff" : GOLD) : EDGE_HI);
-    q.drawImage(b, bx + sx, by + sy);
+    if (seen(bx - 1, by - 1, bw + 2, bh + 2)) q.drawImage(b, bx + sx, by + sy);
     if (land >= 0 && land < 60) rect(bx, by, bw, bh, "rgba(255,255,255,0.2)");
   }
 
@@ -214,9 +240,10 @@
   // After a win the panel shows the result: OUT! hops in, the turns, a PAR stamp, and a big Next button.
   function winBlock(now, x, y, w) {
     const t = now - g.wonAt - 500, cx = x + w / 2;
+    if (t < 700) PX.clock.live(); // letters hop in, the stamp lands, lines appear
     if (t < 0) return;
     const word = "OUT!", lw = PX.logoWidth(word, 1.5);
-    PX.logo(q, word, Math.round(cx - lw / 2) - 18, y + 4, 1.5, () => bodyCols(g.me === "S" ? "gold" : g.me), (n) => { const d = t - n * 70; return d < 0 ? 99 : d < 200 ? Math.round(Math.sin(Math.PI * d / 200) * 5) : Math.floor(now / 500 + n * 0.5) % 2; });
+    PX.logo(q, word, Math.round(cx - lw / 2) - 18, y + 4, 1.5, () => bodyCols(g.me === "S" ? "gold" : g.me), (n) => { const d = t - n * 70; return d < 0 ? 99 : d < 200 ? Math.round(Math.sin(Math.PI * d / 200) * 5) : Math.floor((PX.clock.step(now, 250, [x, y, w, 30]) + n) / 2) % 2; });
     if (t > 350 && g.par) {
       const atPar = g.turns <= g.par, k = prog(t, 350, 100), sx = Math.round(cx + lw / 2 - 6), sy = y + 6;
       if (atPar) {
@@ -228,7 +255,7 @@
     if (t > 250) centre(g.turns <= g.par ? `Out in ${g.turns} turns: par!` : `Out in ${g.turns} turns. Par is ${g.par}.`, cx, y + 23, TEXT);
     if (g.chapterEnd && !g.endMain && t > 250) centre(`${g.chapter} complete!`, cx, y + 32, GOLD);
     if (t > 450) {
-      const b = Math.floor(now / 400) % 2;
+      const b = PX.clock.step(now, 400, [x + 6, y + 39, w - 12, 18]) % 2;
       button(`${TOUCH ? "" : "N  "}${nextLabel()} ${b ? "→" : " "}`, x + 8, y + 41, w - 16, 14, "k-next", () => o.act("next"), "gold");
     }
   }
@@ -241,8 +268,9 @@
     let lines, col;
     if (st.text && !(g.won && !tall())) { lines = PX.wrap(st.text, W - 10).slice(0, max); col = st.cls === "bad" ? BAD : st.cls === "good" ? GOLD : TEXT; }
     else if (g.won) { lines = []; }
-    else { lines = PX.wrap(TOUCH ? "Tap the pad or the board to move. Walk into a body to hop into it." : IDLE_KEYS[Math.floor(now / 5000) % 2], W - 10); col = DIM; }
+    else { lines = PX.wrap(TOUCH ? "Tap the pad or the board to move. Walk into a body to hop into it." : IDLE_KEYS[PX.clock.step(now, 5000, [0, y - 2, W, max * 10 + 8]) % 2], W - 10); col = DIM; }
     const shake = st.text && st.cls === "bad" && now - st.at < 120 && !PX.calm() ? (Math.floor(now / 30) % 2 ? 1 : -1) : 0;
+    if (shake) PX.clock.live();
     const y0 = tall() ? y : lines.length > 1 ? y : y + 5, outline = col === DIM ? null : INK; // the plain hint reads best without an outline
     lines.forEach((ln, i) => centre(ln, cx + shake, y0 + i * 10, col, outline));
   }
@@ -304,6 +332,7 @@
   const skipIntro = () => { introAt = -1e9; };
   function introRibbon(now) {
     const t = now - introAt; if (!introInfo || t > 1600 || !boardRect) return;
+    PX.clock.live(); // slides in and out
     const C = LAY.col, slide = t < 120 ? Math.round((1 - prog(t, 0, 120)) * 4) * -C.w / 4 : t > 1450 ? Math.round(prog(t, 1450, 150) * 4) * C.w / 4 : 0;
     const name = introInfo.name.toUpperCase(), lines = [];
     for (const word of name.split(" ")) { const last = lines[lines.length - 1]; if (last && PX.logoWidth(last + " " + word, 1) <= C.w - 10) lines[lines.length - 1] = last + " " + word; else lines.push(word); }
@@ -343,7 +372,7 @@
     const t = "PAUSED"; PX.logo(q, t, Math.round(W / 2 - PX.logoWidth(t, 1) / 2), py + 7, 1, () => bodyCols(g ? g.me : "S"));
     items.forEach(([label, , keep], i) => {
       const iy = py + 28 + i * 12, on = i === sel, lw = tw(label), lx = Math.round(W / 2 - lw / 2);
-      if (on) { rect(px + 6, iy - 2, pw - 12, 11, "#24244a"); const b = Math.floor(now / 260) % 2; for (let r = 0; r < 4; r++) { rect(lx - 9 + b + r, iy + r, 1, 7 - 2 * r, GOLD); rect(lx + lw + 8 - b - r, iy + r, 1, 7 - 2 * r, GOLD); } }
+      if (on) { rect(px + 6, iy - 2, pw - 12, 11, "#24244a"); const b = PX.clock.step(now, 260, [0, iy - 2, W, 11]) % 2; for (let r = 0; r < 4; r++) { rect(lx - 9 + b + r, iy + r, 1, 7 - 2 * r, GOLD); rect(lx + lw + 8 - b - r, iy + r, 1, 7 - 2 * r, GOLD); } }
       text(label, lx, iy, on ? GOLD : TEXT);
       hits.push({ id: "m" + i, menu: i, x: px + 4, y: iy - 2, w: pw - 8, h: 11, act: () => { sel = i; activateMenu(); } });
     });
@@ -482,5 +511,5 @@
     return [Math.floor((x - b.x) / PX.K), Math.floor((y - b.y) / PX.K)];
   }
 
-  root.BodyHopHUD = { init, fit, frame, key, intro, openMenu, closeMenu, menuOpen, tileAt, toggleHint: showHint };
+  root.BodyHopHUD = { init, fit, frame, key, intro, openMenu, closeMenu, menuOpen, tileAt, boardAt, toggleHint: showHint };
 })(typeof self !== "undefined" ? self : this);

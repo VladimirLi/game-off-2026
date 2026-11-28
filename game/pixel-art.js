@@ -10,7 +10,56 @@ const PAL = { K: "#000000", D: "#3c3c4c", M: "#7c7c8c", L: "#bcbcbc", W: "#fcfcf
 const LENS = { S: { f: ["#80808a", "#787882"], w: ["#16161c", "#40404e"] }, G: { f: ["#ae968e", "#a68e86"], w: ["#1e1210", "#4e3430"] }, C: { f: ["#7088aa", "#6a82a4"], w: ["#0a1230", "#223e78"] } };
 const hx = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 const toHex = (a) => "#" + a.map((v) => Math.round(v).toString(16).padStart(2, "0")).join("");
-const mixHex = (a, b, t) => { const B = hx(b); return toHex(hx(a).map((v, i) => v + (B[i] - v) * t)); };
+const MIXED = new Map(); // mixHex results: the art mixes the same few colours every frame
+const mixHex = (a, b, t) => {
+  const key = a + b + t; let v = MIXED.get(key);
+  if (v === undefined) { const B = hx(b); v = toHex(hx(a).map((c, i) => c + (B[i] - c) * t)); if (MIXED.size > 4096) MIXED.clear(); MIXED.set(key, v); }
+  return v;
+};
+// Redraw scheduling. Drawing code reads the time through step(t, period, rect), a value that changes every `period`
+// ms, naming the rect [x, y, w, h] of what it draws with that value (no rect: anywhere), or calls live() when what
+// it draws changes every frame. After a frame, due() says when the picture next changes and dirty(now) which parts
+// change by then: the game skips frames until due() and then redraws only those parts. at(x, y, fn) runs fn with
+// rects offset by (x, y): fn draws into a canvas that ends up at (x, y) on the screen. begin() starts a frame.
+let dueAt = Infinity, marks = [], prevMarks = [], inPart = null, ox = 0, oy = 0;
+const clock = {
+  begin() { dueAt = Infinity; prevMarks = marks; marks = []; ox = oy = 0; },
+  step(t, period, r) {
+    const v = Math.floor(t / period), at = (v + 1) * period;
+    dueAt = Math.min(dueAt, at); marks.push([at, r ? [r[0] + ox, r[1] + oy, r[2], r[3]] : null, inPart]);
+    return v;
+  },
+  live() { dueAt = -Infinity; },
+  due: () => dueAt,
+  // The rects that change by `now` (many become their bounding box: a clip of many rects is slow), or null when the
+  // whole picture must be drawn.
+  dirty(now) {
+    if (dueAt === -Infinity) return null;
+    const out = [];
+    for (const [at, r] of marks) if (at <= now) { if (!r) return null; out.push(r); }
+    if (out.length <= 12) return out;
+    const x = Math.min(...out.map((r) => r[0])), y = Math.min(...out.map((r) => r[1]));
+    return [[x, y, Math.max(...out.map((r) => r[0] + r[2])) - x, Math.max(...out.map((r) => r[1] + r[3])) - y]];
+  },
+  at(x, y, fn) { const px = ox, py = oy; ox += x; oy += y; try { return fn(); } finally { ox = px; oy = py; } },
+  // Runs fn, which draws only inside rect (screen coords), unless clip (the rects being redrawn) misses rect: then
+  // what fn drew last time stands, its marks are kept, and part returns false.
+  part(name, rect, clip, fn) {
+    if (clip && !clip.some((r) => rect[0] < r[0] + r[2] && r[0] < rect[0] + rect[2] && rect[1] < r[1] + r[3] && r[1] < rect[1] + rect[3])) {
+      for (const m of prevMarks) if (m[2] === name) { marks.push(m); dueAt = Math.min(dueAt, m[0]); }
+      return false;
+    }
+    const was = inPart; inPart = name;
+    try { fn(); } finally { inPart = was; }
+    return true;
+  },
+};
+// Limits drawing on q to the rects (offset by -x, -y), or does nothing when rects is null. Undo with q.restore().
+function clipTo(q, rects, x = 0, y = 0) {
+  q.save();
+  if (!rects) return;
+  q.beginPath(); for (const r of rects) q.rect(r[0] - x, r[1] - y, r[2], r[3]); q.clip();
+}
 // 8-bit fades step in quarters instead of gliding.
 function lens(from, to, t = 1) { const s = Math.floor(Math.min(1, Math.max(0, t)) * 4) / 4, A = LENS[from], B = LENS[to]; return { f: A.f.map((c, i) => mixHex(c, B.f[i], s)), w: A.w.map((c, i) => mixHex(c, B.w[i], s)) }; }
 const sight = (viewer, col) => viewer === "S" ? "fog" : (viewer === "G") === (col === "R") ? "real" : "unreal";
@@ -69,10 +118,27 @@ const glyph = (ch) => FONT[ch] || FONT[SAME[ch]] || FONT[ch.toUpperCase()] || FO
 const textWidth = (str, scale = 1) => [...str].length * 6 * scale - scale;
 // Draws str at (x, y) in art pixels; outline draws a 1-art-pixel ring of that colour round every letter first.
 // Lower case is drawn where the string has it (the title screens pass capitals).
-function text(q, str, x, y, col, scale = 1, outline) {
+function drawText(q, str, x, y, col, scale, outline) {
   const glyphs = (ox, oy, c) => { q.fillStyle = c; [...str].forEach((ch, n) => glyph(ch).forEach((row, j) => [...row].forEach((b, i) => { if (b === "1") q.fillRect(x + ox + (n * 6 + i) * scale, y + oy + j * scale, scale, scale); }))); };
   if (outline) for (const [ox, oy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [1, 1]]) glyphs(ox, oy, outline);
   glyphs(0, 0, col);
+}
+// Text drawn on the pixel grid (whole-pixel position, no rotation or scaling, full opacity) is drawn once into a
+// small canvas and copied from then on: the same pixels for a fraction of the work.
+const TEXTS = new Map();
+const onGrid = (q, x, y) => { const m = q.getTransform(); return q.globalAlpha === 1 && m.a === 1 && m.b === 0 && m.c === 0 && m.d === 1 && Number.isInteger(x + m.e) && Number.isInteger(y + m.f); };
+function text(q, str, x, y, col, scale = 1, outline) {
+  if (!str) return;
+  if (!onGrid(q, x, y)) return drawText(q, str, x, y, col, scale, outline);
+  const key = `${scale}|${col}|${outline || ""}|${str}`;
+  let c = TEXTS.get(key);
+  if (!c) {
+    c = document.createElement("canvas"); c.width = textWidth(str, scale) + 2; c.height = 9 * scale + 2; // descenders reach row 9; outline 1 px
+    drawText(c.getContext("2d"), str, 1, 1, col, scale, outline);
+    if (TEXTS.size > 600) TEXTS.clear();
+    TEXTS.set(key, c);
+  }
+  q.drawImage(c, x - 1, y - 1);
 }
 // Word-wraps str into lines of at most `width` art pixels.
 function wrap(str, width) {
@@ -146,15 +212,27 @@ const advance = (ch, size) => ch === " " ? Math.round(5 * size) : (SIZED[size][c
 const logoWidth = (str, size = 1) => [...str.toUpperCase()].reduce((a, ch) => a + advance(ch, size), -Math.round(size));
 const LOGO_INK = "#06060c";
 // Letters are bevelled (light top and left edges, shaded bottom), extruded 2 pixels and outlined in ink.
-// cols(n) -> [face, shade, light]; lift(n) -> pixels letter n jumps.
-function logo(q, str, x, y, size, cols, lift = () => 0) {
+// cols(n) -> [face, shade, light]; lift(n) -> pixels letter n jumps. Each letter on the pixel grid is drawn once
+// per colour set into a small canvas and copied from then on.
+const LETTERS = new Map();
+function drawLetter(q, g, x, y, face, shade, light) {
   const px = (X, Y, w, h, c) => { q.fillStyle = c; q.fillRect(Math.round(X), Math.round(Y), w, h); };
+  const on = (i, j) => j >= 0 && j < g.length && i >= 0 && i < g[0].length && g[j][i] === "1";
+  for (let j = 0; j < g.length; j++) for (let i = 0; i < g[0].length; i++) if (on(i, j)) px(x + i - 1, y + j - 1, 5, 5, LOGO_INK);
+  for (let j = 0; j < g.length; j++) for (let i = 0; i < g[0].length; i++) if (on(i, j)) { px(x + i + 1, y + j + 1, 1, 1, shade); px(x + i + 2, y + j + 2, 1, 1, mixHex(shade, LOGO_INK, 0.5)); }
+  for (let j = 0; j < g.length; j++) for (let i = 0; i < g[0].length; i++) if (on(i, j)) px(x + i, y + j, 1, 1, !on(i, j - 1) || !on(i - 1, j) ? light : !on(i, j + 1) ? mixHex(face, shade, 0.5) : face);
+}
+function logo(q, str, x, y, size, cols, lift = () => 0) {
   [...str.toUpperCase()].forEach((ch, n) => {
     const g = SIZED[size][ch]; if (!g) { x += advance(ch, size); return; }
-    const on = (i, j) => j >= 0 && j < g.length && i >= 0 && i < g[0].length && g[j][i] === "1", ly = y - lift(n), [face, shade, light] = cols(n);
-    for (let j = 0; j < g.length; j++) for (let i = 0; i < g[0].length; i++) if (on(i, j)) px(x + i - 1, ly + j - 1, 5, 5, LOGO_INK);
-    for (let j = 0; j < g.length; j++) for (let i = 0; i < g[0].length; i++) if (on(i, j)) { px(x + i + 1, ly + j + 1, 1, 1, shade); px(x + i + 2, ly + j + 2, 1, 1, mixHex(shade, LOGO_INK, 0.5)); }
-    for (let j = 0; j < g.length; j++) for (let i = 0; i < g[0].length; i++) if (on(i, j)) px(x + i, ly + j, 1, 1, !on(i, j - 1) || !on(i - 1, j) ? light : !on(i, j + 1) ? mixHex(face, shade, 0.5) : face);
+    const ly = y - lift(n), [face, shade, light] = cols(n);
+    if (!onGrid(q, x, ly)) drawLetter(q, g, x, ly, face, shade, light);
+    else {
+      const key = `${size}|${ch}|${face}|${shade}|${light}`;
+      let c = LETTERS.get(key);
+      if (!c) { c = document.createElement("canvas"); c.width = g[0].length + 5; c.height = g.length + 5; drawLetter(c.getContext("2d"), g, 1, 1, face, shade, light); LETTERS.set(key, c); }
+      q.drawImage(c, x - 1, ly - 1);
+    }
     x += advance(ch, size);
   });
 }
@@ -203,29 +281,20 @@ function drawTile(q, c, X, Y, viewer, L, o) {
     if (o.nb(0, -1) !== "#" && o.nb(0, -1) !== " ") rect(0, 0, K, 1, mixHex(L.w[1], "#ffffff", 0.3)); // lit cap where the wall's top meets open floor
     if (o.nb(0, 1) !== "#") { rect(0, 12, K, 4, mixHex(L.w[1], "#000000", 0.45)); rect(0, 12, K, 1, "rgba(0,0,0,0.55)"); } // front face where the wall meets floor
   };
+  // A block the viewer can't see as solid (dashed outline, or fog) moves on its own: part "static" draws only the
+  // floor under it, part "anim" only the moving pattern, copied from a canvas kept per pattern frame.
   const block = (col, how) => {
     const [dk, mid, lt] = COLS[col], mark = MARK[col];
-    floor();
-    if (how === "unreal") { // marching dashed outline at the tile edge with a dark edge under it, faint fill: "it's here for someone else"
-      const off = Math.floor(t / 180) % 4, per = [];
-      for (let i = 1; i < 14; i++) per.push([i, 1]); for (let j = 1; j < 14; j++) per.push([14, j]); for (let i = 14; i > 1; i--) per.push([i, 14]); for (let j = 14; j > 1; j--) per.push([1, j]);
-      q.globalAlpha = 0.4; for (let j = 2; j < 14; j++) for (let i = 2; i < 14; i++) if ((i + j) % 2 === 0) px(i, j, mid); // checker dither: there, but not solid
-      q.globalAlpha = 0.5; for (let j = 3; j < 13; j++) for (let i = 3; i < 13; i++) if (mark(i, j)) px(i, j, lt); q.globalAlpha = 1;
-      per.forEach(([i, j], k) => { if ((k + off) % 4 < 2) { px(i, j, lt); px(i + (i === 1 ? 1 : i === 14 ? -1 : 0), j + (j === 1 ? 1 : j === 14 ? -1 : 0), dk); } });
-      return;
+    if (o.part !== "anim") floor();
+    if (how !== "real") {
+      if (o.part === "static") return;
+      if (o.part === "anim") return q.drawImage(blockSprite(col, how, t, [X, Y, K, K]), X, Y);
+      return blockPattern(q, X, Y, col, how, t);
     }
     // Shape, not just colour, tells the blocks apart: a red block is a square crate, a blue block a gem with
     // cut corners. span(j) is the block's left and right edge on row j (rows 0-14).
     const span = (j) => { const c = col === "B" ? Math.max(0, 2 - j, j - 12) : 0; return [1 + c, 14 - c]; };
     const row = (j, from, col2) => { const [a, b] = span(j); rect(a + from, j, b - a + 1 - 2 * from, 1, col2); };
-    if (how === "fog") { // a soft cloud of light mist, tinted toward the block's colour, carrying its pattern; wisps drift on top
-      const [f1, f2] = FOGC[col], par = Math.floor(t / 500) % 2;
-      for (let j = 0; j < 15; j++) row(j, 0, PAL.D);
-      for (let j = 1; j < 14; j++) { const [a, b] = span(j); for (let i = a + 1; i < b; i++) px(i, j, (i + j + par) % 2 ? f1 : f2); }
-      for (let j = 3; j < 12; j++) { const [a, b] = span(j); for (let i = a + 1; i < b; i++) if (mark(i, j)) px(i, j, mixHex(f1, "#000000", 0.3)); }
-      { const [a, b] = span(1); for (let i = a + 1; i < b; i++) if ((i + Math.floor(t / 400)) % 4 !== 0) px(i, 1, "#dcdce4"); } // wisps along the top
-      row(15 - 1, 1, "rgba(0,0,0,0.25)"); return;
-    }
     // A solid block: dark outline, a bevelled top face with the pattern, a front face and a shadow.
     for (let j = 0; j < 15; j++) row(j, 0, PAL.K);
     for (let j = 1; j < 11; j++) row(j, 1, mid);
@@ -250,14 +319,16 @@ function drawTile(q, c, X, Y, viewer, L, o) {
     for (const i of [3, 6, 9, 12]) { rect(i, 1, 1, 2, bar > 0 ? PAL.K : PAL.L); if (bar === 0) px(i, 3, PAL.W); } // the bar tips, tucked into the beam when open
     for (const gx of [0, 14]) { rect(gx, 0, 2, K, PAL.K); rect(gx + (gx ? 0 : 1), 4, 1, K - 4, PAL.D); rect(gx, 5, 2, 3, lit ? PAL.G : PAL.R); }
   };
+  const strip = () => rect(2, 15, 12, 1, clock.step(t, 300, [X + 2, Y + 15, 12, 1]) % 2 ? PAL.y : PAL.W); // light spilling onto the floor
   const exit = () => { // an open, lit doorway under a green EXIT sign. With a wall above, the sign hangs on that wall
     // and the door fills its own tile; otherwise both share the tile.
+    if (o.part === "anim") return strip();
     floor();
     const onWall = o.nb(0, -1) === "#", top = onWall ? 1 : 7, sy = onWall ? -7 : 0;
     rect(1, top - 1, 14, K - top + 1, PAL.K); rect(2, top, 12, K - top, "#5a3a1a"); // door frame
     rect(3, top + 1, 10, K - top - 1, PAL.y); rect(4, top + 2, 8, K - top - 2, PAL.W); // light inside
     rect(3, top + 1, 2, K - top - 1, PAL.N); rect(3, top + 1, 1, K - top - 1, PAL.n); // the door leaf, swung open
-    rect(2, 15, 12, 1, Math.floor(t / 300) % 2 ? PAL.y : PAL.W); // light spilling onto the floor
+    if (o.part !== "static") strip();
     rect(0, sy, K, 7, PAL.K); rect(1, sy, 14, 6, PAL.g); rect(1, sy, 14, 1, PAL.G);
     let x = 2; for (const ch of "EXIT") { const g = EXIT_FONT[ch]; g.forEach((row, j) => [...row].forEach((b, i) => { if (b === "1") px(x + i, sy + 1 + j, PAL.W); })); x += g[0].length + 1; }
   };
@@ -270,6 +341,38 @@ function drawTile(q, c, X, Y, viewer, L, o) {
     case "E": return exit();
     default: return floor();
   }
+}
+
+// The moving pattern of a block the viewer can't see as solid, without the floor under it.
+function blockPattern(q, X, Y, col, how, t) {
+  const [dk, mid, lt] = COLS[col], mark = MARK[col];
+  const px = (x, y, c) => { q.fillStyle = c; q.fillRect(X + x, Y + y, 1, 1); };
+  const rect = (x, y, w, h, c) => { q.fillStyle = c; q.fillRect(X + x, Y + y, w, h); };
+  if (how === "unreal") { // marching dashed outline at the tile edge with a dark edge under it, faint fill: "it's here for someone else"
+    const off = Math.floor(t / 180) % 4, per = [];
+    for (let i = 1; i < 14; i++) per.push([i, 1]); for (let j = 1; j < 14; j++) per.push([14, j]); for (let i = 14; i > 1; i--) per.push([i, 14]); for (let j = 14; j > 1; j--) per.push([1, j]);
+    q.globalAlpha = 0.4; for (let j = 2; j < 14; j++) for (let i = 2; i < 14; i++) if ((i + j) % 2 === 0) px(i, j, mid); // checker dither: there, but not solid
+    q.globalAlpha = 0.5; for (let j = 3; j < 13; j++) for (let i = 3; i < 13; i++) if (mark(i, j)) px(i, j, lt); q.globalAlpha = 1;
+    per.forEach(([i, j], k) => { if ((k + off) % 4 < 2) { px(i, j, lt); px(i + (i === 1 ? 1 : i === 14 ? -1 : 0), j + (j === 1 ? 1 : j === 14 ? -1 : 0), dk); } });
+    return;
+  }
+  // fog: a soft cloud of light mist, tinted toward the block's colour, carrying its pattern; wisps drift on top
+  const span = (j) => { const c = col === "B" ? Math.max(0, 2 - j, j - 12) : 0; return [1 + c, 14 - c]; };
+  const row = (j, from, col2) => { const [a, b] = span(j); rect(a + from, j, b - a + 1 - 2 * from, 1, col2); };
+  const [f1, f2] = FOGC[col], par = Math.floor(t / 500) % 2, wisp = Math.floor(t / 400);
+  for (let j = 0; j < 15; j++) row(j, 0, PAL.D);
+  for (let j = 1; j < 14; j++) { const [a, b] = span(j); for (let i = a + 1; i < b; i++) px(i, j, (i + j + par) % 2 ? f1 : f2); }
+  for (let j = 3; j < 12; j++) { const [a, b] = span(j); for (let i = a + 1; i < b; i++) if (mark(i, j)) px(i, j, mixHex(f1, "#000000", 0.3)); }
+  { const [a, b] = span(1); for (let i = a + 1; i < b; i++) if ((i + wisp) % 4 !== 0) px(i, 1, "#dcdce4"); } // wisps along the top
+  row(15 - 1, 1, "rgba(0,0,0,0.25)");
+}
+// The same pattern drawn once per frame of its animation and copied from then on.
+const PATTERNS = new Map();
+function blockSprite(col, how, t, r) {
+  const key = col + how + (how === "unreal" ? clock.step(t, 180, r) % 4 : `${clock.step(t, 500, r) % 2}${clock.step(t, 400, r) % 4}`);
+  let c = PATTERNS.get(key);
+  if (!c) { c = document.createElement("canvas"); c.width = c.height = K; blockPattern(c.getContext("2d"), 0, 0, col, how, t); PATTERNS.set(key, c); }
+  return c;
 }
 
 const sprCache = new Map();
@@ -299,18 +402,50 @@ function drawBody(q, b) {
 }
 const ring = (q, X, Y, col) => { q.fillStyle = col; q.fillRect(X + 4, Y + 13, 8, 1); q.fillRect(X + 4, Y + 15, 8, 1); q.fillRect(X + 2, Y + 14, 2, 1); q.fillRect(X + 12, Y + 14, 2, 1); };
 
+// The tiles that never change on their own, drawn once per look (map, viewer and lens) and kept, most recently used
+// last. Plates and gates (they animate), the exit's light and blocks the viewer can't see as solid are drawn every frame.
+const LAYERS = new Map();
+const tileAt = (map) => (x, y) => { if (y < 0 || y >= map.length || x < 0 || x >= map[0].length) return "#"; const c = map[y][x] || " "; return "SGC".includes(c) ? "." : c; };
+function layer(map, viewer, L) {
+  const key = `${map.join("/")}|${viewer}|${L.f}|${L.w}`;
+  let c = LAYERS.get(key);
+  if (c) LAYERS.delete(key);
+  else {
+    const H = map.length, W = map[0].length, tile = tileAt(map);
+    c = document.createElement("canvas"); c.width = W * K; c.height = H * K;
+    const q = c.getContext("2d");
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const ch = tile(x, y);
+      if (ch !== "_" && ch !== "|") drawTile(q, ch, x * K, y * K, viewer, L, { x, y, nb: (dx, dy) => tile(x + dx, y + dy), part: "static" });
+    }
+  }
+  LAYERS.set(key, c);
+  if (LAYERS.size > 64) LAYERS.delete(LAYERS.keys().next().value);
+  return c;
+}
+// Draws ahead of need the looks of a map that a hop from one body to another passes through (from === to: the
+// body's own look), so the hop itself never stops to draw them. The steps match render's lens and viewer.
+function prewarm(map, from, to) {
+  if (from === to) { layer(map, from, lens(from, from, 1)); return; }
+  for (const s of [0.25, 0.5, 0.75]) layer(map, s < 0.5 ? from : to, lens(from, to, s));
+}
 // scene: { map, viewer, from, to, lensT, t, bodies, hops: [[x, y, dir]], state(x,y), fx(q) }
 function render(cv, sc) {
-  const map = sc.map, H = map.length, W = map[0].length;
-  if (!cv._o || cv._o.width !== W * K || cv._o.height !== H * K) { cv._o = document.createElement("canvas"); cv._o.width = W * K; cv._o.height = H * K; }
-  const o = cv._o, q = o.getContext("2d"); q.imageSmoothingEnabled = false; q.clearRect(0, 0, o.width, o.height);
-  const tile = (x, y) => { if (y < 0 || y >= H || x < 0 || x >= W) return "#"; const c = map[y][x] || " "; return "SGC".includes(c) ? "." : c; };
+  const map = sc.map, H = map.length, W = map[0].length, tile = tileAt(map);
+  const q = cv.getContext("2d"); q.imageSmoothingEnabled = false;
+  clipTo(q, sc.clip); q.clearRect(0, 0, cv.width, cv.height); // sc.clip: redraw only these rects
   const L = lens(sc.from || sc.viewer, sc.to || sc.from || sc.viewer, sc.lensT ?? 1);
-  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) drawTile(q, tile(x, y), x * K, y * K, sc.viewer, L, { x, y, t: sc.t, nb: (dx, dy) => tile(x + dx, y + dy), ...(sc.state ? sc.state(x, y) || {} : {}) });
-  const pulse = Math.floor(sc.t / 400) % 2;
+  q.drawImage(layer(map, sc.viewer, L), 0, 0);
+  const nb = (x, y) => (dx, dy) => tile(x + dx, y + dy);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const c = tile(x, y), o = { x, y, t: sc.t, nb: nb(x, y) };
+    if (c === "_" || c === "|") drawTile(q, c, x * K, y * K, sc.viewer, L, { ...o, ...((sc.state && sc.state(x, y)) || {}) });
+    else if (c === "E" || ((c === "R" || c === "B") && sight(sc.viewer, c) !== "real")) drawTile(q, c, x * K, y * K, sc.viewer, L, { ...o, part: "anim" });
+  }
+  const pulse = (r) => clock.step(sc.t, 400, r) % 2;
   for (const b of [...(sc.bodies || [])].sort((a, c) => a.y - c.y)) {
     const BX = Math.round(b.x * K) + (b.dx || 0), BY = Math.round(b.y * K) + (b.dy || 0);
-    if (b.active && !b.sink) ring(q, BX, BY, pulse ? PAL.Y : PAL.y);
+    if (b.active && !b.sink) ring(q, BX, BY, pulse([BX + 2, BY + 13, 12, 3]) ? PAL.Y : PAL.y);
     else if (!b.sink) { q.fillStyle = "rgba(0,0,0,0.28)"; q.fillRect(BX + 4, BY + 14, 8, 2); q.fillRect(BX + 3, BY + 15, 10, 1); } // shadow
     drawBody(q, b);
     // A body standing in a red or blue block stays visibly inside it: a block it cannot see keeps its dashed edge
@@ -318,7 +453,7 @@ function render(cv, sc) {
     const under = Number.isInteger(b.x) && Number.isInteger(b.y) ? tile(b.x, b.y) : "";
     if (under === "R" || under === "B") {
       const how = sight(sc.viewer, under), X0 = b.x * K, Y0 = b.y * K, f = (x, y, w, h, c) => { q.fillStyle = c; q.fillRect(X0 + x, Y0 + y, w, h); };
-      if (how === "unreal") { for (let i = 0; i < 16; i++) for (const [x, y] of [[i, 0], [i, 15], [0, i], [15, i]]) if ((i + Math.floor(sc.t / 180)) % 4 < 2) f(x, y, 1, 1, COLS[under][2]); }
+      if (how === "unreal") { const off = clock.step(sc.t, 180, [X0, Y0, K, K]); for (let i = 0; i < 16; i++) for (const [x, y] of [[i, 0], [i, 15], [0, i], [15, i]]) if ((i + off) % 4 < 2) f(x, y, 1, 1, COLS[under][2]); }
       else {
         const c = under === "B" ? 1 : 0, face = how === "real" ? COLS[under][0] : PAL.D, top = how === "real" ? COLS[under][1] : FOGC[under][0];
         f(1, 10, 14, 4, PAL.K); f(2, 10, 12, 1, top); f(2, 11, 12, 2, face); f(1 + c, 14, 14 - 2 * c, 1, PAL.K);
@@ -329,15 +464,16 @@ function render(cv, sc) {
       drawTile(q, "|", x * K, y * K, sc.viewer, L, { x, y, t: sc.t, nb: (dx, dy) => tile(x + dx, y + dy), ...(sc.state ? sc.state(x, y) || {} : {}) });
       q.restore();
     }
-    if (b.zz) { const k = Math.floor(sc.t / 500) % 2, ZX = Math.round(b.x * K) + 10, ZY = Math.round(b.y * K) - 3; spr(q, ZZ_SHADOW, ZX + 1, ZY + 1 + k); spr(q, ZZ, ZX, ZY + k); } // above the head, not on it
+    if (b.zz) { const ZX = Math.round(b.x * K) + 10, ZY = Math.round(b.y * K) - 3, k = clock.step(sc.t, 500, [ZX, ZY, 6, 7]) % 2; spr(q, ZZ_SHADOW, ZX + 1, ZY + 1 + k); spr(q, ZZ, ZX, ZY + k); } // above the head, not on it
   }
   // Hop markers: a chevron straddling the edge you would press across, nudging toward the body.
   for (const [x, y, dir] of sc.hops || []) {
-    const n = pulse, at = { right: [x * K + 13 + n, y * K + 5], left: [x * K - 2 - n, y * K + 5], down: [x * K + 5, y * K + 13 + n], up: [x * K + 5, y * K - 2 - n] }[dir];
+    const base = { right: [x * K + 13, y * K + 5], left: [x * K - 2, y * K + 5], down: [x * K + 5, y * K + 13], up: [x * K + 5, y * K - 2] }[dir];
+    const n = pulse([base[0] - 2, base[1] - 2, 10, 10]), at = { right: [base[0] + n, base[1]], left: [base[0] - n, base[1]], down: [base[0], base[1] + n], up: [base[0], base[1] - n] }[dir];
     spr(q, CHEV[dir], at[0], at[1]);
   }
   if (sc.fx) sc.fx(q);
-  const g = cv.getContext("2d"); g.imageSmoothingEnabled = false; g.clearRect(0, 0, cv.width, cv.height); g.drawImage(o, 0, 0, cv.width, cv.height);
+  q.restore();
 }
 const dot = (q, x, y, col, s = 1) => { q.fillStyle = col; q.fillRect(Math.round(x), Math.round(y), s, s); };
 
@@ -348,5 +484,5 @@ function walk(t, t0, a, b, dur = 160) { const k = prog(t, t0, dur), e = 1 - (1 -
 const RM = root.matchMedia ? root.matchMedia("(prefers-reduced-motion: reduce)") : null;
 const calm = () => !!(RM && RM.matches);
 
-root.PixelArt = { K, PAL, LENS, render, drawBody, walk, calm, dot, text, textWidth, wrap, lens, FONT, logo, logoWidth, shiftingLogo, BODY_COLS, mix: mixHex };
+root.PixelArt = { K, PAL, LENS, render, prewarm, drawBody, walk, calm, dot, text, textWidth, wrap, lens, FONT, logo, logoWidth, shiftingLogo, BODY_COLS, mix: mixHex, clock, clipTo };
 })(typeof self !== "undefined" ? self : this);

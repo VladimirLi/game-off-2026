@@ -119,6 +119,7 @@ node tools/gen.js 300000 1 9 7 GC  # random search for raw material (tries, seed
 node tools/bot.js [shot-dir]     # browser check: replay each solution as key presses in Chromium
 node tools/record-gif.js [out.gif]  # record level 2 solved by key presses as the README GIF (media/body-hop.gif; needs ffmpeg)
 node tools/capture-screenshots.js [out-dir]  # save the itch.io page screenshots by key presses (media/screenshots/, see docs/ITCH-PAGE.md)
+node tools/perf.js [--cpu 4]     # performance check against the bar: load, frame times, key latency, idle CPU, layout shift, heap
 node tools/analyze-playtest.js <run>/sessions [notes] [--old-legend]  # score AI persona sessions against levels.js
 ```
 
@@ -129,6 +130,10 @@ The checks a level can declare: `needs:G` and `needs:C` (unsolvable without hopp
 `tools/bot.js` uses Playwright. It replays the solver's route for each level as real key presses, checks the game reports a win in exactly par turns, and checks that `window.BodyHopAudio.log` holds a `win` cue and, when the route hops, a `hop:` cue (it reads which cues were requested; it can't hear them). Then it undoes every turn and checks it is back at the start. It also fails on any page error.
 
 `tools/capture-screenshots.js` uses Playwright too, and plays the game the same way: key presses along the solver's routes on the local build. It saves one PNG per entry under "Screenshots to take" in `docs/ITCH-PAGE.md` (1280 x 720, and the 630 x 500 cover), after checking the game's state against `engine.js` (the guard after the first hop on level 1, the cat inside a red block on level 2, and so on), so a shot that no longer shows what the list describes fails the run (exit 1). The end screen is reached by winning levels 1 to 12 at par first, so its Shift report reads in full. It steps the game's own clock with Playwright's `page.clock`, so a re-run writes the same bytes unless the game looks different. Run it, and `tools/record-gif.js`, again after any visual change to refresh the media.
+
+`tools/perf.js` serves the game gzipped, loads it over a throttled slow 4G connection, plays every level's route at 150 ms a key in Chromium and prints each measure next to its bar (exit 1 if any misses). `--cpu 4` slows the CPU four times, as for a weak laptop or phone. Headless Chromium draws without a GPU, so its frame and paint times run slower than a real browser's.
+
+The game draws only when the picture changes, and then only the parts that change. `PX.clock` in `pixel-art.js` notes, while a frame is drawn, when anything in it next moves and where: a walk or a hop moves every frame (`PX.clock.live()`, the whole screen is drawn), and blinking and marching patterns step every few hundred ms (`PX.clock.step(t, period, rect)`). The loop in `index.html` sleeps until the next step or an input; a step redraws only its rects (clipped), and the board is skipped when none of them touch it. Tiles that never move are drawn once per look (map, body, lens step) and kept, as are text, logo letters and the night sky; each hop's looks are drawn ahead in idle time after a level starts. Code that draws something that changes with time must read the time through `PX.clock.step()` with a rect covering everything that value moves, or call `PX.clock.live()`; a rect too small leaves stale pixels.
 
 ## Sound
 

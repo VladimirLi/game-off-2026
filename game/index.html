@@ -10,13 +10,14 @@
      (#sr) for screen readers and the test tools, pinned to the top-left so it cannot make the page scroll. */
   html, body { margin: 0; height: 100%; background: #06060c; color: #ececf8; font: 15px/1.4 system-ui, sans-serif; }
   #app { min-height: 100%; display: flex; align-items: center; justify-content: center; }
-  #c { display: block; image-rendering: pixelated; touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+  /* Hidden until hud.js has sized it, so the page never shows (and then moves) a canvas of the default size. */
+  #c { display: block; visibility: hidden; image-rendering: pixelated; touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
   .sr { position: absolute; top: 0; left: 0; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   /* Title and end screens (screens.js): one pixel-art canvas over the game, scaled by whole numbers. */
   #screen { display: none; position: fixed; inset: 0; z-index: 20; background: #06060c; align-items: center; justify-content: center; animation: screen-in 0.3s ease-out; }
   #screen.open { display: flex; }
   #screen.leaving { opacity: 0; transition: opacity 0.25s ease-in; }
-  #screen canvas { display: block; background: none; border-radius: 0; max-width: 100%; touch-action: manipulation; }
+  #screen canvas { display: block; background: none; border-radius: 0; max-width: 100%; image-rendering: pixelated; touch-action: manipulation; }
   @keyframes screen-in { from { opacity: 0; } to { opacity: 1; } }
   /* Feedback: a plain form over the game, drawn to match the pixel panels. */
   #feedback { position: fixed; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; background: rgba(4,4,12,0.85); }
@@ -81,10 +82,21 @@ function load(i, cue = "start") {
   $("title").textContent = `${label(idx)}. ${LEVELS[idx].name}`;
   $("hint").textContent = LEVELS[idx].hint || "";
   setStatus("");
-  renderLevels(); draw(); hud();
+  renderLevels(); stale(); hud(); prewarmLooks();
   SND.levelChange(); SND.setBody("S"); SND.play(cue);
   if (cue !== "restart") HUD.intro(performance.now(), introInfo(idx));
   if (started) AN.track("level_start", { level: label(idx), index: idx + 1, name: LEVELS[idx].name, chapter: chapterOf(idx), restart: cue === "restart" });
+}
+
+// In idle time after a level starts, draw ahead each body's look of the room and the looks every hop passes through
+// (PX.prewarm), so no hop stops to draw them. A newer level cancels the rest.
+let warmJob = 0;
+function prewarmLooks() {
+  const map = L.tiles.map((r) => r.join("")), types = [...new Set(["S", ...L.types])], jobs = [];
+  for (const a of types) for (const b of types) if (a === b || b !== "S") jobs.push([a, b]); // nobody hops into the spirit
+  const job = ++warmJob, idle = window.requestIdleCallback || ((f) => setTimeout(f, 50));
+  const next = () => { if (job !== warmJob || !jobs.length) return; PX.prewarm(map, ...jobs.shift()); idle(next); };
+  idle(next);
 }
 
 // What the intro ribbon says: the chapter, the level's number and its name.
@@ -94,7 +106,7 @@ function introInfo(i) {
     chapter: isBonus(i) ? "Night shift: bonus levels" : `Chapter ${n}: ${ch}` };
 }
 
-function setStatus(text, cls) { const el = $("status"); el.textContent = text; el.className = cls || ""; status = { text, cls: cls || "", at: performance.now() }; }
+function setStatus(text, cls) { const el = $("status"); el.textContent = text; el.className = cls || ""; status = { text, cls: cls || "", at: performance.now() }; stale(); }
 
 function hud() {
   const me = BH.current(L, s);
@@ -159,7 +171,7 @@ function act(dir) {
   if (won) return;
   const r = BH.step(L, s, dir);
   log.push(dir[0].toUpperCase());
-  if (!r.state) { setStatus(r.why, "bad"); flash = { t: performance.now(), dir }; draw(); SND.play("blocked"); return; }
+  if (!r.state) { setStatus(r.why, "bad"); flash = { t: performance.now(), dir }; stale(); SND.play("blocked"); return; }
   history.push(s); s = r.state; turns++;
   // A hop says which body you are in now, and whether you have been in it before, so an
   // accidental hop back into a parked body is never silent.
@@ -177,7 +189,7 @@ function act(dir) {
     setStatus(`Out in ${turns} turns${par ? (turns <= par ? " (par!)" : ` (par ${par})`) : ""}.${winNext()}`, "good");
     logEnd("complete"); renderLevels(); SND.play("win");
   }
-  hud(); draw();
+  hud(); noteChange(performance.now()); stale(); // tweens start from the key press; the next animation frame draws them
 }
 
 // The sounds of a walk: the step of the body that walked, plus at most one extra, the most specific
@@ -228,7 +240,7 @@ function undo() {
   const after = BH.current(L, s).t;
   setStatus(s.ctrl !== was ? `Undone: you are the ${BH.NAMES[after]} again.` : `Undone: back to turn ${turns}.`);
   SND.setBody(after);
-  hud(); draw();
+  hud(); noteChange(performance.now()); stale();
 }
 
 // ---------- drawing: 8-bit art from pixel-art.js ----------
@@ -249,8 +261,8 @@ function noteChange(now) {
   }
   if (anim.seen === s) return;
   const prev = anim.seen; anim.seen = s;
-  // Draw the settled picture too, in case the browser is not running animation frames (a hidden tab).
-  for (const ms of [WALK_MS + 40, 700, 1300]) setTimeout(() => draw(), ms);
+  // A hidden tab runs no animation frames: draw the settled picture too.
+  for (const ms of [WALK_MS + 40, 700, 1300]) setTimeout(() => { if (document.hidden) draw(); }, ms);
   const ents = s.pos.map((_, i) => i); if (s.ctrl < 0 && prev.ctrl < 0) ents.push(-1);
   for (const i of ents) {
     const [ax, ay] = entPos(prev, i), [bx, by] = entPos(s, i);
@@ -261,23 +273,34 @@ function noteChange(now) {
   anim.won = won;
 }
 
-function draw(now = performance.now()) {
+// The picture is drawn only when it changes: draw() asks PX.clock when anything it drew next moves (a walk or a hop
+// moves every frame; blinking and marching patterns step every few hundred ms). Between those times the loop sleeps
+// on a timer and asks for no animation frames, unless an input or a status change marks the picture stale.
+let needDraw = true, frameAsked = 0, sleepTimer = 0;
+function wake() { clearTimeout(sleepTimer); if (!frameAsked) frameAsked = requestAnimationFrame(loop); }
+function stale() { needDraw = true; if (document.hidden) draw(); else wake(); } // a hidden tab runs no animation frames
+for (const ev of ["keydown", "keyup", "pointerdown", "pointerup", "pointermove", "pointerleave", "resize", "visibilitychange"]) addEventListener(ev, stale, true);
+// clip: redraw only these rects of the screen (from PX.clock.dirty), or everything when it is missing.
+function draw(now = performance.now(), clip) {
   if (!L) return;
+  PX.clock.begin(); needDraw = false;
   noteChange(now);
   // Event handlers draw with performance.now(), animation frames with a frame time that can be a little
-  // earlier, so the clock only moves forward.
-  const dt = Math.max(0, now - (anim.last || now)); anim.last = Math.max(anim.last, now);
+  // earlier, so the clock only moves forward. After the loop has slept, plates and gates step at most 100 ms.
+  const dt = Math.min(100, Math.max(0, now - (anim.last || now))); anim.last = Math.max(anim.last, now);
   const me = BH.current(L, s), K = PX.K, PAL = PX.PAL, still = PX.calm();
   const hop = anim.hop && now - anim.hop.t0 < HOP_MS ? anim.hop : null, k = hop ? (now - hop.t0) / HOP_MS : 1;
   const landed = anim.hop && !hop ? now - anim.hop.t0 - HOP_MS : Infinity;
   const fl = flash && now - flash.t < 300 ? flash : null, fdt = fl ? now - fl.t : 0;
   const [ndx, ndy] = fl ? BH.DIRS[fl.dir] : [0, 0], nudge = fl && fdt < 120 && !still ? Math.round(Math.sin(Math.PI * fdt / 120) * 2) : 0;
   const sinkT = won ? now - anim.wonAt - WALK_MS : -1, sink = sinkT > 0 ? Math.min(16, Math.floor(sinkT / 30)) : 0;
-  const idle = Math.floor(now / 450) % 2, bodies = [];
+  const bodies = [], walking = anim.walks.size > 0; // a walk's last frame differs from the next
+  const [bx, by] = HUD.boardAt(boardCv.width, boardCv.height); // where the board sits on the screen
   const place = (i, t, x, y, o) => {
-    const w = anim.walks.get(i); let px = x, py = y, frame = 0, lift = o.active && !won ? idle : 0;
+    const w = anim.walks.get(i), r = [bx + Math.round(x * K) - 2, by + Math.round(y * K) - 4, 20, 22]; // the sprite at rest: lift, outline, ring
+    let px = x, py = y, frame = 0, lift = o.active && !won ? PX.clock.step(now, 450, r) % 2 : 0;
     if (w) { const p = PX.walk(now, w.t0, 0, 1, WALK_MS); px = w.ax + (w.bx - w.ax) * p.pos; py = w.ay + (w.by - w.ay) * p.pos; frame = p.moving ? 1 : 0; lift = p.lift; if (p.pos >= 1) anim.walks.delete(i); }
-    if (t === "S") frame = Math.floor(now / 250) % 2;
+    if (t === "S") frame = PX.clock.step(now, 250, r) % 2;
     bodies.push({ t, x: px, y: py, frame, lift, flip: anim.facing.get(i), ...o });
   };
   // A hop crouches the body you leave as the spark leaves it, and squashes the one you land in.
@@ -300,12 +323,14 @@ function draw(now = performance.now()) {
   // Finished walks are dropped here, not only when drawn: the spirit's last walk is never drawn again once it hops.
   for (const [i, w] of anim.walks) if (now - w.t0 >= WALK_MS) anim.walks.delete(i);
   if (!anim.walks.size) anim.gate = gateTo ? Math.min(1, anim.gate + dt / 300) : Math.max(0, anim.gate - dt / 120);
+  if (hop || landed < 200 || fl || (won && sinkT < 980) || walking || anim.gate !== gateTo) PX.clock.live();
   const state = (x, y) => {
     const c = L.tiles[y][x];
     if (c === "|") return { open: Math.floor(anim.gate * 6) / 6, lit: anim.gate > 0.5 };
     if (c !== "_") return null;
     const key = x + "," + y, v = anim.plates.get(key) || 0, to = onTile(x, y) ? 1 : 0;
     const nv = to ? Math.min(1, v + dt / 80) : Math.max(0, v - dt / 80); anim.plates.set(key, nv);
+    if (nv !== to) PX.clock.live();
     return { press: nv };
   };
   const fx = (q) => {
@@ -324,13 +349,23 @@ function draw(now = performance.now()) {
     }
   };
   const viewer = hop ? (k < 0.5 ? hop.from : hop.to) : me.t, lv = LEVELS[idx], last = idx === LEVELS.length - 1;
-  PX.render(boardCv, { map: anim.map, viewer, from: hop ? hop.from : me.t, to: hop ? hop.to : me.t, lensT: k, t: now, bodies, hops, state, fx });
+  // The board canvas is redrawn only when a changing rect touches it.
+  PX.clock.part("board", [bx, by, boardCv.width, boardCv.height], clip, () => PX.clock.at(bx, by, () => PX.render(boardCv, { map: anim.map, viewer,
+    from: hop ? hop.from : me.t, to: hop ? hop.to : me.t, lensT: k, t: now, bodies, hops, state, fx, clip: clip && clip.map((r) => [r[0] - bx, r[1] - by, r[2], r[3]]) })));
   HUD.frame(now, { board: boardCv, me: viewer, label: label(idx), name: lv.name, hint: lv.hint || "", turns, par: lv.par, best: best[lv.name],
     won, wonAt: anim.wonAt, winFlashAt: anim.wonAt + WALK_MS + 480, exit: [me.x, me.y], status, hopLanded: landed, bump: fl ? [ndx, ndy, fdt] : null, legendOpen, endMain: idx === mainCount - 1, last,
-    chapter: chapterOf(idx).replace(/ \(optional\)/, ""), chapterEnd: !last && chapterOf(idx + 1) !== chapterOf(idx), nextChapter: last ? "" : chapterOf(idx + 1).replace(/ \(optional\)/, "") });
+    chapter: chapterOf(idx).replace(/ \(optional\)/, ""), chapterEnd: !last && chapterOf(idx + 1) !== chapterOf(idx), nextChapter: last ? "" : chapterOf(idx + 1).replace(/ \(optional\)/, "") }, clip);
 }
-const loop = (now) => { if (SCR.open()) SCR.draw(now); else draw(now); requestAnimationFrame(loop); };
-requestAnimationFrame(loop);
+function loop(now) {
+  frameAsked = 0;
+  if (SCR.open()) { SCR.draw(now); wake(); return; } // the title and end screens animate all the time
+  if (needDraw) draw(now);
+  else if (now >= PX.clock.due()) draw(now, PX.clock.dirty(now)); // only the parts that changed
+  // Sleep until the next change, then draw it in the next frame; nothing scheduled: sleep until an input.
+  const wait = PX.clock.due() - performance.now();
+  if (wait <= 0) wake(); else if (wait !== Infinity) sleepTimer = setTimeout(wake, wait);
+}
+wake();
 
 // ---------- How to play: hud.js draws it over the game while legendOpen ----------
 let legendOpen = false;

@@ -242,19 +242,24 @@
   const load = (k) => { try { return localStorage.getItem(k) !== "0"; } catch (e) { return true; } };
   const save = (k, on) => { try { localStorage.setItem(k, on ? "1" : "0"); } catch (e) { /* storage unavailable */ } };
   let sfxOn = load("bodyhop-sfx"), musicOn = load("bodyhop-music");
-  let ctx = null, master = null, sfxBus = null, musicBus = null, musicShape = null, buffers = null, layers = null;
+  let ctx = null, master = null, sfxBus = null, musicBus = null, musicShape = null, buffers = {}, layers = null, unlocked = false;
   let body = "S", nextNote = 0, degree = 2, timer = null;
 
-  function unlock() {
+  // Browsers allow sound only after a key press, click or tap; the context then resumes. Making it takes tens of ms in
+  // some browsers, so it is made early when the page is idle (nothing animating, see below) or else on that first
+  // press. Every sound and the music are then set up in small steps in idle time, so no frame waits for them.
+  function create() {
+    if (ctx) return;
     try {
-      if (!ctx) {
-        const AC = window.AudioContext || window.webkitAudioContext;
-        if (!AC) return;
-        ctx = new AC();
-        build();
-      }
-      if (ctx.state !== "running" && !document.hidden && (sfxOn || musicOn)) ctx.resume().catch(() => {});
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      ctx = new AC();
+      build();
     } catch (e) { ctx = null; /* audio unavailable: stay silent */ }
+  }
+  function unlock() {
+    unlocked = true; create();
+    if (ctx && ctx.state !== "running" && !document.hidden && (sfxOn || musicOn)) ctx.resume().catch(() => {});
   }
 
   function build() {
@@ -269,36 +274,68 @@
     musicBus = ctx.createGain(); musicBus.gain.value = 0;
     musicShape = ctx.createGain(); musicShape.gain.value = 1;
     musicBus.connect(musicShape).connect(mix);
-
-    buffers = {};
-    for (const [name, p] of Object.entries(SOUNDS)) {
-      const params = p.slice(); params[1] = 0; // render without randomness; it is applied as pitch on play
-      const data = zzfxBuildSamples(...params);
-      const buf = ctx.createBuffer(1, Math.max(1, data.length), ZZFX_RATE);
-      for (let i = 0; i < data.length; i++) data[i] *= ZZFX_VOLUME;
-      buf.getChannelData(0).set(data);
-      buffers[name] = { buf, rnd: p[1] || 0 };
-    }
-
-    buildMusic();
-    if (musicOn) musicBus.gain.setTargetAtTime(MUSIC_LEVEL, ctx.currentTime, 1);
-    nextNote = ctx.currentTime + BEAT * 2;
-    timer = setInterval(schedule, 100);
+    // The rest in steps: each sound, the reverb's impulse in slices, the reverb in parts, then the music.
+    const steps = Object.keys(SOUNDS).map((name) => () => buffer(name));
+    const n = Math.floor(ctx.sampleRate * 3.5), imp = [new Float32Array(n), new Float32Array(n)], SLICE = 20000, PARTS = 8;
+    for (const d of imp) for (let a = 0; a < n; a += SLICE) steps.push(() => impulse(d, a, Math.min(n, a + SLICE), 3));
+    const reverb = ctx.createGain(); let scale = 1; // the reverb's input
+    steps.push(() => { scale = normalization(imp, ctx.sampleRate); });
+    for (let k = 0; k < PARTS; k++) steps.push(() => reverbPart(reverb, imp, k, PARTS, scale));
+    steps.push(() => buildMusic(reverb), () => {
+      if (musicOn) musicBus.gain.setTargetAtTime(MUSIC_LEVEL, ctx.currentTime, 1);
+      nextNote = ctx.currentTime + BEAT * 2;
+      timer = setInterval(schedule, 100);
+    });
+    const idle = window.requestIdleCallback || ((f) => setTimeout(() => f({ timeRemaining: () => 0, didTimeout: true }), 50));
+    const work = (deadline) => {
+      try {
+        if (deadline.didTimeout) steps.shift()(); // no idle time for 2 s (an animation running): one step anyway
+        while (steps.length && deadline.timeRemaining() > 15) steps.shift()();
+      } catch (e) { steps.length = 0; /* audio unavailable: stay silent */ }
+      if (steps.length) idle(work, { timeout: 2000 });
+    };
+    idle(work, { timeout: 2000 });
   }
 
-  function impulse(seconds, decay) {
-    const n = Math.floor(ctx.sampleRate * seconds), buf = ctx.createBuffer(2, n, ctx.sampleRate);
-    for (let c = 0; c < 2; c++) {
-      const d = buf.getChannelData(c);
-      for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n) ** decay;
-    }
-    return buf;
+  // A sound's buffer, rendered the first time it is needed (normally by build's steps, before any play).
+  function buffer(name) {
+    if (buffers[name]) return buffers[name];
+    const p = SOUNDS[name], params = p.slice(); params[1] = 0; // render without randomness; it is applied as pitch on play
+    const data = zzfxBuildSamples(...params);
+    const buf = ctx.createBuffer(1, Math.max(1, data.length), ZZFX_RATE);
+    for (let i = 0; i < data.length; i++) data[i] *= ZZFX_VOLUME;
+    buf.getChannelData(0).set(data);
+    return (buffers[name] = { buf, rnd: p[1] || 0 });
   }
 
-  function buildMusic() {
-    const reverb = ctx.createConvolver();
-    reverb.buffer = impulse(3.5, 3);
-    reverb.connect(musicBus);
+  // Samples [a, b) of a reverb impulse of d.length samples: noise fading out.
+  function impulse(d, a, b, decay) {
+    const n = d.length;
+    for (let i = a; i < b; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n) ** decay;
+  }
+  // The gain a ConvolverNode gives an impulse when it normalizes it (the Web Audio spec's algorithm). The reverb's
+  // parts are set up unnormalized with this gain for the whole impulse, so together they sound as one would.
+  function normalization(data, rate) {
+    let p = 0;
+    for (const d of data) for (let i = 0; i < d.length; i++) p += d[i] * d[i];
+    p = Math.sqrt(p / (data.length * data[0].length));
+    if (!isFinite(p) || p < 0.000125) p = 0.000125;
+    return 0.00125 / p * 44100 / rate;
+  }
+  // Part k of the reverb: its slice of the impulse, delayed to where the slice starts. Convolution adds up over the
+  // impulse, so the parts sum to the whole 3.5 s reverb, and none takes long to set up (one long impulse blocks
+  // the page for tens of ms).
+  function reverbPart(input, data, k, parts, scale) {
+    const n = data[0].length, a = Math.floor(n * k / parts), b = Math.floor(n * (k + 1) / parts);
+    const buf = ctx.createBuffer(2, b - a, ctx.sampleRate);
+    for (let c = 0; c < 2; c++) { const d = buf.getChannelData(c); for (let i = a; i < b; i++) d[i - a] = data[c][i] * scale; }
+    const conv = ctx.createConvolver(); conv.normalize = false; conv.buffer = buf;
+    let from = input;
+    if (a) { from = ctx.createDelay(a / ctx.sampleRate + .01); from.delayTime.value = a / ctx.sampleRate; input.connect(from); }
+    from.connect(conv).connect(musicBus);
+  }
+
+  function buildMusic(reverb) {
     layers = {};
     for (const [t, def] of Object.entries(LAYERS)) {
       const out = ctx.createGain(); out.gain.value = t === body ? 1 : 0;
@@ -368,7 +405,7 @@
     try {
       const now = ctx.currentTime;
       for (const [sound, delay = 0, semis = 0, gain = 1] of CUES[name]) {
-        const { buf, rnd } = buffers[sound];
+        const { buf, rnd } = buffer(sound);
         const src = ctx.createBufferSource(); src.buffer = buf;
         src.playbackRate.value = 2 ** (semis / 12) * (1 + rnd * (Math.random() * 2 - 1));
         const g = ctx.createGain(); g.gain.value = gain;
@@ -382,14 +419,14 @@
     if (!LAYERS[t] || t === body) return;
     body = t;
     pushLog("body:" + t);
-    if (!ctx) return;
+    if (!ctx || !layers) return; // the music is still being built; it starts in this body
     const now = ctx.currentTime;
     for (const [k, l] of Object.entries(layers)) l.out.gain.setTargetAtTime(k === t ? 1 : 0, now, FADE);
   }
 
   // Suspend the context when nothing can be heard (tab hidden, or both sounds off).
   function wake() {
-    if (!ctx) return;
+    if (!ctx || !unlocked) return;
     if (document.hidden || (!sfxOn && !musicOn)) ctx.suspend().catch(() => {});
     else ctx.resume().catch(() => {});
   }
@@ -411,6 +448,11 @@
 
   addEventListener("keydown", unlock, true);
   addEventListener("pointerdown", unlock, true);
+  // Idle periods of 45 ms or more come only when no animation is running.
+  if (window.requestIdleCallback) {
+    const early = (d) => { if (!ctx) { if (d.timeRemaining() >= 45) create(); else requestIdleCallback(early); } };
+    addEventListener("load", () => requestIdleCallback(early));
+  }
   document.addEventListener("visibilitychange", wake);
 
   window.BodyHopAudio = Object.freeze({
